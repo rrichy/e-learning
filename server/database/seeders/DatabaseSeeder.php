@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             AffiliationSeeder::class,
             CategorySeeder::class,
             SignatureSeeder::class,
+            MailTemplateSeeder::class,
             CourseSeeder::class,
             ChapterSeeder::class,
             TestSeeder::class,

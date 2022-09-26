@@ -24,10 +24,10 @@ class Signature extends Model
         return $this->hasMany(Course::class);
     }
 
-    // public function mailTemplates(): HasMany
-    // {
-    //     return $this->hasMany(MailTemplate::class);
-    // }
+    public function mailTemplates(): HasMany
+    {
+        return $this->hasMany(MailTemplate::class);
+    }
 
     // public function notice(): HasOne
     // {
