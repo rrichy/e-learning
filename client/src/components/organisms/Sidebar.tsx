@@ -212,7 +212,7 @@ const adminSidebarContent: SidebarItemProps[] = [
   {
     icon: <UserIcon />,
     label: "アカウント管理",
-    to: "/account",
+    to: "/account-management",
   },
   {
     icon: <DepartmentIcon />,
@@ -255,7 +255,7 @@ const corporateSidebarContent: SidebarItemProps[] = [
   {
     icon: <UserIcon />,
     label: "アカウント管理",
-    to: "/account",
+    to: "/account-management",
   },
   {
     icon: <DepartmentIcon />,
