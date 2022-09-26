@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\SignatureIndexResource;
-use App\Models\Signature;
+use App\Http\Resources\MailTemplateIndexResource;
+use App\Models\MailTemplate;
 use Illuminate\Http\Request;
 
-class SignatureController extends Controller
+class MailTemplateController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -19,7 +19,7 @@ class SignatureController extends Controller
         $per_page = request()->input('per_page', '10');
         $sort = request()->input('sort', 'id');
 
-        return SignatureIndexResource::collection(Signature::orderBy($sort, $order)->paginate($per_page))->additional(['message' => 'Signatures successfully fetched!']);
+        return MailTemplateIndexResource::collection(MailTemplate::orderBy($sort, $order)->paginate($per_page))->additional(['message' => 'Mail templates successfully fetched!']);
     }
 
     /**
@@ -31,17 +31,15 @@ class SignatureController extends Controller
     public function store(Request $request)
     {
         $valid = $request->validate([
-            'name' => 'required|string',
-            'from_email' => 'required|string|email',
-            'from_name' => 'required|string',
+            'title' => 'required|string',
             'content' => 'required|string',
-            'priority' => 'required|integer|min:1|unique:signatures',
+            'signature_id' => 'required|integer|exists:signatures,id',
         ]);
 
-        Signature::create($valid);
+        MailTemplate::create(array_merge($valid, ['priority' => MailTemplate::max('priority') + 1]));
 
         return response()->json([
-            'message' => 'Successfully created a signature!',
+            'message' => 'Successfully created a mail template!',
         ]);
     }
 
@@ -49,23 +47,21 @@ class SignatureController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Signature
+     * @param  \App\Models\MailTemplate  $mail_template
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, \App\Models\Signature $signature)
+    public function update(Request $request, \App\Models\MailTemplate $mail_template)
     {
         $valid = $request->validate([
-            'name' => 'required|string',
-            'from_email' => 'required|string|email',
-            'from_name' => 'required|string',
+            'title' => 'required|string',
             'content' => 'required|string',
-            'priority' => 'required|integer|min:1|unique:signatures,priority,' . $signature->id,
+            'signature_id' => 'required|integer|exists:signatures,id',
         ]);
 
-        $signature->update($valid);
+        $mail_template->update($valid);
 
         return response()->json([
-            'message' => 'Successfully updated a signature!',
+            'message' => 'Successfully updated a mail template!',
         ]);
     }
 
@@ -78,10 +74,10 @@ class SignatureController extends Controller
     public function massDelete($ids)
     {
         $ids = explode(",", $ids);
-        $deleted_count = \App\Models\Signature::destroy($ids);
+        $deleted_count = \App\Models\MailTemplate::destroy($ids);
 
         return response()->json([
-            'message' => 'Successfully deleted ' . $deleted_count . ' signatures!',
+            'message' => 'Successfully deleted ' . $deleted_count . ' templates!',
         ]);
     }
 }

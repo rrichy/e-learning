@@ -19,14 +19,15 @@ class MailTemplateSeeder extends Seeder
         $signatures = Signature::all();
 
         $templates = [];
-        $signatures->each(function ($signature) use (&$templates) {
+        $priority = 0;
+        $signatures->each(function ($signature) use (&$templates, &$priority) {
             $template_count = rand(0, 5);
-            for ($priority = 1; $priority <= $template_count; $priority++) {
+            for ($p = 0; $p < $template_count; $p++) {
                 $templates[] = [
                     'title' => fake()->text(10),
                     'content' => fake()->text(30),
                     'signature_id' => $signature->id,
-                    'priority' => $priority,
+                    'priority' => ++$priority,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];

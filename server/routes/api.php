@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\MailTemplateController;
 use App\Http\Controllers\OptionsController;
 use App\Http\Controllers\SignatureController;
 use Illuminate\Http\Request;
@@ -42,6 +43,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         
         Route::delete('/signature/{ids}', [SignatureController::class, 'massDelete']);
         Route::resource('/signature', SignatureController::class)->only(['index', 'store', 'update']);
+
+        Route::delete('/mail-template/{ids}', [MailTemplateController::class, 'massDelete']);
+        Route::resource('/mail-template', MailTemplateController::class)->only(['index', 'store', 'update']);
 
         Route::put('/course/mass', [CourseController::class, 'massUpdate']);
         Route::put('/course/toggle', [CourseController::class, 'toggleStatus']);

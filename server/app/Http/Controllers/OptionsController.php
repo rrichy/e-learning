@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Affiliation;
 use App\Models\Category;
+use App\Models\MembershipType;
+use App\Models\Signature;
 use Illuminate\Http\Request;
 
 class OptionsController extends Controller
@@ -27,6 +29,10 @@ class OptionsController extends Controller
                     }
                 case 'categories': {
                         $value = Category::get(['id', 'name']);
+                        break;
+                    }
+                case 'signatures': {
+                        $value = auth()->user()->membership_type_id === MembershipType::ADMIN ? Signature::get(['id', 'name']) : [];
                         break;
                     }
             }
