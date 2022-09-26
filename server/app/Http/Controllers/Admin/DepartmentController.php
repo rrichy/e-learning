@@ -71,7 +71,9 @@ class DepartmentController extends Controller
         $valid = $request->validate([
             'affiliation_id' => 'required|numeric|exists:affiliations,id',
             'name' => ['required', 'string', Rule::unique('departments')->where(fn ($q) => $q->where('affiliation_id', $department->affiliation_id)->whereNull('parent_id'))->ignore($department->id)],
-            'priority' => ['required', 'numeric', 'min:1', Rule::unique('departments')->where(fn ($q) => $q->where('affiliation_id', $department->affiliation_id)->whereNull('parent_id'))->ignore($department->id)],
+            'priority' => ['required', 'numeric', 'min:1', Rule::unique('departments')->where(function ($q) use ($department) {
+                $q->where('affiliation_id', $department->affiliation_id)->whereNull('parent_id');
+            })->ignore($department->id)],
             'child_departments' => 'present|array',
             'child_departments.*.name' => 'required|string|distinct',
             'child_departments.*.priority' => 'required|numeric|min:1|distinct',

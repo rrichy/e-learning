@@ -1,7 +1,7 @@
 import { MembershipType } from "@/enums/membershipTypes";
 import useAuth from "@/hooks/useAuth";
 import { HEADER_HEIGHT } from "@/settings/appconfig";
-import { Close } from "@mui/icons-material";
+import { AssignmentOutlined, Close } from "@mui/icons-material";
 import {
   Box,
   Divider,
@@ -228,6 +228,11 @@ const adminSidebarContent: SidebarItemProps[] = [
     icon: <AnnouncementIcon />,
     label: "お知らせ管理",
     to: "/home",
+  },
+  {
+    icon: <AssignmentOutlined />,
+    label: "署名管理",
+    to: "/signature-management",
   },
   {
     icon: <TemplateIcon />,

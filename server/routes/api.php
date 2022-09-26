@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\OptionsController;
+use App\Http\Controllers\SignatureController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -38,6 +39,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/category/{category}/duplicate', [CategoryController::class, 'duplicate']);
         Route::delete('/category/{ids}', [CategoryController::class, 'massDelete']);
         Route::resource('/category', CategoryController::class)->only(['index', 'store', 'update']);
+        
+        Route::delete('/signature/{ids}', [SignatureController::class, 'massDelete']);
+        Route::resource('/signature', SignatureController::class)->only(['index', 'store', 'update']);
 
         Route::put('/course/mass', [CourseController::class, 'massUpdate']);
         Route::put('/course/toggle', [CourseController::class, 'toggleStatus']);

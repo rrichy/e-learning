@@ -40,7 +40,7 @@ class CourseRequest extends FormRequest
                     'item_number' => $xindex + 1,
                     'title' => $xvideo['title'],
                     'content' => $xvideo['content'],
-                    'video_file_path' => $xvideo['video_file_path'],
+                    'video_file_path' => $xvideo['video_file_path'] ?? "",
                 ];
             }
 
@@ -132,7 +132,9 @@ class CourseRequest extends FormRequest
             'chapters.*.chapter_test.questions.*.options.*.description' => 'required|string',
             'chapters.*.explainer_videos.*.title' => 'required|string',
             'chapters.*.explainer_videos.*.content' => 'required|string',
-            'chapters.*.explainer_videos.*.video_file_path' => 'required|string',
+            // 'chapters.*.explainer_videos.*.video_file_path' => 'required|string',
+            // temporarily disable save filepath
+            'chapters.*.explainer_videos.*.video_file_path' => 'nullable|string',
             // see below for nested indexed and distinct rules
         ];
 

@@ -24,6 +24,7 @@ class Course extends Model
         'start_period',
         'end_period',
         'target',
+        'signature_id',
     ];
 
     public const STATUS = [
@@ -47,10 +48,10 @@ class Course extends Model
         return $this->hasMany(Chapter::class);
     }
 
-    // public function signature(): BelongsTo
-    // {
-    //     return $this->belongsTo(Signature::class);
-    // }
+    public function signature(): BelongsTo
+    {
+        return $this->belongsTo(Signature::class);
+    }
 
     // public function groups(): HasMany
     // {

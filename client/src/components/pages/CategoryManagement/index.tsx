@@ -1,5 +1,4 @@
 import {
-  Box,
   IconButton,
   Link,
   Paper,
@@ -171,7 +170,6 @@ function CategoryManagement() {
           <Stack
             spacing={1}
             direction="row"
-            justifyContent="space-between"
             sx={{
               "& button": {
                 borderRadius: 6,
@@ -194,7 +192,6 @@ function CategoryManagement() {
             >
               追加
             </Button>
-            <Box flex={1} />
           </Stack>
           <Table
             columns={columns}

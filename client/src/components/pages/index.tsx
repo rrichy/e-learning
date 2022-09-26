@@ -26,7 +26,7 @@ import CourseDetailCorrection from "./CourseManagement/CourseDetailCorrection";
 import Account from "./Account/Account";
 import CategoryManagement from "./CategoryManagement";
 import AffiliationsDepartments from "./AffiliationsDepartments";
-import Signature from "./Signature/Signature";
+import Signature from "./Signature"
 import NoticeManagement from "./NoticeManagement/NoticeManagement";
 import NoticeManagementAdd from "./NoticeManagement/NoticeManagementAdd";
 import OrganizeMail from "./OrganizeMail/OrganizeMail";
@@ -168,9 +168,9 @@ export default function Pages() {
       ),
     },
     {
-      path: "/signature",
+      path: "/signature-management",
       element: (
-        <PrivateRoute membershipTypes={registered}>
+        <PrivateRoute membershipTypes={[admin]}>
           <Signature />
         </PrivateRoute>
       ),

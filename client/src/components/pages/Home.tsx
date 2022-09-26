@@ -10,7 +10,7 @@ function Home() {
       <Link to='/affiliations-departments-management'>Affiliations Departments - 所属・部署管理</Link> <br />
       <Link to='/category-management'>Category - カテゴリー管理</Link> <br />
       <Link to='/notice-management'>Notice Management</Link> <br />
-      <Link to='/signature'>Signature - 署名管理</Link> <br />
+      <Link to='/signature-management'>Signature - 署名管理</Link> <br />
       <Link to='/organize-mail'>Organize Mail - メールテンプレート管理</Link> <br />
       <Link to='/contact'>Contact - お問い合わせ</Link> <br /><br />
       CORPORATE Links <br />
