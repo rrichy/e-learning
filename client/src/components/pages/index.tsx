@@ -29,7 +29,7 @@ import AffiliationsDepartments from "./AffiliationsDepartments";
 import Signature from "./Signature"
 import NoticeManagement from "./NoticeManagement/NoticeManagement";
 import NoticeManagementAdd from "./NoticeManagement/NoticeManagementAdd";
-import OrganizeMail from "./OrganizeMail/OrganizeMail";
+import OrganizeMail from "./OrganizeMail";
 import Contact from "./Contact";
 import Sidebar from "../organisms/Sidebar";
 import { Container, Stack, useMediaQuery, useTheme } from "@mui/material";
@@ -176,9 +176,9 @@ export default function Pages() {
       ),
     },
     {
-      path: "/organize-mail",
+      path: "/organize-mail-management",
       element: (
-        <PrivateRoute membershipTypes={registered}>
+        <PrivateRoute membershipTypes={[admin, corporate]}>
           <OrganizeMail />
         </PrivateRoute>
       ),

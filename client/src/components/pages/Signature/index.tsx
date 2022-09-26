@@ -1,31 +1,7 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  Container,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  Link,
-  Paper,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { IconButton, Link, Paper, Tooltip, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Button from "@/components/atoms/Button";
-import Footer from "@/components/molecules/Footer";
-import { FormContainer } from "react-hook-form-mui";
-import CloseIcon from "@mui/icons-material/Close";
-import {
-  DatePicker,
-  // RadioGroup,
-  Selection,
-  TextField,
-} from "../../molecules/LabeledHookForms";
-import { RadioGroup } from "@/components/atoms/HookForms";
 import Table from "@/components/atoms/Table";
 import useAlerter from "@/hooks/useAlerter";
 import {
@@ -51,14 +27,6 @@ function Signature() {
   >([]);
   const [dialog, setDialog] =
     useState<PageDialogProps<SignatureFormAttributeWithId>>(null);
-  const [open, setOpen] = useState(false);
-
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-  const handleClose = () => {
-    setOpen(false);
-  };
 
   const fetchData = useCallback(
     async (

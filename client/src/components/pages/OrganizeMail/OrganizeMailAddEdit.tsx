@@ -1,15 +1,19 @@
 import Button from "@/components/atoms/Button";
-import { TextField } from "@/components/molecules/LabeledHookForms";
+import { Selection, TextField } from "@/components/molecules/LabeledHookForms";
 import useAlerter from "@/hooks/useAlerter";
 import useConfirm from "@/hooks/useConfirm";
+import { OptionAttribute } from "@/interfaces/CommonInterface";
 import DisabledComponentContextProvider from "@/providers/DisabledComponentContextProvider";
-import { storeSignature, updateSignature } from "@/services/SignatureService";
 import {
-  SignatureFormAttribute,
-  SignatureFormAttributeWithId,
-  signatureFormInit,
-  signatureFormSchema,
-} from "@/validations/SignatureFormValidation";
+  storeOrganizeMail,
+  updateOrganizeMail,
+} from "@/services/OrganizeMailService";
+import {
+  OrganizeMailFormAttribute,
+  OrganizeMailFormAttributeWithId,
+  organizeMailFormInit,
+  organizeMailFormSchema,
+} from "@/validations/OrganizeMailFormValidation";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
   Dialog,
@@ -22,33 +26,35 @@ import {
 import { useEffect, useRef } from "react";
 import { FormContainer, useForm } from "react-hook-form-mui";
 
-interface SignatureAddEditProps {
-  state: "add" | SignatureFormAttributeWithId | null;
+interface OrganizeMailAddEditProps {
+  state: "add" | OrganizeMailFormAttributeWithId | null;
   closeFn: () => void;
   resolverFn: () => void;
+  signatures: OptionAttribute[];
 }
 
-function SignatureAddEdit({
+function OrganizeMailAddEdit({
   state,
   closeFn,
   resolverFn,
-}: SignatureAddEditProps) {
+  signatures,
+}: OrganizeMailAddEditProps) {
   const mounted = useRef(true);
   const { isConfirmed } = useConfirm();
   const { successSnackbar, handleError } = useAlerter();
 
-  const formContext = useForm<SignatureFormAttribute>({
+  const formContext = useForm<OrganizeMailFormAttribute>({
     mode: "onChange",
-    defaultValues: signatureFormInit,
-    resolver: yupResolver(signatureFormSchema),
+    defaultValues: organizeMailFormInit,
+    resolver: yupResolver(organizeMailFormSchema),
   });
 
   const {
-    formState: { isSubmitting, isDirty },
+    formState: { isSubmitting, isDirty, isValid },
   } = formContext;
 
   const handleSubmit = formContext.handleSubmit(
-    async (raw: SignatureFormAttribute) => {
+    async (raw: OrganizeMailFormAttribute) => {
       const confirmed = await isConfirmed({
         title: "sure ka?",
         content: "text here",
@@ -57,15 +63,15 @@ function SignatureAddEdit({
       if (confirmed) {
         try {
           const res = await (state === "add"
-            ? storeSignature(raw)
-            : updateSignature(state!.id, raw));
+            ? storeOrganizeMail(raw)
+            : updateOrganizeMail(state!.id, raw));
 
           successSnackbar(res.data.message);
           handleClose();
           resolverFn();
         } catch (e: any) {
           const errors = handleError(e);
-          type Key = keyof SignatureFormAttribute;
+          type Key = keyof OrganizeMailFormAttribute;
           Object.entries(errors).forEach(([name, error]) => {
             const err = error as string | string[];
             const str_error = typeof err === "string" ? err : err.join("");
@@ -83,7 +89,7 @@ function SignatureAddEdit({
   const handleClose = () => {
     closeFn();
     setTimeout(() => {
-      formContext.reset(signatureFormInit);
+      formContext.reset(organizeMailFormInit);
     }, 200);
   };
 
@@ -120,15 +126,12 @@ function SignatureAddEdit({
                 基本情報
               </Typography>
               <Stack spacing={2}>
-                <TextField label="登録名" name="name" />
-                <TextField label="from_name" name="from_name" />
-                <TextField label="from_email" name="from_email" />
+                <TextField label="タイトル" name="title" />
                 <TextField label="内容" name="content" multiline rows={3} />
-                <TextField
-                  label="並び順"
-                  name="priority"
-                  type="number"
-                  inputProps={{ min: 1 }}
+                <Selection
+                  label="署名"
+                  name="signature_id"
+                  options={signatures}
                 />
               </Stack>
             </Paper>
@@ -157,7 +160,7 @@ function SignatureAddEdit({
                 variant="contained"
                 color="secondary"
                 type="submit"
-                disabled={!isDirty}
+                disabled={!(isValid && isDirty)}
               >
                 登録
               </Button>
@@ -169,4 +172,4 @@ function SignatureAddEdit({
   );
 }
 
-export default SignatureAddEdit;
+export default OrganizeMailAddEdit;

@@ -237,7 +237,7 @@ const adminSidebarContent: SidebarItemProps[] = [
   {
     icon: <TemplateIcon />,
     label: "メールテンプレート管理",
-    to: "/organize-mail",
+    to: "/organize-mail-management",
   },
   {
     icon: <InquiryIcon />,
