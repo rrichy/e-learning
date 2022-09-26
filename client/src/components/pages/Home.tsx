@@ -6,7 +6,7 @@ function Home() {
       Home Page (Sidebar) <br /><br />
       ADMIN Links <br />
       <Link to='/course-management'>Course Management - コース管理</Link> <br />
-      <Link to='/account'>Account - アカウント管理</Link> <br />
+      <Link to='/account-management'>Account - アカウント管理</Link> <br />
       <Link to='/affiliations-departments-management'>Affiliations Departments - 所属・部署管理</Link> <br />
       <Link to='/category-management'>Category - カテゴリー管理</Link> <br />
       <Link to='/notice-management'>Notice Management</Link> <br />
@@ -15,7 +15,7 @@ function Home() {
       <Link to='/contact'>Contact - お問い合わせ</Link> <br /><br />
       CORPORATE Links <br />
       <Link to='/course-management'>Course Management - コース管理</Link> <br />
-      <Link to='/account'>Account - アカウント管理</Link> <br />
+      <Link to='/account-management'>Account - アカウント管理</Link> <br />
       <Link to='/affiliations-departments-management'>Affiliations Departments - 所属・部署管理</Link> <br />
       <Link to='/category-management'>Category - カテゴリー管理</Link> <br />
       <Link to='/notice-management'>Notice Management</Link> <br />

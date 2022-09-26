@@ -15,6 +15,7 @@ import { MembershipType } from "@/enums/membershipTypes";
 import Register from "./Register";
 import MyPage from "./MyPage";
 import ChangePlan from "./ChangePlan";
+import ChangePassword from "./ChangePassword";
 import Inquiries from "./Inquiries";
 import Header from "../organisms/Header";
 import CourseManagement from "./CourseManagement";
@@ -23,7 +24,9 @@ import ComprehensionTestAdd from "./CourseManagement/ComprehensionTestAdd";
 import CourseDetail from "./CourseManagement/CourseDetail";
 import ConditionalMail from "./CourseManagement/ConditionalMail";
 import CourseDetailCorrection from "./CourseManagement/CourseDetailCorrection";
-import Account from "./Account/Account";
+import AccountManagement from "./AccountManagement";
+import AccountManagementAddEdit from "./AccountManagement/AccountManagementAddEdit";
+import AccountManagementDetail from "./AccountManagement/AccountManagementDetail";
 import CategoryManagement from "./CategoryManagement";
 import AffiliationsDepartments from "./AffiliationsDepartments";
 import Signature from "./Signature"
@@ -78,6 +81,14 @@ export default function Pages() {
       element: (
         <PrivateRoute membershipTypes={registered}>
           <ChangePlan />
+        </PrivateRoute>
+      ),
+    },
+    {
+      path: "/change-password",
+      element: (
+        <PrivateRoute membershipTypes={registered}>
+          <ChangePassword />
         </PrivateRoute>
       ),
     },
@@ -144,12 +155,30 @@ export default function Pages() {
       ),
     },
     {
-      path: "/account",
+      path: "/account-management",
       element: (
-        <PrivateRoute membershipTypes={registered}>
-          <Account />
+        <PrivateRoute membershipTypes={[admin, corporate]}>
+          <Outlet />
         </PrivateRoute>
       ),
+      children: [
+        {
+          index: true,
+          element: <AccountManagement />,
+        },
+        {
+          path: "create",
+          element: <AccountManagementAddEdit />,
+        },
+        {
+          path: ":accountId/edit",
+          element: <AccountManagementAddEdit />,
+        },
+        {
+          path: ":accountId/detail",
+          element: <AccountManagementDetail />,
+        },
+      ],
     },
     {
       path: "/category-management",

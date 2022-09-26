@@ -6,10 +6,10 @@ import {
   RadioGroup,
   Selection,
   TextField,
-} from "../molecules/LabeledHookForms";
+} from "../../molecules/LabeledHookForms";
 import AccountManagementForm from "@/components/organisms/AccountManagementFragment/AccountManagementForm";
 
-function MyPage() {
+function AccountManagementAddEdit() {
   return (
     <Paper variant="outlined">
       <Stack spacing={3}>
@@ -20,14 +20,14 @@ function MyPage() {
             <FormContainer>
               <AccountManagementForm
                 viewable={true}
-                isEdit
+                isCreate
               />
             </FormContainer>
           </Paper>
         </Paper>
       </Stack>
     </Paper>
-  )
+  );
 }
 
-export default MyPage
+export default AccountManagementAddEdit;
