@@ -1,0 +1,10 @@
+export { default as LogoutIcon } from "./LogoutIcon";
+export { default as UserIcon } from "./UserIcon";
+export { default as InquiryIcon } from "./InquiryIcon";
+export { default as ChangePlanIcon } from "./ChangePlanIcon";
+export { default as CourseManagementIcon } from "./CourseManagementIcon";
+export { default as LectureIcon } from "./LectureIcon";
+export { default as DepartmentIcon } from "./DepartmentIcon";
+export { default as CategoryIcon } from "./CategoryIcon";
+export { default as AnnouncementIcon } from "./AnnouncementIcon";
+export { default as TemplateIcon } from "./TemplateIcon";

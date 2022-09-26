@@ -1,0 +1,300 @@
+import { MembershipType } from "@/enums/membershipTypes";
+import useAuth from "@/hooks/useAuth";
+import { HEADER_HEIGHT } from "@/settings/appconfig";
+import { Close } from "@mui/icons-material";
+import {
+  Box,
+  Divider,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+} from "@mui/material";
+import React, { useMemo } from "react";
+import { Link, To } from "react-router-dom";
+import Button from "../atoms/Button";
+import {
+  AnnouncementIcon,
+  CategoryIcon,
+  CourseManagementIcon,
+  DepartmentIcon,
+  InquiryIcon,
+  LectureIcon,
+  TemplateIcon,
+  UserIcon,
+} from "../atoms/Icons";
+
+const { admin, corporate, individual, trial, guest } = MembershipType;
+
+function Sidebar({
+  closeFn,
+  useDarkColorScheme,
+}: {
+  closeFn?: () => void;
+  useDarkColorScheme: boolean;
+}) {
+  const { userCount, authData } = useAuth();
+
+  const CountContent = () => {
+    switch (authData?.membership_type_id) {
+      case admin:
+        return (
+          <>
+            <ListItem>
+              <ListItemText
+                primary="法人アカウント数"
+                secondary={userCount?.corporate + "人"}
+              />
+            </ListItem>
+            <ListItem>
+              <ListItemText
+                primary="個人アカウント数"
+                secondary={userCount?.individual + "人"}
+              />
+            </ListItem>
+            <ListItem>
+              <ListItemText
+                primary="トライアルアカウント数"
+                secondary={userCount?.trial + "人"}
+              />
+            </ListItem>
+          </>
+        );
+      case corporate:
+        return (
+          <ListItem>
+            <ListItemText
+              primary="アカウント数"
+              secondary={userCount?.individual + "人"}
+            />
+          </ListItem>
+        );
+      case individual:
+        return (
+          <ListItem>
+            <ListItemIcon>
+              <CourseManagementIcon sx={{ color: "common.black" }} />
+            </ListItemIcon>
+            <ListItemText primary="コース一覧" />
+          </ListItem>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const sidebarContent = useMemo(() => {
+    switch (authData?.membership_type_id) {
+      case admin:
+        return adminSidebarContent;
+      case corporate:
+        return corporateSidebarContent;
+      case individual:
+        return individualSidebarContent;
+      default:
+        return [];
+    }
+  }, [authData?.membership_type_id]);
+
+  return (
+    <Box
+      width={240}
+      bgcolor={useDarkColorScheme ? "common.black" : "common.white"}
+      flexShrink={0}
+      position="relative"
+      overflow="visible"
+      sx={{
+        "& .MuiListItemIcon-root": {
+          minWidth: "fit-content",
+          mr: 1,
+        },
+      }}
+    >
+      <List
+        dense
+        sx={{
+          bgcolor: useDarkColorScheme ? "common.gray" : "common.white",
+          color: useDarkColorScheme ? "common.white" : "common.black",
+          "& .MuiListItemText-root": {
+            display: "flex",
+            justifyContent: "space-between",
+            "& .MuiListItemText-primary": {
+              fontSize: 13,
+              fontWeight: "bold",
+            },
+            "& .MuiListItemText-secondary": {
+              fontSize: 14,
+              color: "primary.main",
+            },
+          },
+        }}
+      >
+        <CountContent />
+      </List>
+      <List
+        disablePadding
+        sx={{
+          "& .MuiDivider-root": {
+            borderColor: useDarkColorScheme ? "common.menuhover" : undefined,
+          },
+          "& .MuiListItemButton-root": {
+            color: useDarkColorScheme ? "common.white" : "common.black",
+            transition: "all 0.2s",
+            height: 52,
+            "& svg": {
+              color: useDarkColorScheme ? "common.white" : "common.black",
+            },
+            "& .MuiTypography-root": {
+              fontWeight: "bold",
+              fontSize: 14,
+            },
+            "&:hover": {
+              bgcolor: useDarkColorScheme ? "common.menuhover" : undefined,
+            },
+          },
+        }}
+        onClick={closeFn}
+      >
+        <Divider />
+        {sidebarContent.map((props, index) => (
+          <SidebarItem {...props} key={"sidebar-item" + index} />
+        ))}
+      </List>
+      {closeFn && (
+        <Button
+          onClick={closeFn}
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 240,
+            bgcolor: "common.white",
+            height: HEADER_HEIGHT,
+            width: HEADER_HEIGHT,
+            borderRadius: 0,
+            flexDirection: "column",
+            color: "common.black",
+            "& .MuiButton-startIcon": {
+              m: 0,
+            },
+            "&:hover": {
+              bgcolor: "common.white",
+            },
+          }}
+          startIcon={<Close />}
+        >
+          MENU
+        </Button>
+      )}
+    </Box>
+  );
+}
+
+export default Sidebar;
+
+interface SidebarItemProps {
+  icon: React.ReactNode;
+  label: string;
+  to?: To;
+}
+
+const adminSidebarContent: SidebarItemProps[] = [
+  {
+    icon: <CourseManagementIcon />,
+    label: "コース管理",
+    to: "/course-management",
+  },
+  {
+    icon: <LectureIcon />,
+    label: "受講履歴",
+    to: "/home",
+  },
+  {
+    icon: <UserIcon />,
+    label: "アカウント管理",
+    to: "/account",
+  },
+  {
+    icon: <DepartmentIcon />,
+    label: "所属・部署管理",
+    to: "/affiliations-departments-management",
+  },
+  {
+    icon: <CategoryIcon />,
+    label: "カテゴリー管理",
+    to: "/category-management",
+  },
+  {
+    icon: <AnnouncementIcon />,
+    label: "お知らせ管理",
+    to: "/home",
+  },
+  {
+    icon: <TemplateIcon />,
+    label: "メールテンプレート管理",
+    to: "/organize-mail",
+  },
+  {
+    icon: <InquiryIcon />,
+    label: "お問い合わせ",
+    to: "/inquiries",
+  },
+];
+
+const corporateSidebarContent: SidebarItemProps[] = [
+  {
+    icon: <CourseManagementIcon />,
+    label: "コース管理",
+    to: "/course-management",
+  },
+  {
+    icon: <UserIcon />,
+    label: "アカウント管理",
+    to: "/account",
+  },
+  {
+    icon: <DepartmentIcon />,
+    label: "所属・部署管理",
+    to: "/affiliations-departments-management",
+  },
+  {
+    icon: <InquiryIcon />,
+    label: "お問い合わせ",
+    to: "/inquiries",
+  },
+];
+
+const individualSidebarContent: SidebarItemProps[] = [
+  {
+    icon: <LectureIcon />,
+    label: "受講履歴",
+    to: "/home",
+  },
+  {
+    icon: <UserIcon />,
+    label: "マイページ",
+    to: "/home",
+  },
+  {
+    icon: <AnnouncementIcon />,
+    label: "お知らせ",
+    to: "/home",
+  },
+  {
+    icon: <InquiryIcon />,
+    label: "お問い合わせ",
+    to: "/home",
+  },
+];
+
+const SidebarItem = ({ icon, label, to = "/home" }: SidebarItemProps) => {
+  return (
+    <>
+      <ListItemButton component={Link} to={to}>
+        <ListItemIcon>{icon}</ListItemIcon>
+        <ListItemText primary={label} />
+      </ListItemButton>
+      <Divider />
+    </>
+  );
+};

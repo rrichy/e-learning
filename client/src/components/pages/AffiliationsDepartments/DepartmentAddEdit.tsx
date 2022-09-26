@@ -1,0 +1,252 @@
+import Button from "@/components/atoms/Button";
+import { Selection, TextField } from "@/components/molecules/LabeledHookForms";
+import useAlerter from "@/hooks/useAlerter";
+import useConfirm from "@/hooks/useConfirm";
+import {
+  storeDepartment,
+  updateDepartment,
+} from "@/services/DepartmentService";
+import {
+  DepartmentFormAttribute,
+  DepartmentFormAttributeWithId,
+  departmentFormInit,
+  departmentFormSchema,
+} from "@/validations/DepartmentFormValidation";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { Delete } from "@mui/icons-material";
+import {
+  Box,
+  Checkbox,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControlLabel,
+  Paper,
+  Stack,
+  Typography,
+} from "@mui/material";
+import React, { useEffect, useRef, useState } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
+import { FormContainer } from "react-hook-form-mui";
+
+function DepartmentAddEdit({
+  state,
+  closeFn,
+  resolverFn,
+}: {
+  state: "add" | DepartmentFormAttributeWithId | null;
+  closeFn: () => void;
+  resolverFn: () => void;
+}) {
+  const mounted = useRef(true);
+  const { isConfirmed } = useConfirm();
+  const { successSnackbar, handleError } = useAlerter();
+  const [hasChildren, setHasChildren] = useState(false);
+  const [tempChildren, setTempChildren] = useState<
+    DepartmentFormAttribute["child_departments"]
+  >([]);
+  const formContext = useForm<DepartmentFormAttribute>({
+    mode: "onChange",
+    defaultValues: departmentFormInit,
+    resolver: yupResolver(departmentFormSchema),
+  });
+
+  const {
+    fields: child_departments,
+    remove,
+    append,
+  } = useFieldArray({
+    control: formContext.control,
+    name: "child_departments",
+    keyName: "fieldKey",
+  });
+
+  const handleSubmit = formContext.handleSubmit(
+    async (raw: DepartmentFormAttribute) => {
+      try {
+        const res = await (state === "add"
+          ? storeDepartment(raw)
+          : updateDepartment(state!.id, raw));
+
+        successSnackbar(res.data.message);
+        handleClose();
+        resolverFn();
+      } catch (e: any) {
+        const errors = handleError(e);
+        type Key = keyof DepartmentFormAttribute;
+        Object.entries(errors).forEach(([name, error]) => {
+          const err = error as string | string[];
+          const str_error = typeof err === "string" ? err : err.join("");
+          formContext.setError(name as Key, {
+            type: "manual",
+            message: str_error,
+          });
+        });
+      }
+    }
+  );
+
+  const handleCheck = (
+    _e: React.ChangeEvent<HTMLInputElement>,
+    checked: boolean
+  ) => {
+    if (!checked) {
+      setTempChildren(formContext.getValues("child_departments"));
+      formContext.setValue("child_departments", []);
+    } else {
+      formContext.setValue("child_departments", tempChildren);
+    }
+    setHasChildren(checked);
+  };
+
+  const handleClose = () => {
+    closeFn();
+    formContext.reset(departmentFormInit);
+    setTempChildren([]);
+    setHasChildren(false);
+  };
+
+  useEffect(() => {
+    mounted.current = true;
+
+    if (state && state !== "add") {
+      formContext.reset(state);
+      if (state.child_departments?.length > 0) {
+        setHasChildren(true);
+        setTempChildren(state.child_departments);
+      }
+    }
+
+    return () => {
+      mounted.current = false;
+    };
+  }, [state]);
+
+  return (
+    <Dialog
+      open={Boolean(state)}
+      maxWidth="sm"
+      fullWidth
+      PaperProps={{ sx: { bgcolor: "#f7f7f7" } }}
+    >
+      <DialogTitle sx={{ px: 0, pt: 0 }}>
+        <Typography variant="sectiontitle1">所属の登録</Typography>
+      </DialogTitle>
+      <DialogContent>
+        <FormContainer formContext={formContext} handleSubmit={handleSubmit}>
+          <Paper variant="subpaper">
+            <Typography
+              variant="sectiontitle2"
+              sx={{ transform: "translate(-8px, -8px)" }}
+            >
+              基本情報
+            </Typography>
+            <Stack spacing={2}>
+              <Selection label="所属名" name="affiliation_id" />
+              <TextField label="部署名" name="name" />
+              <TextField
+                label="並び順"
+                name="priority"
+                type="number"
+                inputProps={{ min: 0 }}
+              />
+            </Stack>
+          </Paper>
+          <Paper variant="subpaper" sx={{ mt: 3 }}>
+            <Typography
+              variant="sectiontitle2"
+              sx={{ transform: "translate(-8px, -8px)" }}
+            >
+              子部署
+            </Typography>
+            <Stack spacing={2}>
+              <FormControlLabel
+                label="子部署を作成する"
+                control={
+                  <Checkbox checked={hasChildren} onChange={handleCheck} />
+                }
+              />
+              {child_departments.map(({ fieldKey }, index) => (
+                <Box key={fieldKey}>
+                  <Paper
+                    variant="outlined"
+                    sx={{
+                      p: "16px !important",
+                      borderBottomRightRadius: 0,
+                      borderBottomLeftRadius: 0,
+                    }}
+                  >
+                    <Stack spacing={2}>
+                      <TextField
+                        label="子部署名"
+                        name={`child_departments.${index}.name`}
+                      />
+                      <TextField
+                        label="並び順"
+                        name={`child_departments.${index}.priority`}
+                        type="number"
+                        inputProps={{ min: 0 }}
+                      />
+                    </Stack>
+                  </Paper>
+                  <Button
+                    type="button"
+                    color="secondary"
+                    startIcon={<Delete />}
+                    onClick={() => remove(index)}
+                    sx={{
+                      borderTopRightRadius: 0,
+                      borderTopLeftRadius: 0,
+                      border: "1px solid rgba(0, 0, 0, 0.12)",
+                      borderTopWidth: 0,
+                      bgcolor: "#fff",
+                    }}
+                  >
+                    削除
+                  </Button>
+                </Box>
+              ))}
+              {hasChildren && (
+                <Button
+                  type="button"
+                  onClick={() => append({ name: "", priority: null })}
+                  variant="contained"
+                  color="secondary"
+                >
+                  子部署を追加✙
+                </Button>
+              )}
+            </Stack>
+          </Paper>
+          <Stack
+            direction="row"
+            mt={3}
+            spacing={1}
+            justifyContent="space-between"
+            sx={{
+              "& button": {
+                height: 60,
+                borderRadius: 8,
+              },
+            }}
+          >
+            <Button
+              variant="outlined"
+              color="dull"
+              type="button"
+              onClick={handleClose}
+            >
+              キャンセル
+            </Button>
+            <Button variant="contained" color="secondary" type="submit">
+              登録
+            </Button>
+          </Stack>
+        </FormContainer>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export default DepartmentAddEdit;

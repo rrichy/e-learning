@@ -1,0 +1,86 @@
+<?php
+
+namespace App\Http\Controllers\Auth;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Models\MembershipType;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
+class AuthenticatedSessionController extends Controller
+{
+    /**
+     * Handle an incoming authentication request.
+     *
+     * @param  \App\Http\Requests\Auth\LoginRequest  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(LoginRequest $request)
+    {
+
+        $request->authenticate();
+
+        $auth = $request->user();
+        $token = $auth->createToken('access_token')->plainTextToken;
+
+        return response()->json([
+            'access_token' => $token,
+            'message' => 'Login Successful!',
+        ]);
+    }
+
+    public function show(Request $request)
+    {
+        switch (auth()->user()->membership_type_id) {
+            case 4:
+                // Count all users that are not admin
+                return response()->json([
+                    'user' => auth()->user(),
+                    'users_count' => User::where('membership_type_id', '<', MembershipType::ADMIN)
+                        ->select(DB::raw('count(membership_type_id) as count, (CASE WHEN membership_type_id = 1 THEN "trial" WHEN membership_type_id = 2 THEN "individual" ELSE "corporate" END) AS membership_type'))
+                        ->groupBy('membership_type_id')->get()
+                        ->mapWithKeys(fn ($item) => [$item['membership_type'] => $item['count']]),
+                    'message' => 'Login Successful!',
+                ]);
+            case 3:
+                // Count individuals under the same affiliation as the Corporate (UNFINISHED)
+                return response()->json([
+                    'user' => auth()->user(),
+                    'users_count' => User::where('membership_type_id', MembershipType::INDIVIDUAL)
+                        ->select(DB::raw('count(membership_type_id) as count, (CASE WHEN membership_type_id = 1 THEN "trial" WHEN membership_type_id = 2 THEN "individual" ELSE "corporate" END) AS membership_type'))
+                        ->groupBy('membership_type_id')->get()
+                        ->mapWithKeys(fn ($item) => [$item['membership_type'] => $item['count']]),
+                    'message' => 'Login Successful!',
+                ]);
+            case 1:
+                // Get Categories and its courses (UNFINISHED)
+                return response()->json([
+                    'user' => auth()->user(),
+                    'message' => 'Login Successful!',
+                ]);
+            default:
+                return response()->json([
+                    'user' => auth()->user(),
+                    'message' => 'Login Successful!',
+                ]);
+        }
+    }
+
+    /**
+     * Destroy an authenticated session.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Request $request)
+    {
+        auth()->user()->currentAccessToken()->delete();
+
+        return response()->json([
+            'message' => 'Logout Successful!',
+        ]);
+    }
+}
