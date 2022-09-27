@@ -3,59 +3,37 @@ import {
   CardContent,
   CardHeader,
   Checkbox,
-  Container,
   Dialog,
   DialogTitle,
   Divider,
   FormControlLabel,
-  Grid,
   IconButton,
   Paper,
   Typography,
 } from "@mui/material";
 import { Stack } from "@mui/system";
-import React, { useState } from "react";
+import { useState } from "react";
 import Button from "@/components/atoms/Button";
 import { FormContainer } from "react-hook-form-mui";
 import {
-  DatePicker,
-  RadioGroup,
   Selection,
   TextField,
 } from "../../molecules/LabeledHookForms";
-// import { RadioGroup } from "@/components/atoms/HookForms";
 import CloseIcon from '@mui/icons-material/Close';
 import { OptionAttribute } from "@/interfaces/CommonInterface";
 import AccountManagementSearch from "@/components/organisms/AccountManagementFragment/AccountManagementSearchAccordion";
 import MaterialTable from "material-table";
 import Link from "@/components/atoms/Link";
-import { render } from "react-dom";
 
 function AccountManagement() {
-  const [searchOpen, setSearchOpen] = useState(false);
   const [multipleAccountsOpen, setMultipleAccountsOpen] = useState(false);
-  const [createAccountOpen, setCreateAccountOpen] = useState(false);
   const [checked, setChecked] = useState(false);
-
-  const handleSearchOpen = () => {
-    setSearchOpen(true);
-  };
-  const handleSearchClose = () => {
-    setSearchOpen(false);
-  };
 
   const handleMultipleAccountsOpen = () => {
     setMultipleAccountsOpen(true);
   };
   const handleMultipleAccountsClose = () => {
     setMultipleAccountsOpen(false);
-  };
-
-  const handleCreateAccountOpen = () => {
-    setCreateAccountOpen(true);
-  };
-  const handleCreateAccountClose = () => {
-    setCreateAccountOpen(false);
   };
 
   const [categories, setCategories] = useState<OptionAttribute[]>([
