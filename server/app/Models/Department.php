@@ -38,9 +38,16 @@ class Department extends Model
     {
         return $this->hasMany(DepartmentUser::class);
     }
-    
+
     public function users(): HasManyThrough
     {
-        return $this->hasManyThrough(User::class, DepartmentUser::class);
+        return $this->hasManyThrough(
+            User::class,
+            DepartmentUser::class,
+            'department_id',
+            'id',
+            'id',
+            'user_id',
+        );
     }
 }

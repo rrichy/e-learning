@@ -55,14 +55,21 @@ class User extends Authenticatable
         return $this->belongsTo(MembershipType::class);
     }
 
-    public function departmentUser(): HasMany
+    public function departmentUsers(): HasMany
     {
         return $this->hasMany(DepartmentUser::class);
     }
 
     public function departments(): HasManyThrough
     {
-        return $this->hasManyThrough(Department::class, DepartmentUser::class);
+        return $this->hasManyThrough(
+            Department::class, 
+            DepartmentUser::class,
+            'user_id',
+            'id',
+            'id',
+            'department_id',
+        );
     }
 
     public function affiliation(): BelongsTo
