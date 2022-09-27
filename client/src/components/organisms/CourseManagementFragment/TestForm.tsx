@@ -1,35 +1,12 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  IconButton,
-  Paper,
-  Typography,
-} from "@mui/material";
+import { Paper, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
 import Button from "@/components/atoms/Button";
 import {
-  DatePicker,
-  // RadioGroup,
   Selection,
   TextField,
 } from "../../molecules/LabeledHookForms";
-import Trash from "@/assets/icon-trash.svg";
-import { RadioGroup } from "@/components/atoms/HookForms";
-import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
-import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
-import React, { useEffect, useMemo, useState } from "react";
-import CloseIcon from "@mui/icons-material/Close";
+import React, { useMemo, useState } from "react";
 import {
-  ChapterAttributes,
-  chapterInit,
-  CourseFormAttribute,
   QuestionAttributes,
   questionInit,
   TestAttributes,
@@ -37,10 +14,8 @@ import {
 } from "@/validations/CourseFormValidation";
 import {
   FormContainer,
-  FormContainerProps,
   useFieldArray,
   useForm,
-  useFormContext,
   UseFormReturn,
 } from "react-hook-form-mui";
 import { Delete, DragIndicator, Quiz } from "@mui/icons-material";
@@ -262,7 +237,11 @@ function TestForm({
           setOpenIndex(null);
           setTimeout(() => questionContext.reset(questionInit), 200);
         }}
-        itemNumber={openIndex !== null ? (openIndex >= 0 ? openIndex : questions.length) + 1 : 0}
+        itemNumber={
+          openIndex !== null
+            ? (openIndex >= 0 ? openIndex : questions.length) + 1
+            : 0
+        }
         formContext={questionContext}
         onSubmit={handleQuestionSubmit}
       />
