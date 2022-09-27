@@ -4,7 +4,6 @@ import { useState } from "react";
 import Button from "@/components/atoms/Button";
 import {
   ConditionalDateRange,
-  RadioGroup,
   Selection,
   TextField,
 } from "@/components/molecules/LabeledHookForms";
@@ -86,8 +85,10 @@ function AccountManagementSearchAccordion({
               }}
             />
             <Labeler label="Display Number of Results">
-              <ASelection name="page_count" label="Results" />
-              <ASelection name="order" label="Order" />
+              <Stack direction="row" spacing={2}>
+                <ASelection name="page_count" label="Results" />
+                <ASelection name="order" label="Order" />
+              </Stack>
             </Labeler>
           </Stack>
           <Stack direction="row" spacing={2} p={3} justifyContent="center">

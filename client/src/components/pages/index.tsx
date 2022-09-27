@@ -30,8 +30,8 @@ import AccountManagementDetail from "./AccountManagement/AccountManagementDetail
 import CategoryManagement from "./CategoryManagement";
 import AffiliationsDepartments from "./AffiliationsDepartments";
 import Signature from "./Signature"
-import NoticeManagement from "./NoticeManagement/NoticeManagement";
-import NoticeManagementAdd from "./NoticeManagement/NoticeManagementAdd";
+import NoticeManagement from "./NoticeManagement";
+import NoticeManagementAddEdit from "./NoticeManagement/NoticeManagementAddEdit";
 import OrganizeMail from "./OrganizeMail";
 import Contact from "./Contact";
 import Sidebar from "../organisms/Sidebar";
@@ -215,16 +215,30 @@ export default function Pages() {
     {
       path: "/notice-management",
       element: (
-        <PrivateRoute membershipTypes={registered}>
-          <NoticeManagement />
+        <PrivateRoute membershipTypes={[admin, corporate]}>
+          <Outlet />
         </PrivateRoute>
       ),
+      children: [
+        {
+          index: true,
+          element: <NoticeManagement />,
+        },
+        {
+          path: "create",
+          element: <NoticeManagementAddEdit />,
+        },
+        {
+          path: ":noticeId/edit",
+          element: <NoticeManagementAddEdit />,
+        },
+      ],
     },
     {
       path: "/notice-management/create",
       element: (
         <PrivateRoute membershipTypes={registered}>
-          <NoticeManagementAdd />
+          <NoticeManagementAddEdit />
         </PrivateRoute>
       ),
     },
