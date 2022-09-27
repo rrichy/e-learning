@@ -32,7 +32,7 @@ function Sidebar({
   useDarkColorScheme,
 }: {
   closeFn?: () => void;
-  useDarkColorScheme: boolean;
+  useDarkColorScheme?: boolean;
 }) {
   const { userCount, authData } = useAuth();
 

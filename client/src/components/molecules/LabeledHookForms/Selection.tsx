@@ -6,7 +6,7 @@ function Selection({
   label,
   labelProps,
   ...rest
-}: SelectElementProps<any> & { labelProps?: LabelerSupplementaryProps }) {
+}: SelectElementProps<any> & { labelProps?: LabelerSupplementaryProps; optionName?: string }) {
   return (
     <Labeler label={label} {...labelProps}>
       <AtomSelection fullWidth size="small" {...rest} />

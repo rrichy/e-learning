@@ -10,7 +10,7 @@ import Button from "../atoms/Button";
 
 interface HeaderProps {
   showMenu?: boolean;
-  useDarkColorScheme: boolean;
+  useDarkColorScheme?: boolean;
 }
 
 function Header({ showMenu, useDarkColorScheme }: HeaderProps) {
