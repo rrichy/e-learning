@@ -1,6 +1,7 @@
 export { default as CheckboxGroup } from "./CheckboxGroup";
 export { default as ConditionalDateRange } from "./ConditionalDateRange";
 export { default as DatePicker } from "./DatePicker";
+export { default as ImageDropzone } from "./ImageDropzone";
 export { default as MultiSelection } from "./MultiSelection";
 export { default as RadioGroup } from "./RadioGroup";
 export { default as RangeSelection } from "./RangeSelection";

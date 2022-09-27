@@ -1,5 +1,5 @@
 import { RegistrationFormAttribute } from "@/validations/RegistrationFormValidation";
-import { get, post, BEARER_TOKEN } from "./ApiService";
+import { get, post, BEARER_TOKEN, put } from "./ApiService";
 
 export const getBearerToken = () => localStorage.getItem(BEARER_TOKEN) || "";
 
@@ -19,10 +19,18 @@ export const login = async (credentials: {
   return res;
 };
 
+export const getAuthData = () => {
+  return get("/api/me");
+};
+
+export const updateAuthData = (payload: Partial<RegistrationFormAttribute>) => {
+  return put("/api/me", payload);
+};
+
 export const register = (payload: RegistrationFormAttribute) => {
   return post("/api/register", payload);
 };
 
 export const logout = () => {
   return post("/api/logout");
-}
+};

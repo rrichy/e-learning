@@ -70,6 +70,28 @@ class AuthenticatedSessionController extends Controller
     }
 
     /**
+     * Update the authenticated user
+     * 
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request)
+    {
+        $valid = $request->validate([
+            'name' => 'required|string',
+            'email' => 'required|string|email|unique:users,email,' . auth()->id(),
+            'image' => 'nullable|string'
+        ]);
+
+        auth()->user()->update($valid);
+
+        return response()->json([
+            'message' => 'Update successful!',
+            'user' => auth()->user(),
+        ]);
+    }
+
+    /**
      * Destroy an authenticated session.
      *
      * @param  \Illuminate\Http\Request  $request

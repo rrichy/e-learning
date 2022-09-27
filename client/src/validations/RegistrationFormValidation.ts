@@ -1,9 +1,10 @@
-import { InferType } from "yup";
+import { InferType,  } from "yup";
 import Yup from "./localizedYup";
 
-const { string, number, date, ref } = Yup;
+const { string, number, date, mixed, ref } = Yup;
 
 export const registrationFormSchema = Yup.object({
+  image: mixed().label("アイコン画像").nullable(),
   name: string().label("氏名").required().name(),
   email: string().label("メールアドレス").required().email(),
   sex: number().label("性別").required().selectionId(),
@@ -24,6 +25,7 @@ export interface RegistrationFormAttribute
 }
 
 export const registrationFormInit: RegistrationFormAttribute = {
+  image: null,
   name: "",
   email: "",
   sex: 0,

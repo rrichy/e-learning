@@ -55,27 +55,30 @@ function ImageDropzone({
 
   const {
     field: { value, onChange },
-    fieldState: { error }
+    fieldState: { error },
   } = useController({
     name,
     rules: required ? { required: "This field is required" } : undefined,
     control,
   });
 
-  const onDropAccepted = useCallback((acceptedFiles: File[]) => {
-    onChange(null);
-    acceptedFiles.forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = () => onChange([file, reader.result]);
-      reader.readAsDataURL(file);
-    });
-  }, [disabled]);
+  const onDropAccepted = useCallback(
+    (acceptedFiles: File[]) => {
+      onChange(null);
+      acceptedFiles.forEach((file) => {
+        const reader = new FileReader();
+        reader.onload = () => onChange([file, reader.result]);
+        reader.readAsDataURL(file);
+      });
+    },
+    [disabled]
+  );
 
   const { getRootProps, getInputProps, isDragAccept, isDragReject } =
     useDropzone({
       maxFiles: 1,
       accept: {
-        'image/*': ['.jpeg', '.png']
+        "image/*": [".jpeg", ".png"],
       },
       minSize: 0,
       maxSize: 5_242_880,
@@ -96,6 +99,7 @@ function ImageDropzone({
     <Stack
       {...getRootProps()}
       direction={!value ? "column" : "row"}
+      position="relative"
       sx={[
         dropzoneRootStyle,
         isDragAccept && { borderColor: "success.main" },
@@ -113,8 +117,10 @@ function ImageDropzone({
           </p>
         )
       ) : (
-        <Box position="relative">
-          <img src={typeof value === "string" ? value : value[1]} alt="" />
+        <>
+          <Box position="relative" className="image-wrapper">
+            <img src={typeof value === "string" ? value : value[1]} alt="" />
+          </Box>
           {!hideRemove && (
             <IconButton
               type="button"
@@ -127,7 +133,7 @@ function ImageDropzone({
               <HighlightOff fontSize="small" />
             </IconButton>
           )}
-        </Box>
+        </>
       )}
     </Stack>
   );

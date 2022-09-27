@@ -1,6 +1,7 @@
 import axios, { AxiosError } from "axios";
 import { OptionsObject, SnackbarMessage, useSnackbar } from "notistack";
 import { useCallback, useState } from "react";
+import { UseFormReturn } from "react-hook-form-mui";
 
 type LaravelError = string | string[];
 interface NestedErrors {
@@ -11,7 +12,7 @@ function useAlerter() {
   const [errors, setErrors] = useState<NestedErrors>({});
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
-  const handleError = (e: Error | AxiosError) => {
+  const handleError = (e: Error | AxiosError, context?: UseFormReturn<any>) => {
     const temp_errors: { [k: string]: any } = {};
 
     if (axios.isAxiosError(e)) {
@@ -25,6 +26,18 @@ function useAlerter() {
 
       setErrors(temp_errors);
     } else enqueueSnackbar(e.message, { variant: "error" });
+
+    if (context) {
+      Object.entries(temp_errors).forEach(([name, error]) => {
+        const err = error as string | string[];
+        const str_error = typeof err === "string" ? err : err.join("");
+        context.setError(name, {
+          type: "manual",
+          message: str_error,
+        });
+      });
+    }
+
     return temp_errors as NestedErrors;
   };
 

@@ -15,7 +15,7 @@ export interface UserAttributes {
   // first_name: string;
   // first_name_furigana: string;
   // id: number;
-  // image: string | null;
+  image: string | null;
   // last_name: string;
   // last_name_furigana: string;
   // line: string | null;
@@ -44,4 +44,5 @@ export const userInit: UserAttributes = {
   sex: 1,
   membership_type_id: 2,
   remarks: null,
+  image: null,
 };

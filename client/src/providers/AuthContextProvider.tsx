@@ -2,7 +2,7 @@ import useAlerter from "@/hooks/useAlerter";
 import { AuthAttributes } from "@/interfaces/AuthAttributes";
 import React, { createContext, useEffect, useState } from "react";
 import { get } from "@/services/ApiService";
-import { getBearerToken } from "@/services/AuthService";
+import { getAuthData, getBearerToken } from "@/services/AuthService";
 
 export const AuthContext = createContext<
   | [
@@ -24,7 +24,7 @@ function AuthContextProvider({ children }: { children: React.ReactNode }) {
     if (auth.isLoggedIn && !auth.data) {
       (async () => {
         try {
-          const res = await get("/api/me");
+          const res = await getAuthData();
           setAuth({
             isLoggedIn: true,
             data: res.data.user,
