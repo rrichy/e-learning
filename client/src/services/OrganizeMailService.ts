@@ -19,10 +19,22 @@ export const storeOrganizeMail = (data: OrganizeMailFormAttribute) => {
   return post(url_prefix, data);
 };
 
-export const updateOrganizeMail = (id: number, data: OrganizeMailFormAttribute) => {
+export const updateOrganizeMail = (
+  id: number,
+  data: OrganizeMailFormAttribute
+) => {
   return put(`${url_prefix}/${id}`, data);
 };
 
 export const destroyOrganizeMail = (ids: number[]) => {
   return destroy(`${url_prefix}/${ids.join(",")}`);
+};
+
+export const massUpdateOrganizeMailPriority = (
+  payload: {
+    id: number;
+    priority: number;
+  }[]
+) => {
+  return put(`${url_prefix}/mass`, { payload });
 };

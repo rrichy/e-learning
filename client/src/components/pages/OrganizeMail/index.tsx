@@ -1,6 +1,6 @@
-import { Box, Link, Paper, Typography } from "@mui/material";
+import { Box, Paper, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
-import { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Button from "@/components/atoms/Button";
 import useAlerter from "@/hooks/useAlerter";
 import {
@@ -10,22 +10,41 @@ import {
   PageDialogProps,
 } from "@/interfaces/CommonInterface";
 import { TABLE_ROWS_PER_PAGE } from "@/settings/appconfig";
-import { Column } from "material-table";
+import { MTableBodyRow } from "material-table";
 import { OrganizeMailFormAttributeWithId } from "@/validations/OrganizeMailFormValidation";
 import {
   destroyOrganizeMail,
   indexOrganizeMail,
+  massUpdateOrganizeMailPriority,
 } from "@/services/OrganizeMailService";
 import Table from "@/components/atoms/Table";
 import { getOptions } from "@/services/CommonService";
 import OrganizeMailAddEdit from "./OrganizeMailAddEdit";
+import organizeMailColumns from "@/columns/organizeMailColumns";
+import arrayMoveTo from "@/utils/arrayMoveTo";
+import useConfirm from "@/hooks/useConfirm";
 
 function OrganizeMail() {
   const mounted = useRef(true);
   const { successSnackbar, errorSnackbar } = useAlerter();
+  const { isConfirmed } = useConfirm();
   const [state, setState] = useState(
     initPaginatedData<OrganizeMailFormAttributeWithId>()
   );
+  const [snapshot, setSnapshot] = useState<OrganizeMailFormAttributeWithId[]>(
+    []
+  );
+  // keyof id value of priority
+  const [prioritySnapshot, setPrioritySnapshot] = useState(
+    new Map<number, number>()
+  );
+  const [changes, setChanges] = useState<{ id: number; priority: number }[]>(
+    []
+  );
+  const dragState = {
+    row: -1,
+    dropIndex: -1,
+  };
   const [stateSelected, setStateSelected] = useState<
     OrganizeMailFormAttributeWithId[]
   >([]);
@@ -54,10 +73,11 @@ function OrganizeMail() {
           per_page: pageSize,
           loading: true,
         }));
+        setChanges([]);
 
         const res = await indexOrganizeMail(page, pageSize, sort, order);
         const { data, meta } = res.data;
-        if (mounted.current)
+        if (mounted.current) {
           setState((s) => ({
             ...s,
             loading: false,
@@ -69,6 +89,16 @@ function OrganizeMail() {
             per_page: meta.per_page,
             last_page: meta.last_page,
           }));
+          setSnapshot(data);
+          setPrioritySnapshot(
+            new Map(
+              data.map((a: OrganizeMailFormAttributeWithId) => [
+                a.id,
+                a.priority,
+              ])
+            )
+          );
+        }
       } catch (e: any) {
         errorSnackbar(e.message);
       } finally {
@@ -91,20 +121,53 @@ function OrganizeMail() {
     }
   };
 
-  const columns: Column<OrganizeMailFormAttributeWithId>[] = [
-    {
-      field: "title",
-      title: "タイトル",
-      render: (row) => (
-        <Link component="button" onClick={() => setDialog(row)}>
-          {row.title}
-        </Link>
-      ),
-    },
-    { field: "content", title: "内容" },
-    { field: "priority", title: "並び順" },
-    { field: "signature_id", title: "署名", lookup: signatures.lookup },
-  ];
+  const handleReorder = (sourceIndex: number, targetIndex: number) => {
+    const newdata = arrayMoveTo(
+      [...state.data],
+      sourceIndex,
+      targetIndex,
+      "priority"
+    );
+
+    setState({
+      ...state,
+      data: newdata,
+    });
+    const changes = newdata.reduce(
+      (acc, { id, priority }) =>
+        prioritySnapshot.get(id) !== priority
+          ? [...acc, { id, priority }]
+          : acc,
+      [] as { id: number; priority: number }[]
+    );
+
+    setChanges(changes);
+  };
+
+  const handleRevertOrder = () => {
+    setState({
+      ...state,
+      data: snapshot,
+    });
+    setChanges([]);
+  };
+
+  const handleUpdateOrder = async () => {
+    const confirmed = await isConfirmed({
+      title: "update priorty",
+      content: "update priority",
+    });
+    if (confirmed) {
+      try {
+        const res = await massUpdateOrganizeMailPriority(changes);
+
+        successSnackbar(res.data.message);
+        fetchData(state.page, state.per_page, state.sort, state.order);
+      } catch (e: any) {
+        errorSnackbar(e.message);
+      }
+    }
+  };
 
   useEffect(() => {
     mounted.current = true;
@@ -167,20 +230,64 @@ function OrganizeMail() {
               variant="outlined"
               color="dull"
               sx={{ width: 75, borderRadius: 6 }}
+              onClick={handleRevertOrder}
+              disabled={changes.length === 0}
             >
-              戻す restore default order
+              戻す
             </Button>
-            <Button variant="contained" sx={{ width: 75, borderRadius: 6 }}>
-              更新 change order
+            <Button
+              variant="contained"
+              sx={{ width: 75, borderRadius: 6 }}
+              disabled={changes.length === 0}
+              onClick={handleUpdateOrder}
+            >
+              更新
             </Button>
           </Stack>
           <Table
-            columns={columns}
+            columns={organizeMailColumns({
+              lookup: signatures.lookup,
+              titleClickFn: setDialog,
+              prioritySnapshot,
+            })}
             state={state}
             fetchData={fetchData}
             onSelectionChange={(rows) => setStateSelected(rows)}
             options={{
               selection: true,
+              maxBodyHeight: "unset",
+            }}
+            components={{
+              Row: (props) => (
+                <MTableBodyRow
+                  {...props}
+                  draggable="true"
+                  onDragStart={(e: React.DragEvent<HTMLElement>) => {
+                    console.log({
+                      src: dragState.row,
+                      target: dragState.dropIndex,
+                    });
+                    dragState.row = props.data.tableData.id;
+                  }}
+                  onDragEnter={(e: React.DragEvent<HTMLElement>) => {
+                    e.preventDefault();
+                    if (props.data.tableData.id !== dragState.row) {
+                      dragState.dropIndex = props.data.tableData.id;
+                    }
+                  }}
+                  onDragEnd={(e: any) => {
+                    console.log({
+                      src: dragState.row,
+                      target: dragState.dropIndex,
+                    });
+                    if (dragState.dropIndex !== -1) {
+                      handleReorder(dragState.row, dragState.dropIndex);
+                    }
+                    dragState.row = -1;
+                    dragState.dropIndex = -1;
+                  }}
+                />
+              ),
             }}
           />
         </Stack>
@@ -195,123 +302,6 @@ function OrganizeMail() {
       </Paper>
     </Stack>
   );
-
-  // return (
-  //   <Stack justifyContent="space-between">
-  //     <Container>
-  //       <Stack spacing={3} sx={{ p: 3 }}>
-  //         <Paper variant="softoutline" sx={{ p: 6 }}>
-  //           <Stack spacing={3}>
-  //             <Typography
-  //               fontWeight="bold"
-  //               variant="h6"
-  //               pl={1}
-  //               sx={{ borderLeft: "5px solid #00c2b2" }}
-  //             >
-  //               メールテンプレートの管理
-  //             </Typography>
-  //             <Stack spacing={2} direction="row" justifyContent="space-between">
-  //               <Stack spacing={1} direction="row">
-  //                 <Button
-  //                   variant="contained"
-  //                   color="warning"
-  //                   sx={{ width: 75, borderRadius: 6 }}
-  //                 >
-  //                   削除
-  //                 </Button>
-  //                 <Button
-  //                   variant="contained"
-  //                   sx={{ width: 100, borderRadius: 6 }}
-  //                   onClick={handleClickOpen}
-  //                 >
-  //                   新規追加
-  //                 </Button>
-  //               </Stack>
-  //               <Stack spacing={1} direction="row">
-  //                 <Button
-  //                   variant="contained"
-  //                   color="info"
-  //                   sx={{ width: 75, borderRadius: 6 }}
-  //                 >
-  //                   戻す
-  //                 </Button>
-  //                 <Button
-  //                   variant="contained"
-  //                   sx={{ width: 75, borderRadius: 6 }}
-  //                 >
-  //                   更新
-  //                 </Button>
-  //               </Stack>
-  //             </Stack>
-  //             <Typography>Table Here</Typography>
-  //           </Stack>
-  //         </Paper>
-  //       </Stack>
-  //       <FormContainer>
-  //         <Dialog open={open} maxWidth="lg">
-  //           <DialogTitle>
-  //             <Typography
-  //               fontWeight="bold"
-  //               variant="h6"
-  //               pl={1}
-  //               sx={{ borderLeft: '5px solid #00c2b2' }}
-  //             >
-  //               メールテンプレートの編集
-  //             </Typography>
-  //             <IconButton
-  //               onClick={handleClose}
-  //               sx={{
-  //                 position: 'absolute',
-  //                 right: 8,
-  //                 top: 8,
-  //                 color: (theme) => theme.palette.grey[500],
-  //               }}
-  //             >
-  //               <CloseIcon />
-  //             </IconButton>
-  //           </DialogTitle>
-  //           <DialogContent>
-  //             <Card>
-  //               <CardHeader
-  //                 title="基本情報"
-  //                 sx={{
-  //                   fontWeight: "bold",
-  //                   background: "#000000",
-  //                   color: "#ffffff",
-  //                   fontSize: "1.25rem"
-  //                 }}
-  //               />
-  //               <CardContent>
-  //                 <Stack spacing={2} p={2}>
-  //                   <TextField
-  //                     name="name"
-  //                     label="タイトル"
-  //                     placeholder="タイトルを入力"
-  //                   />
-  //                   <TextField
-  //                     name="name"
-  //                     label="内容"
-  //                     placeholder="内容を入力"
-  //                     multiline
-  //                     rows={3}
-  //                   />
-  //                   <Selection
-  //                     name="sex"
-  //                     label="署名選択"
-  //                   />
-  //                 </Stack>
-  //               </CardContent>
-  //             </Card>
-  //             <Stack direction="row" spacing={1} justifyContent="center" pt={2}>
-  //               <Button large color="inherit" variant="outlined" sx={{ borderRadius: 7 }}>キャンセル</Button>
-  //               <Button large color="warning" variant="contained" sx={{ borderRadius: 7 }}>登録</Button>
-  //             </Stack>
-  //           </DialogContent>
-  //         </Dialog>
-  //       </FormContainer>
-  //     </Container>
-  //   </Stack>
-  // );
 }
 
 export default OrganizeMail;

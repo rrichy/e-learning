@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\MailTemplateIndexResource;
 use App\Models\MailTemplate;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class MailTemplateController extends Controller
 {
@@ -78,6 +79,43 @@ class MailTemplateController extends Controller
 
         return response()->json([
             'message' => 'Successfully deleted ' . $deleted_count . ' templates!',
+        ]);
+    }
+
+    /**
+     * Mass update priority number of mail templates
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function massUpdate(Request $request)
+    {
+        // Gate::authorize('massUpdate-mail-template', $course);
+        $template_ids = array_map(fn ($q) => $q['id'], $request->payload);
+
+        $rules = [
+            'payload' => 'array',
+            'payload.*.id' => 'required|integer|distinct|exists:mail_templates,id',
+            'payload.*.priority' => [
+                'required',
+                'integer',
+                'distinct',
+                'min:1',
+                Rule::unique('mail_templates', 'priority')
+                    ->where(function ($q) use ($template_ids) {
+                        $q->whereNotIn('id', $template_ids);
+                    })
+            ]
+        ];
+
+        $count = 0;
+        foreach ($request->validate($rules)['payload'] as $template) {
+            MailTemplate::find($template['id'])->update(['priority' => $template['priority']]);
+            $count++;
+        }
+
+        return response()->json([
+            'message' => 'Successfully updated ' . $count . ' mail templates!',
         ]);
     }
 }

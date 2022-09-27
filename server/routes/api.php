@@ -44,6 +44,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('/signature/{ids}', [SignatureController::class, 'massDelete']);
         Route::resource('/signature', SignatureController::class)->only(['index', 'store', 'update']);
 
+        Route::put('/mail-template/mass', [MailTemplateController::class, 'massUpdate']);
         Route::delete('/mail-template/{ids}', [MailTemplateController::class, 'massDelete']);
         Route::resource('/mail-template', MailTemplateController::class)->only(['index', 'store', 'update']);
 
