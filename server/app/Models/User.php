@@ -5,6 +5,9 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -52,6 +55,18 @@ class User extends Authenticatable
         return $this->belongsTo(MembershipType::class);
     }
 
-    // public function departments
-    // public function affiliation
+    public function departmentUser(): HasMany
+    {
+        return $this->hasMany(DepartmentUser::class);
+    }
+
+    public function departments(): HasManyThrough
+    {
+        return $this->hasManyThrough(Department::class, DepartmentUser::class);
+    }
+
+    public function affiliation(): BelongsTo
+    {
+        return $this->belongsTo(Affiliation::class);
+    }
 }

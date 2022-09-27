@@ -15,8 +15,8 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         $this->call([
-            DevAccountSeeder::class,
             AffiliationSeeder::class,
+            DevAccountSeeder::class,
             CategorySeeder::class,
             SignatureSeeder::class,
             MailTemplateSeeder::class,
@@ -27,7 +27,5 @@ class DatabaseSeeder extends Seeder
             QuestionSeeder::class,
             QuestionOptionSeeder::class,
         ]);
-
-        \App\Models\User::factory(10)->create();
     }
 }

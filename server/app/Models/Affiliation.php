@@ -20,6 +20,11 @@ class Affiliation extends Model
         return $this->hasMany(Department::class);
     }
 
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class);
+    }
+
     // public function affiliationGroups(): HasMany
     // {
     //     return $this->hasMany(AffiliationGroup::class);

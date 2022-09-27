@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Department extends Model
 {
@@ -33,8 +34,13 @@ class Department extends Model
         return $this->belongsTo(Affiliation::class);
     }
 
-    // public function users(): HasMany
-    // {
-    //     return $this->hasMany(User::class);
-    // }
+    public function departmentUsers(): HasMany
+    {
+        return $this->hasMany(DepartmentUser::class);
+    }
+    
+    public function users(): HasManyThrough
+    {
+        return $this->hasManyThrough(User::class, DepartmentUser::class);
+    }
 }

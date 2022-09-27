@@ -17,7 +17,7 @@ class AffiliationSeeder extends Seeder
     {
         // Create affiliations and pick random affilitions that will have departments
         $affiliations = [];
-        foreach (Affiliation::factory(30)->make()->toArray() as $index => $affiliation) {
+        foreach (Affiliation::factory(10)->make()->toArray() as $index => $affiliation) {
             $affiliation['priority'] = $index + 1;
             $affiliation['created_at'] = now();
             $affiliation['updated_at'] = now();
@@ -28,7 +28,7 @@ class AffiliationSeeder extends Seeder
         Affiliation::insert($affiliations);
 
         $departments = [];
-        Affiliation::all()->random(rand(15, 20))->each(function ($affiliation) use (&$departments) {
+        Affiliation::all()->random(rand(5, 8))->each(function ($affiliation) use (&$departments) {
             $parent_departments = Department::factory(rand(1, 5))->make(['affiliation_id' => $affiliation->id])->toArray();
 
             foreach($parent_departments as $index => $department) {
