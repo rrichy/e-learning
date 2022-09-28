@@ -199,7 +199,7 @@ function CourseManagementAddEdit() {
     return () => {
       mounted.current = false;
     };
-  }, [state, pathname, courseId, isCreate]);
+  }, [state, courseId, isCreate]);
 
   return (
     <DisabledComponentContextProvider

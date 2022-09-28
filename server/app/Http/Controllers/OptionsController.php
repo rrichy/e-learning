@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\AffiliationOptionsResource;
-use App\Http\Resources\DepartmentOptionsResource;
 use App\Models\Affiliation;
 use App\Models\Category;
 use App\Models\Department;

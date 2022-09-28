@@ -33,27 +33,24 @@ function MyPage() {
     formState: { isDirty, isValid, isSubmitting },
   } = formContext;
 
-  const handleSubmit = formContext.handleSubmit(
-    async (raw) => {
-      const confirmed = await isConfirmed({
-        title: "update",
-        content: "update?",
-      });
+  const handleSubmit = formContext.handleSubmit(async (raw) => {
+    const confirmed = await isConfirmed({
+      title: "update",
+      content: "update?",
+    });
 
-      if (confirmed) {
-        try {
-          const res = await updateAuthData(raw);
+    if (confirmed) {
+      try {
+        const res = await updateAuthData(raw);
 
-          successSnackbar(res.data.message);
-          setAuthData(res.data.user);
-          navigate("/home");
-        } catch (e: any) {
-          handleError(e, formContext);
-        }
+        successSnackbar(res.data.message);
+        setAuthData(res.data.user);
+        navigate("/home");
+      } catch (e: any) {
+        handleError(e, formContext);
       }
-    },
-    (a, b) => console.log({ a, b })
-  );
+    }
+  });
 
   useEffect(() => {
     mounted.current = true;
@@ -75,7 +72,7 @@ function MyPage() {
         <Typography variant="sectiontitle2">アカウントを編集</Typography>
         <DisabledComponentContextProvider value={isSubmitting} showLoading>
           <FormContainer formContext={formContext} handleSubmit={handleSubmit}>
-            <AccountManagementForm viewable={true} isEdit />
+            <AccountManagementForm mode="edit" personal />
             <Stack direction="row" spacing={2} justifyContent="center" mt={3}>
               <Button
                 color="dull"

@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class AffiliationOptionsResource extends JsonResource
+class AccountShowResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -17,7 +17,13 @@ class AffiliationOptionsResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'departments' => DepartmentOptionsResource::collection($this->whenLoaded('departments')),
+            'email' => $this->email,
+            'sex' => $this->sex,
+            'birthday' => $this->birthday,
+            'membership_type_id' => $this->membership_type_id,
+            'affiliation_id' => $this->affiliation_id,
+            'departments' => $this->departments->map(fn ($d) => $d['id']),
+            'remarks' => $this->remarks,
         ];
     }
 }

@@ -1,4 +1,5 @@
-import { InferType,  } from "yup";
+import { MembershipType } from "@/enums/membershipTypes";
+import { InferType } from "yup";
 import Yup from "./localizedYup";
 
 const { string, number, date, mixed, ref } = Yup;
@@ -14,13 +15,23 @@ export const registrationFormSchema = Yup.object({
     .label("パスワード（確認用)")
     .required()
     .oneOf([ref("password"), null], "パスワードと${path}が一致しません。"),
-  // department_1: number().label("部署1").selectionId(),
-  // department_2: number().label("部署2").selectionId(),
-  // remarks: string().label("備考"),
+});
+
+export const adminRegistrationFormSchema = registrationFormSchema.shape({
+  membership_type_id: number().label("権限").selectionId(),
+  affiliation_id: number().label("所属").selectionId(),
+  department_1: number().label("部署1").selectionId(),
+  department_2: number().label("部署2").selectionId(),
+  remarks: string().label("備考"),
 });
 
 export interface RegistrationFormAttribute
   extends Omit<InferType<typeof registrationFormSchema>, "birthday"> {
+  birthday: Date | null;
+}
+
+export interface AdminRegistrationFormAttribute
+  extends Omit<InferType<typeof adminRegistrationFormSchema>, "birthday"> {
   birthday: Date | null;
 }
 
@@ -32,7 +43,13 @@ export const registrationFormInit: RegistrationFormAttribute = {
   birthday: null,
   password: "",
   password_confirmation: "",
-  // department_1: 0,
-  // department_2: 0,
-  // remarks: "",
+};
+
+export const adminRegistrationFormInit: AdminRegistrationFormAttribute = {
+  ...registrationFormInit,
+  membership_type_id: MembershipType.individual,
+  affiliation_id: 0,
+  department_1: 0,
+  department_2: 0,
+  remarks: "",
 };

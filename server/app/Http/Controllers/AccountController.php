@@ -2,11 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AccountStoreRequest;
 use App\Http\Resources\AccountIndexResource;
 use App\Http\Resources\AccountShowResource;
 use App\Models\User;
+use Carbon\Carbon;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules;
 
 class AccountController extends Controller
 {
@@ -34,12 +40,26 @@ class AccountController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  App\Http\Requests\AccountStoreRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(AccountStoreRequest $request)
     {
-        //
+        $valid = $request->validated();
+
+        $parsed = array_merge($valid, [
+            'password' => Hash::make($request->password),
+            'birthday' => Carbon::create($request->birthday),
+        ]);
+
+        $user = User::create($parsed);
+
+        // ignore but do not comment out
+        event(new Registered($user));
+
+        return response()->json([
+            'message' => 'Successfully registered a new account!'
+        ]);
     }
 
     /**
