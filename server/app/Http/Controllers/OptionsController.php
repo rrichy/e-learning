@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\AffiliationOptionsResource;
+use App\Http\Resources\DepartmentOptionsResource;
 use App\Models\Affiliation;
 use App\Models\Category;
+use App\Models\Department;
 use App\Models\MembershipType;
 use App\Models\Signature;
 use Illuminate\Http\Request;
@@ -24,7 +27,17 @@ class OptionsController extends Controller
             $value = [];
             switch ($field) {
                 case 'affiliations': {
-                        $value = Affiliation::get(['id', 'name']);
+                        $value = auth()->user()->membership_type_id === MembershipType::ADMIN
+                            ? AffiliationOptionsResource::collection(Affiliation::with('departments.childDepartments')->get())
+                            : [];
+                        break;
+                    }
+                case 'departments': {
+                        $value = DepartmentOptionsResource::collection(Department::whereNull('parent_id')->with('childDepartments')->get());
+                        // use commented upon creating the relationship between affiliation and user
+                        // $value = auth()->user()->membership_type_id === MembershipType::ADMIN 
+                        //     ? DepartmentOptionsResource::collection(Department::with('childDepartments')->get())
+                        //     : Department::where('affiliation_id', auth()->user()->affiliation)->get(['id', 'name', 'parent_id']);
                         break;
                     }
                 case 'categories': {
