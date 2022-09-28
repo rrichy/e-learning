@@ -21,38 +21,53 @@ class OptionsController extends Controller
     public function index()
     {
         // Grab all fields from a request params, put into a collection where only unique fields are retained
-        $fields = collect(explode(',', request()->input('fields', '')))->unique()->values();
+        $raw_fields = request()->input('fields');
+        if ($raw_fields) {
+            $fields = collect(explode(',', $raw_fields))->unique()->values();
 
-        $options = $fields->mapWithKeys(function ($field, $_) {
-            $value = [];
-            switch ($field) {
-                case 'affiliations': {
-                        $value = auth()->user()->membership_type_id === MembershipType::ADMIN
-                            ? AffiliationOptionsResource::collection(Affiliation::with('departments.childDepartments')->get())
-                            : [];
-                        break;
-                    }
-                case 'departments': {
-                        $value = DepartmentOptionsResource::collection(Department::whereNull('parent_id')->with('childDepartments')->get());
-                        // use commented upon creating the relationship between affiliation and user
-                        // $value = auth()->user()->membership_type_id === MembershipType::ADMIN 
-                        //     ? DepartmentOptionsResource::collection(Department::with('childDepartments')->get())
-                        //     : Department::where('affiliation_id', auth()->user()->affiliation)->get(['id', 'name', 'parent_id']);
-                        break;
-                    }
-                case 'categories': {
-                        $value = Category::get(['id', 'name']);
-                        break;
-                    }
-                case 'signatures': {
-                        $value = auth()->user()->membership_type_id === MembershipType::ADMIN ? Signature::get(['id', 'name']) : [];
-                        break;
-                    }
-            }
+            $options = $fields->mapWithKeys(function ($field, $_) {
+                $value = [];
+                switch ($field) {
+                    case 'affiliations': {
+                            $value = auth()->user()->membership_type_id === MembershipType::ADMIN
+                                ? Affiliation::get(['id', 'name'])
+                                : [];
+                            break;
+                        }
+                    case 'departments': {
+                            // $value = DepartmentOptionsResource::collection(Department::whereNull('parent_id')->with('childDepartments')->get());
+                            // use commented upon creating the relationship between affiliation and user
+                            $value = auth()->user()->membership_type_id === MembershipType::ADMIN
+                                ? Department::get(['id', 'name'])
+                                : Department::where('affiliation_id', auth()->user()->affiliation_id)->get(['id', 'name']);
+                            break;
+                        }
+                    case 'categories': {
+                            $value = Category::get(['id', 'name']);
+                            break;
+                        }
+                    case 'signatures': {
+                            $value = auth()->user()->membership_type_id === MembershipType::ADMIN ? Signature::get(['id', 'name']) : [];
+                            break;
+                        }
+                }
 
-            return [$field => $value];
-        });
+                return [$field => $value];
+            });
 
-        return response()->json($options);
+            return response()->json($options);
+        } else {
+            $options = [];
+
+            // get departments of a given affiliation_id
+            $affiliation_id = request()->input('affiliation_id');
+            if ($affiliation_id) $options['departments'] = Department::where('affiliation_id', $affiliation_id)->get(['id', 'name']);
+
+            // get child_departments of a given department_id
+            $department_id = request()->input('department_id');
+            if ($department_id) $options['child_departments'] = Department::where('parent_id', $department_id)->get(['id', 'name']);
+
+            return response()->json($options);
+        }
     }
 }

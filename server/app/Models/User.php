@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -72,6 +73,30 @@ class User extends Authenticatable
         );
     }
 
+    public function parentDepartment(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            Department::class, 
+            DepartmentUser::class,
+            'user_id',
+            'id',
+            'id',
+            'department_id',
+        )->where('order', 1);
+    }
+
+    public function childDepartment(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            Department::class, 
+            DepartmentUser::class,
+            'user_id',
+            'id',
+            'id',
+            'department_id',
+        )->where('order', 2);
+    }
+    
     public function affiliation(): BelongsTo
     {
         return $this->belongsTo(Affiliation::class);

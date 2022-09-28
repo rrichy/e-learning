@@ -25,6 +25,8 @@ class AuthenticatedSessionController extends Controller
 
         $auth = $request->user();
         $token = $auth->createToken('access_token')->plainTextToken;
+        $auth->last_login_date = now();
+        $auth->save();
 
         return response()->json([
             'access_token' => $token,

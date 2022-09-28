@@ -25,6 +25,11 @@ export interface UserAttributes {
   // station: string | null;
   // status_id: number | null;
   // // tel: string | null;
+  created_at: Date | null;
+  last_login_date: Date | null;
+  affiliation_id: number | null;
+  department_1: number | null;
+  department_2: number | null;
 }
 
 export interface AuthAttributes {
@@ -45,4 +50,9 @@ export const userInit: UserAttributes = {
   membership_type_id: 2,
   remarks: null,
   image: null,
+  created_at: null,
+  last_login_date: null,
+  affiliation_id: null,
+  department_1: null,
+  department_2: null,
 };

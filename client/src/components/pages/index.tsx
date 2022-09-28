@@ -174,10 +174,10 @@ export default function Pages() {
           path: ":accountId/edit",
           element: <AccountManagementAddEdit />,
         },
-        {
-          path: ":accountId/detail",
-          element: <AccountManagementDetail />,
-        },
+        // {
+        //   path: ":accountId/detail",
+        //   element: <AccountManagementDetail />,
+        // },
       ],
     },
     {
@@ -250,6 +250,10 @@ export default function Pages() {
         </PrivateRoute>
       ),
     },
+    {
+      path: "/*",
+      element: <Navigate to="/home" />
+    }
   ]);
 
   return routes;

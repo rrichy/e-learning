@@ -18,7 +18,7 @@ class AccountPolicy
      */
     public function viewAny(User $user)
     {
-        return auth()->user()->membership_type_id === MembershipType::ADMIN;
+        return $user->membership_type_id === MembershipType::ADMIN;
     }
 
     /**
@@ -30,7 +30,7 @@ class AccountPolicy
      */
     public function view(User $user, User $model)
     {
-        return auth()->user()->membership_type_id === MembershipType::ADMIN;
+        return $user->membership_type_id === MembershipType::ADMIN;
     }
 
     /**
@@ -41,7 +41,7 @@ class AccountPolicy
      */
     public function create(User $user)
     {
-        return auth()->user()->membership_type_id === MembershipType::ADMIN;
+        return $user->membership_type_id === MembershipType::ADMIN;
     }
 
     /**
@@ -53,7 +53,7 @@ class AccountPolicy
      */
     public function update(User $user, User $model)
     {
-        return auth()->user()->membership_type_id === MembershipType::ADMIN;
+        return $user->membership_type_id === MembershipType::ADMIN;
     }
 
     /**
@@ -63,8 +63,20 @@ class AccountPolicy
      * @param  \App\Models\User  $model
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function delete(User $user, User $model)
+    // public function delete(User $user, User $model)
+    // {
+    //     return $user->membership_type_id === MembershipType::ADMIN;
+    // }
+
+    /**
+     * Determine whether the user can mass delete the model.
+     *
+     * @param  \App\Models\User  $user
+     * @param  mixed  $ids
+     * @return \Illuminate\Auth\Access\Response|bool
+     */
+    public function massDelete(User $user, mixed $ids)
     {
-        return auth()->user()->membership_type_id === MembershipType::ADMIN;
+        return $user->membership_type_id === MembershipType::ADMIN;
     }
 }

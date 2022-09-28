@@ -35,6 +35,7 @@ class DevAccountSeeder extends Seeder
             'password' => bcrypt('123'),
             'membership_type_id' => MembershipType::CORPORATE,
             'affiliation_id' => $affiliation->id,
+            'remarks' => fake()->text(50),
         ]);
         $this->pushDepartmentUser($department_users, $affiliation, $corporate);
 
@@ -46,6 +47,7 @@ class DevAccountSeeder extends Seeder
             'password' => bcrypt('123'),
             'membership_type_id' => MembershipType::INDIVIDUAL,
             'affiliation_id' => $affiliation->id,
+            'remarks' => fake()->text(50),
         ]);
         $this->pushDepartmentUser($department_users, $affiliation, $individual);
 
@@ -65,6 +67,7 @@ class DevAccountSeeder extends Seeder
             if (in_array($user->membership_type_id, [MembershipType::CORPORATE, MembershipType::INDIVIDUAL])) {
                 $affiliation = $affiliations->random();
                 $user->affiliation_id = $affiliation->id;
+                $user->remarks = fake()->text(50);
                 $user->save();
 
                 $this->pushDepartmentUser($department_users, $user->affiliation, $user);
@@ -76,17 +79,28 @@ class DevAccountSeeder extends Seeder
 
     private function pushDepartmentUser(array &$department_users, mixed $affiliation, mixed $user)
     {
-        $count = 0;
-        $affiliation->departments->each(function ($dept) use ($user, &$count, &$department_users) {
-            if ($count >= 2) return false;
+        if ($affiliation->departments->count()) {
+            $parent_department = $affiliation->departments->random();
 
             $department_users[] = [
-                'department_id' => $dept->id,
+                'department_id' => $parent_department->id,
                 'user_id' => $user->id,
-                'order' => ++$count,
+                'order' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
-        });
+
+            if ($parent_department->childDepartments->count()) {
+                $child_department = $parent_department->childDepartments->random();
+
+                $department_users[] = [
+                    'department_id' => $child_department->id,
+                    'user_id' => $user->id,
+                    'order' => 2,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+        }
     }
 }
