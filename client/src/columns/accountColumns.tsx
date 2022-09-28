@@ -15,7 +15,7 @@ export default function generate({
       field: "email",
       title: "メールアドレス",
       render: (row) => (
-        <Link to={`/account-management/${row.id}/detail`}>{row.email}</Link>
+        <Link to={`/account-management/${row.id}/details`}>{row.email}</Link>
       ),
     },
     { field: "name", title: "氏名" },

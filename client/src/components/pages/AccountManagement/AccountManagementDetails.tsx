@@ -10,9 +10,9 @@ import DisabledComponentContextProvider from "@/providers/DisabledComponentConte
 import { useState } from "react";
 import MaterialTable from "material-table";
 import Link from "@/components/atoms/Link";
-import AccountManagementForm from "@/components/organisms/AccountManagementFragment/AccountManagementForm";
+// import AccountManagementForm from "@/components/organisms/AccountManagementFragment/AccountManagementForm";
 
-function AccountManagementDetail() {
+function AccountManagementDetails() {
   const [applyOpen, setApplyOpen] = useState(false);
   const handleApplyOpen = () => {
     setApplyOpen(true);
@@ -87,9 +87,9 @@ function AccountManagementDetail() {
             <Typography variant="sectiontitle3">アカウントを作成</Typography>
             <Paper variant="outlined" sx={{ m: { xs: 2, md: 4 }, p: 2 }}>
               <DisabledComponentContextProvider value>
-                <AccountManagementForm
+                {/* <AccountManagementForm
                   viewable={true}
-                />
+                /> */}
                 <Stack direction="row" spacing={2} justifyContent="center">
                   <Button
                     color="secondary"
@@ -286,4 +286,4 @@ function AccountManagementDetail() {
   );
 }
 
-export default AccountManagementDetail;
+export default AccountManagementDetails;
