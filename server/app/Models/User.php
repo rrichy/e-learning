@@ -102,4 +102,9 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Affiliation::class);
     }
+
+    public function notices(): HasMany
+    {
+        return $this->hasMany(Notice::class);
+    }
 }

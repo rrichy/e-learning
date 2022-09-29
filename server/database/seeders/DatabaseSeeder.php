@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             ExplainerVideoSeeder::class,
             QuestionSeeder::class,
             QuestionOptionSeeder::class,
+            NoticeSeeder::class,
         ]);
     }
 }

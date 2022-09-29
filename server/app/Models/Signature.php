@@ -29,8 +29,8 @@ class Signature extends Model
         return $this->hasMany(MailTemplate::class);
     }
 
-    // public function notice(): HasOne
-    // {
-    //     return $this->hasOne(Notice::class);
-    // }
+    public function notice(): HasOne
+    {
+        return $this->hasOne(Notice::class);
+    }
 }
