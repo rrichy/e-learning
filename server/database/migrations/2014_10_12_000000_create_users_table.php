@@ -24,6 +24,7 @@ return new class extends Migration
             $table->tinyInteger('sex')->nullable();
             $table->string('remarks')->nullable();
             $table->rememberToken();
+            $table->timestamp('last_login_date')->nullable();
             $table->timestamps();
         });
     }

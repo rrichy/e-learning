@@ -26,7 +26,7 @@ import ConditionalMail from "./CourseManagement/ConditionalMail";
 import CourseDetailCorrection from "./CourseManagement/CourseDetailCorrection";
 import AccountManagement from "./AccountManagement";
 import AccountManagementAddEdit from "./AccountManagement/AccountManagementAddEdit";
-import AccountManagementDetail from "./AccountManagement/AccountManagementDetail";
+import AccountManagementDetails from "./AccountManagement/AccountManagementDetails";
 import CategoryManagement from "./CategoryManagement";
 import AffiliationsDepartments from "./AffiliationsDepartments";
 import Signature from "./Signature"
@@ -175,8 +175,8 @@ export default function Pages() {
           element: <AccountManagementAddEdit />,
         },
         {
-          path: ":accountId/detail",
-          element: <AccountManagementDetail />,
+          path: ":accountId/details",
+          element: <AccountManagementDetails />,
         },
       ],
     },
@@ -250,6 +250,10 @@ export default function Pages() {
         </PrivateRoute>
       ),
     },
+    {
+      path: "/*",
+      element: <Navigate to="/home" />
+    }
   ]);
 
   return routes;

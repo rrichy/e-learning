@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\Policies\AccountPolicy;
 use App\Policies\CoursePolicy;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
@@ -33,10 +34,19 @@ class AuthServiceProvider extends ServiceProvider
         });
 
         // Registering policies
+        //course
         Gate::define('viewAny-course', [CoursePolicy::class, 'viewAny']);
         Gate::define('view-course', [CoursePolicy::class, 'view']);
         Gate::define('create-course', [CoursePolicy::class, 'create']);
         Gate::define('update-course', [CoursePolicy::class, 'update']);
         Gate::define('delete-course', [CoursePolicy::class, 'delete']);
+
+        //account
+        Gate::define('viewAny-account', [AccountPolicy::class, 'viewAny']);
+        Gate::define('view-account', [AccountPolicy::class, 'view']);
+        Gate::define('create-account', [AccountPolicy::class, 'create']);
+        Gate::define('update-account', [AccountPolicy::class, 'update']);
+        Gate::define('massDelete-account', [AccountPolicy::class, 'massDelete']);
+        
     }
 }

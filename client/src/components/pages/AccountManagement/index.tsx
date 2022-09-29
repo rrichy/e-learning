@@ -1,4 +1,5 @@
 import {
+  Box,
   Card,
   CardContent,
   CardHeader,
@@ -12,45 +13,133 @@ import {
   Typography,
 } from "@mui/material";
 import { Stack } from "@mui/system";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Button from "@/components/atoms/Button";
 import { FormContainer } from "react-hook-form-mui";
+import { Selection, TextField } from "../../molecules/LabeledHookForms";
+import CloseIcon from "@mui/icons-material/Close";
 import {
-  Selection,
-  TextField,
-} from "../../molecules/LabeledHookForms";
-import CloseIcon from '@mui/icons-material/Close';
-import { OptionAttribute } from "@/interfaces/CommonInterface";
+  initPaginatedData,
+  OptionAttribute,
+  OptionsAttribute,
+  OrderType,
+  PageDialogProps,
+} from "@/interfaces/CommonInterface";
 import AccountManagementSearch from "@/components/organisms/AccountManagementFragment/AccountManagementSearchAccordion";
-import MaterialTable from "material-table";
-import Link from "@/components/atoms/Link";
+import Table from "@/components/atoms/Table";
+import useAlerter from "@/hooks/useAlerter";
+import useConfirm from "@/hooks/useConfirm";
+import { TABLE_ROWS_PER_PAGE } from "@/settings/appconfig";
+import { getOptions } from "@/services/CommonService";
+import { destroyAccount, indexAccount } from "@/services/AccountService";
+import { UserAttributes } from "@/interfaces/AuthAttributes";
+import accountColumns from "@/columns/accountColumns";
 
 function AccountManagement() {
-  const [multipleAccountsOpen, setMultipleAccountsOpen] = useState(false);
-  const [checked, setChecked] = useState(false);
+  const mounted = useRef(true);
+  const { successSnackbar, errorSnackbar } = useAlerter();
+  const { isConfirmed } = useConfirm();
+  const [lookups, setLookups] = useState({
+    affiliation_lookup: {} as { [k: number]: string },
+    department_lookup: {} as { [k: number]: string },
+  });
+  const [state, setState] = useState(initPaginatedData<UserAttributes>());
+  const [stateSelected, setStateSelected] = useState<UserAttributes[]>([]);
 
-  const handleMultipleAccountsOpen = () => {
-    setMultipleAccountsOpen(true);
-  };
-  const handleMultipleAccountsClose = () => {
-    setMultipleAccountsOpen(false);
-  };
+  const fetchData = useCallback(
+    async (
+      page: number = 1,
+      pageSize: number = TABLE_ROWS_PER_PAGE[0],
+      sort: keyof UserAttributes = "id",
+      order: OrderType = "asc"
+    ) => {
+      try {
+        setState((s) => ({
+          ...s,
+          page,
+          order,
+          sort,
+          per_page: pageSize,
+          loading: true,
+        }));
 
-  const [categories, setCategories] = useState<OptionAttribute[]>([
-    { id: 0, name: "未選択", selectionType: "disabled" },
-  ]);
-
-  const [data, setData] = useState([
-    { 
-      email: "trevionshields@gmail.com", 
-      name: "Trevion Shields", 
-      affiliation: "Enrise Global",
-      department: "Jackson Beer DDS Child 3",
-      registered_date: "2022-09-18",
-      last_login_date: "2022-09-18"
+        const res = await indexAccount(page, pageSize, sort, order);
+        const { data, meta } = res.data;
+        if (mounted.current) {
+          setState((s) => ({
+            ...s,
+            loading: false,
+            data,
+            page: meta.current_page,
+            total: meta.total,
+            order,
+            sort,
+            per_page: meta.per_page,
+            last_page: meta.last_page,
+          }));
+        }
+      } catch (e: any) {
+        errorSnackbar(e.message);
+      } finally {
+        setState((s) => ({ ...s, loading: false }));
+      }
     },
-  ]);
-  
+    []
+  );
+
+  const handleDelete = async () => {
+    const confirmed = await isConfirmed({
+      title: "sure delete?",
+      content: "suredelete?",
+    });
+
+    if (confirmed) {
+      try {
+        setState((s) => ({ ...s, loading: true }));
+        const res = await destroyAccount(stateSelected.map((a) => a.id!));
+        successSnackbar(res.data.message);
+        fetchData();
+      } catch (e: any) {
+        errorSnackbar(e.message);
+      } finally {
+        setState((s) => ({ ...s, loading: false }));
+      }
+    }
+  };
+
+  useEffect(() => {
+    mounted.current = true;
+    fetchData();
+
+    (async () => {
+      try {
+        const res = await getOptions(["affiliations", "departments"]);
+        setLookups({
+          affiliation_lookup: res.data.affiliations.reduce(
+            (acc: { [k: number]: string }, b: OptionAttribute) => ({
+              ...acc,
+              [b.id]: b.name,
+            }),
+            {}
+          ),
+          department_lookup: res.data.departments.reduce(
+            (acc: { [k: number]: string }, b: OptionAttribute) => ({
+              ...acc,
+              [b.id]: b.name,
+            }),
+            {}
+          ),
+        });
+      } catch (e: any) {
+        errorSnackbar(e.message);
+      }
+    })();
+
+    return () => {
+      mounted.current = false;
+    };
+  }, [errorSnackbar]);
+
   return (
     <>
       <Stack
@@ -62,9 +151,9 @@ function AccountManagement() {
           },
         }}
       >
-        <FormContainer>
+        {/* <FormContainer>
           <AccountManagementSearch categories={categories} />
-        </FormContainer>
+        </FormContainer> */}
         <Stack
           spacing={2}
           justifyContent="center"
@@ -74,57 +163,48 @@ function AccountManagement() {
           <Button to="create" variant="contained" rounded>
             新規作成
           </Button>
-          <Button variant="contained" rounded onClick={handleMultipleAccountsOpen}>
+          <Button
+            variant="contained"
+            rounded
+            // onClick={handleMultipleAccountsOpen}
+          >
             一括登録
           </Button>
         </Stack>
+
         <Paper variant="outlined">
           <Stack spacing={3}>
-            <Typography variant="sectiontitle2">所属の管理</Typography>
-            <Stack spacing={1} direction="row" pb={3}>
-              <Button
-                variant="contained"
-                color="secondary"
-                sx={{ width: "fit-content", borderRadius: 6 }}
-              >
-                削除
-              </Button>
-            </Stack>
+            <Typography variant="sectiontitle2">アカウントの管理</Typography>
+            <Button
+              color="secondary"
+              variant="contained"
+              rounded
+              sx={{ maxWidth: 150 }}
+              onClick={handleDelete}
+              disabled={stateSelected.length === 0}
+            >
+              削除
+            </Button>
+            <Box>
+              <Typography fontStyle="italic">
+                検索結果: {state.total}人
+              </Typography>
+              <Table
+                columns={accountColumns(lookups)}
+                state={state}
+                fetchData={fetchData}
+                onSelectionChange={(rows) => setStateSelected(rows)}
+                options={{
+                  selection: true,
+                  maxBodyHeight: undefined,
+                }}
+              />
+            </Box>
           </Stack>
-          <Typography>検索結果: 12 人</Typography>
-          <MaterialTable 
-            columns={[
-              { 
-                field: "email", 
-                title: "メールアドレス",
-                render: (row) => (
-                  <Link to={`/account-management/1/detail`}>
-                    {row.email}
-                  </Link>
-                ) 
-              },
-              { field: "name", title: "氏名" },
-              { field: "affiliation", title: "所属" },
-              { field: "department", title: "部署" },
-              { field: "registered_date", title: "登録日" },
-              { field: "last_login_date", title: "最終ログイン日" },
-            ]}
-            options={{
-              toolbar: false,
-              draggable: false,
-              paging: false,
-              maxBodyHeight: 600,
-              selection: true,
-            }}
-            components={{
-              Container: (props) => <Paper {...props} variant="table" />,
-            }}
-            data={data}
-          />
         </Paper>
       </Stack>
 
-      <FormContainer>
+      {/* <FormContainer>
         <Dialog open={multipleAccountsOpen} maxWidth="lg">
           <DialogTitle>
             <Typography
@@ -220,7 +300,7 @@ function AccountManagement() {
             <Button large color="warning" variant="contained" sx={{ borderRadius: 7 }}>登録</Button>
           </Stack>
         </Dialog>
-      </FormContainer>
+      </FormContainer> */}
     </>
   );
 }

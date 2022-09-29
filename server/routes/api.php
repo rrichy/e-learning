@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin\AffiliationController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DepartmentController;
@@ -34,6 +35,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::resource('/affiliation', AffiliationController::class)->except([
             'create', 'edit', 'show'
         ]);
+
         Route::resource('/department', DepartmentController::class)->except([
             'create', 'edit', 'show'
         ]);
@@ -55,6 +57,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::resource('/course', CourseController::class)->only([
             'index', 'store', 'show', 'update',
         ]);
+
+        Route::delete('/account/{ids}', [AccountController::class, 'massDelete']);
+        Route::resource('/account', AccountController::class)->except(['create', 'edit', 'destroy']);
     });
 
     // Route::group([

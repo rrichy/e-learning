@@ -72,7 +72,7 @@ export default function DatePickerElement({
                 parsedDate = parseDate(selectionState);
               }
             } else {
-              parsedDate = date;
+              parsedDate = date?.toISOString().substr(0, 10);
               if (typeof parseDate === "function") {
                 parsedDate = parseDate(date);
               }

@@ -5,3 +5,11 @@ export enum MembershipType {
   corporate,
   admin,
 }
+
+export enum MembershipTypeJp {
+  "",
+  "トライアル",
+  "個人",
+  "法人",
+  "管理者",
+}

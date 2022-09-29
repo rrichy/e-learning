@@ -44,7 +44,7 @@ class AffiliationSeeder extends Seeder
 
         // Pick random parent departments that will have child departments
         $departments = [];
-        Department::whereNull('parent_id')->get()->random(15)->each(function ($parent) use (&$departments) {
+        Department::whereNull('parent_id')->get()->random(10)->each(function ($parent) use (&$departments) {
             $child_departments = Department::factory(rand(1, 5))->make([
                     'affiliation_id' => $parent->affiliation_id,
                     'parent_id' => $parent->id,

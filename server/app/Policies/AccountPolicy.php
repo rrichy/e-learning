@@ -2,12 +2,11 @@
 
 namespace App\Policies;
 
-use App\Models\Course;
 use App\Models\MembershipType;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class CoursePolicy
+class AccountPolicy
 {
     use HandlesAuthorization;
 
@@ -19,19 +18,19 @@ class CoursePolicy
      */
     public function viewAny(User $user)
     {
-        return auth()->user()->membership_type_id === MembershipType::ADMIN;
+        return $user->membership_type_id === MembershipType::ADMIN;
     }
 
     /**
      * Determine whether the user can view the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Course  $course
+     * @param  \App\Models\User  $model
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function view(User $user, Course $course)
+    public function view(User $user, User $model)
     {
-        return auth()->user()->membership_type_id === MembershipType::ADMIN;
+        return $user->membership_type_id === MembershipType::ADMIN;
     }
 
     /**
@@ -42,30 +41,44 @@ class CoursePolicy
      */
     public function create(User $user)
     {
-        return auth()->user()->membership_type_id === MembershipType::ADMIN;
+        return $user->membership_type_id === MembershipType::ADMIN;
     }
 
     /**
      * Determine whether the user can update the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Course  $course
+     * @param  \App\Models\User  $model
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function update(User $user, Course $course)
+    public function update(User $user, User $model)
     {
-        return auth()->user()->membership_type_id === MembershipType::ADMIN;
+        return $user->id === $model->id
+            || $user->membership_type_id === MembershipType::ADMIN
+            || ($user->membership_type_id === MembershipType::CORPORATE && $user->affiliation_id === $model->affiliation_id);
     }
 
     /**
      * Determine whether the user can delete the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Course  $course
+     * @param  \App\Models\User  $model
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function delete(User $user, Course $course)
+    // public function delete(User $user, User $model)
+    // {
+    //     return $user->membership_type_id === MembershipType::ADMIN;
+    // }
+
+    /**
+     * Determine whether the user can mass delete the model.
+     *
+     * @param  \App\Models\User  $user
+     * @param  mixed  $ids
+     * @return \Illuminate\Auth\Access\Response|bool
+     */
+    public function massDelete(User $user, mixed $ids)
     {
-        return auth()->user()->membership_type_id === MembershipType::ADMIN;
+        return $user->membership_type_id === MembershipType::ADMIN;
     }
 }
