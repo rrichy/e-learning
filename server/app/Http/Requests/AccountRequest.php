@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 
-class AccountStoreRequest extends FormRequest
+class AccountRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -17,6 +17,20 @@ class AccountStoreRequest extends FormRequest
     {
         return true;
     }
+    
+    /**
+     * Prepare the data for validation.
+     *
+     * @return void
+     */
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'affiliation_id' => request()->affiliation_id ?: null,
+            'department_1' => request()->department_1 ?: null,
+            'department_2' => request()->department_2 ?: null,
+        ]);
+    }
 
     /**
      * Get the validation rules that apply to the request.
@@ -25,12 +39,11 @@ class AccountStoreRequest extends FormRequest
      */
     public function rules()
     {
-        return [
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'image' => ['nullable', 'string', 'max:255'],
             'sex' => ['required', 'integer', 'in:1,2'],
-            'birthday' => ['required', 'date', 'before:today'],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'birthday' => ['required', 'date_format:Y-m-d', 'before:today'],
             'affiliation_id' => ['nullable', 'required_with:department_1,department_2', 'integer', 'exists:affiliations,id'],
             'department_1' => [
                 'nullable',
@@ -45,5 +58,14 @@ class AccountStoreRequest extends FormRequest
             ],
             'remarks' => ['nullable', 'string'],
         ];
+
+        if (request()->method() === 'POST') {
+            $rules['password'] = ['required', 'confirmed', Rules\Password::defaults()];
+            $rules['email'] = ['required', 'string', 'email', 'max:255', 'unique:users'];
+        } else {
+            $rules['email'] = ['required', 'string', 'email', 'max:255', 'unique:users,email,' . request()->id];
+        }
+
+        return $rules;
     }
 }

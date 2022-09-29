@@ -30,6 +30,7 @@ class User extends Authenticatable
         'sex',
         'membership_type_id',
         'remarks',
+        'affiliation_id',
     ];
 
     /**

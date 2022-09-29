@@ -53,7 +53,9 @@ class AccountPolicy
      */
     public function update(User $user, User $model)
     {
-        return $user->membership_type_id === MembershipType::ADMIN;
+        return $user->id === $model->id
+            || $user->membership_type_id === MembershipType::ADMIN
+            || ($user->membership_type_id === MembershipType::CORPORATE && $user->affiliation_id === $model->affiliation_id);
     }
 
     /**

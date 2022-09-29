@@ -16,7 +16,11 @@ import {
   getOptions,
   getOptionsWithBelongsToId,
 } from "@/services/CommonService";
-import { showAccount, storeAccount, updateAccount } from "@/services/AccountService";
+import {
+  showAccount,
+  storeAccount,
+  updateAccount,
+} from "@/services/AccountService";
 import {
   OptionAttribute,
   OptionsAttribute,
@@ -51,21 +55,24 @@ function AccountManagementAddEdit() {
   const { isConfirmed } = useConfirm();
   const { successSnackbar, errorSnackbar, handleError } = useAlerter();
   const { membershipTypeId } = useAuth();
-  const formContext = useForm<AdminRegistrationFormAttribute>({
-    mode: "onChange",
-    defaultValues: adminRegistrationFormInit,
-    resolver: yupResolver(adminRegistrationFormSchema),
-  });
-
-  const {
-    formState: { isDirty, isValid, isSubmitting },
-  } = formContext;
-
   const isCreate =
     pathname
       .split("/")
       .filter((a) => a)
       .pop() === "create";
+  const formContext = useForm<AdminRegistrationFormAttribute>({
+    mode: "onChange",
+    defaultValues: adminRegistrationFormInit,
+    resolver: yupResolver(
+      adminRegistrationFormSchema.omit(
+        isCreate ? [] : ["password", "password_confirmation"]
+      )
+    ),
+  });
+
+  const {
+    formState: { isDirty, isValid, isSubmitting },
+  } = formContext;
 
   const handleSubmit = formContext.handleSubmit(
     async (raw) => {
@@ -76,7 +83,9 @@ function AccountManagementAddEdit() {
 
       if (confirmed) {
         try {
-          const res = await (isCreate ? storeAccount(raw) : updateAccount(+accountId!, raw));
+          const res = await (isCreate
+            ? storeAccount(raw)
+            : updateAccount(+accountId!, raw));
           successSnackbar(res.data.message);
           navigate("/account-management");
         } catch (e: any) {
@@ -97,6 +106,23 @@ function AccountManagementAddEdit() {
       if (fromAffiliation) formContext.setValue("department_1", 0);
       formContext.setValue("department_2", 0);
 
+      if (!belongsToId) {
+        if (fromAffiliation) {
+          setOptions((o) => ({
+            ...o,
+            department_1: [{ id: 0, name: "未選択" }],
+            department_2: [{ id: 0, name: "部署１未選択" }],
+          }));
+        } else {
+          setOptions((o) => ({
+            ...o,
+            department_2: [{ id: 0, name: "未選択" }],
+          }));
+        }
+
+        return;
+      }
+
       const res = await getOptionsWithBelongsToId([
         {
           belongsTo: fromAffiliation ? "affiliation_id" : "department_id",
@@ -107,19 +133,14 @@ function AccountManagementAddEdit() {
       if (fromAffiliation) {
         setOptions((o) => ({
           ...o,
-          department_1: [
-            { id: 0, name: "未選択", selectionType: "disabled" },
-            ...res.data.departments,
-          ],
-          department_2: [
-            { id: 0, name: "部署１未選択", selectionType: "disabled" },
-          ],
+          department_1: [{ id: 0, name: "未選択" }, ...res.data.departments],
+          department_2: [{ id: 0, name: "部署１未選択" }],
         }));
       } else {
         setOptions((o) => ({
           ...o,
           department_2: [
-            { id: 0, name: "未選択", selectionType: "disabled" },
+            { id: 0, name: "未選択" },
             ...res.data.child_departments,
           ],
         }));
@@ -154,9 +175,10 @@ function AccountManagementAddEdit() {
 
         if (!isCreate) {
           if (shouldFetch) {
-            const { departments, ...data } = res[1].data.data;
+            const { departments, affiliation_id, ...data } = res[1].data.data;
             formContext.reset({
               ...data,
+              affiliation_id: affiliation_id ?? 0,
               department_1: departments[0] ?? 0,
               department_2: departments[1] ?? 0,
             });
@@ -184,20 +206,14 @@ function AccountManagementAddEdit() {
           setOptions((o) => ({
             ...o,
             affiliation_id: [
-              { id: 0, name: "未選択", selectionType: "disabled" },
+              { id: 0, name: "未選択" },
               ...res[0].data.affiliations,
             ],
             department_1: affiliation_id
-              ? [
-                  { id: 0, name: "未選択", selectionType: "disabled" },
-                  ...resID.data.departments,
-                ]
+              ? [{ id: 0, name: "未選択" }, ...resID.data.departments]
               : [{ id: 0, name: "所属未選択", selectionType: "disabled" }],
-            department_2: affiliation_id
-              ? [
-                  { id: 0, name: "未選択", selectionType: "disabled" },
-                  ...resID.data.child_departments,
-                ]
+            department_2: department_id
+              ? [{ id: 0, name: "未選択" }, ...resID.data.child_departments]
               : [{ id: 0, name: "部署１未選択", selectionType: "disabled" }],
           }));
         } else {
@@ -211,11 +227,11 @@ function AccountManagementAddEdit() {
             setOptions((o) => ({
               ...o,
               department_1: [
-                { id: 0, name: "未選択", selectionType: "disabled" },
+                { id: 0, name: "未選択" },
                 ...res[0].data.departments,
               ],
               department_2: [
-                { id: 0, name: "未選択", selectionType: "disabled" },
+                { id: 0, name: "未選択" },
                 ...resID.data.child_departments,
               ],
             }));
@@ -223,7 +239,7 @@ function AccountManagementAddEdit() {
             setOptions((o) => ({
               ...o,
               department_1: [
-                { id: 0, name: "未選択", selectionType: "disabled" },
+                { id: 0, name: "未選択" },
                 ...res[0].data.departments,
               ],
               department_2: [

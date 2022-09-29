@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\AccountStoreRequest;
+use App\Http\Requests\AccountRequest;
 use App\Http\Resources\AccountIndexResource;
 use App\Http\Resources\AccountShowResource;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -30,26 +31,25 @@ class AccountController extends Controller
         $sort = request()->input('sort', 'id');
 
         return AccountIndexResource::collection(
-                User::whereNot('id', auth()->id())
-                    ->with(['parentDepartment', 'childDepartment'])
-                    ->orderBy($sort, $order)
-                    ->paginate($per_page)
-            )->additional(['message' => 'Users successfully fetched!']);
+            User::whereNot('id', auth()->id())
+                ->with(['parentDepartment', 'childDepartment'])
+                ->orderBy($sort, $order)
+                ->paginate($per_page)
+        )->additional(['message' => 'Users successfully fetched!']);
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  App\Http\Requests\AccountStoreRequest  $request
+     * @param  App\Http\Requests\AccountRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(AccountStoreRequest $request)
+    public function store(AccountRequest $request)
     {
         $valid = $request->validated();
 
         $parsed = array_merge($valid, [
             'password' => Hash::make($request->password),
-            'birthday' => Carbon::create($request->birthday),
         ]);
 
         $user = User::create($parsed);
@@ -70,7 +70,7 @@ class AccountController extends Controller
      */
     public function show(User $account)
     {
-        Gate::authorize("view-account", $account);
+        Gate::authorize('view-account', $account);
 
         return new AccountShowResource($account->load('departments'));
     }
@@ -78,13 +78,40 @@ class AccountController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  App\Http\Requests\AccountRequest  $request
      * @param  \App\Models\User  $account
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, User $account)
+    public function update(AccountRequest $request, User $account)
     {
-        //
+        Gate::authorize('update-account', $account);
+        
+        $valid = $request->validated();
+
+        DB::transaction(function () use ($valid, $account) {
+            $account->update($valid);
+
+            $newdepartments = [];
+            if (isset($valid['department_1'])) {
+                $newdepartments[] = $account->departmentUsers()->updateOrCreate([
+                    'department_id' => $valid['department_1'],
+                    'order' => 1,
+                ])->id;
+
+                if (isset($valid['department_2'])) {
+                    $newdepartments[] = $account->departmentUsers()->updateOrCreate([
+                        'department_id' => $valid['department_2'],
+                        'order' => 2,
+                    ])->id;
+                }
+            }
+
+            $account->departmentUsers()->whereNotIn('id', $newdepartments)->delete();
+        });
+
+        return response()->json([
+            'message' => 'Successfully updated an account!'
+        ]);
     }
 
     /**
@@ -106,9 +133,9 @@ class AccountController extends Controller
      */
     public function massDelete($ids)
     {
-        $ids = explode(",", $ids);
+        $ids = explode(',', $ids);
         Gate::authorize('massDelete-account', $ids);
-        
+
         $deleted_count = \App\Models\User::destroy($ids);
 
         return response()->json([

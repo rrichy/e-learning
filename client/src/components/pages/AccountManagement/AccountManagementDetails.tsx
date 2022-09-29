@@ -10,9 +10,12 @@ import DisabledComponentContextProvider from "@/providers/DisabledComponentConte
 import { useState } from "react";
 import MaterialTable from "material-table";
 import Link from "@/components/atoms/Link";
+import { useNavigate, useParams } from "react-router-dom";
 // import AccountManagementForm from "@/components/organisms/AccountManagementFragment/AccountManagementForm";
 
 function AccountManagementDetails() {
+  const navigate = useNavigate();
+  const { accountId } = useParams();
   const [applyOpen, setApplyOpen] = useState(false);
   const handleApplyOpen = () => {
     setApplyOpen(true);
@@ -80,7 +83,6 @@ function AccountManagementDetails() {
   
   return (
     <Paper variant="outlined">
-      <FormContainer>
         <Stack spacing={3}>
           <Typography variant="sectiontitle2">アカウントを作成</Typography>
           <Paper variant="sectionsubpaper">
@@ -96,7 +98,8 @@ function AccountManagementDetails() {
                     variant="contained"
                     rounded
                     large
-                    type="submit"
+                    type="button"
+                    onClick={() => navigate(`/account-management/${accountId}/edit`)}
                     // disabled={!(isValid && isDirty)}
                   >
                     edit
@@ -104,7 +107,7 @@ function AccountManagementDetails() {
                 </Stack>
               </DisabledComponentContextProvider>
             </Paper>
-            <Paper variant="outlined" sx={{ m: { xs: 2, md: 4 }, p: 2 }}>
+            {/* <Paper variant="outlined" sx={{ m: { xs: 2, md: 4 }, p: 2 }}>
               <Typography variant="sectiontitle2">コース情報</Typography>
               <Stack spacing={2} pt={3}>
                 <MaterialTable 
@@ -164,8 +167,8 @@ function AccountManagementDetails() {
                   data={dataTwo}
                 />
               </Stack>
-            </Paper>
-            <Paper variant="outlined" sx={{ m: { xs: 2, md: 4 }, p: 2 }}>
+            </Paper> */}
+            {/* <Paper variant="outlined" sx={{ m: { xs: 2, md: 4 }, p: 2 }}>
               <Typography variant="sectiontitle2">コース情報</Typography>
               <Stack spacing={2} direction="row" justifyContent="flex-end" alignItems="center">
                 <Selection
@@ -220,10 +223,11 @@ function AccountManagementDetails() {
                   Back
                 </Button>
               </Stack>
-            </Paper>
+            </Paper> */}
           </Paper>
         </Stack>
 
+      {/* <FormContainer>
         <Dialog 
           open={applyOpen} 
           maxWidth="sm"
@@ -281,7 +285,7 @@ function AccountManagementDetails() {
             </Stack>
           </DialogContent>
         </Dialog>
-      </FormContainer>
+      </FormContainer> */}
     </Paper>
   );
 }

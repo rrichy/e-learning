@@ -2,14 +2,14 @@ import { MembershipType } from "@/enums/membershipTypes";
 import { InferType } from "yup";
 import Yup from "./localizedYup";
 
-const { string, number, date, mixed, ref } = Yup;
+const { string, number, mixed, ref } = Yup;
 
 export const registrationFormSchema = Yup.object({
   image: mixed().label("アイコン画像").nullable(),
   name: string().label("氏名").required().name(),
   email: string().label("メールアドレス").required().email(),
   sex: number().label("性別").required().selectionId(),
-  birthday: date().label("生年月日").required(),
+  birthday: string().label("生年月日").required(),
   password: string().label("パスワード").required().password(),
   password_confirmation: string()
     .label("パスワード（確認用)")
@@ -26,21 +26,17 @@ export const adminRegistrationFormSchema = registrationFormSchema.shape({
 });
 
 export interface RegistrationFormAttribute
-  extends Omit<InferType<typeof registrationFormSchema>, "birthday"> {
-  birthday: Date | null;
-}
+  extends InferType<typeof registrationFormSchema> {}
 
 export interface AdminRegistrationFormAttribute
-  extends Omit<InferType<typeof adminRegistrationFormSchema>, "birthday"> {
-  birthday: Date | null;
-}
+  extends InferType<typeof adminRegistrationFormSchema> {}
 
 export const registrationFormInit: RegistrationFormAttribute = {
   image: null,
   name: "",
   email: "",
   sex: 0,
-  birthday: null,
+  birthday: "",
   password: "",
   password_confirmation: "",
 };

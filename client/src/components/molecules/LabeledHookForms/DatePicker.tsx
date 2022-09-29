@@ -1,4 +1,5 @@
 import { DatePicker as AtomDatePicker, DatePickerElementProps } from "@/components/atoms/HookForms";
+import { localeDate } from "@/utils/localeDateString";
 import Labeler, { LabelerSupplementaryProps } from "../Labeler";
 
 function DatePicker({
@@ -8,7 +9,7 @@ function DatePicker({
 }: DatePickerElementProps & { labelProps?: LabelerSupplementaryProps }) {
   return (
     <Labeler label={label} {...labelProps}>
-      <AtomDatePicker {...rest} fullWidth />
+      <AtomDatePicker {...rest} fullWidth parseDate={localeDate} />
     </Labeler>
   );
 }
