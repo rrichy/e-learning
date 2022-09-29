@@ -235,14 +235,6 @@ export default function Pages() {
       ],
     },
     {
-      path: "/notice-management/create",
-      element: (
-        <PrivateRoute membershipTypes={registered}>
-          <NoticeManagementAddEdit />
-        </PrivateRoute>
-      ),
-    },
-    {
       path: "/contact",
       element: (
         <PrivateRoute membershipTypes={registered}>

@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\MailTemplateController;
+use App\Http\Controllers\NoticeController;
 use App\Http\Controllers\OptionsController;
 use App\Http\Controllers\SignatureController;
 use Illuminate\Http\Request;
@@ -60,6 +61,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         Route::delete('/account/{ids}', [AccountController::class, 'massDelete']);
         Route::resource('/account', AccountController::class)->except(['create', 'edit', 'destroy']);
+
+        Route::delete('/notice/{ids}', [NoticeController::class, 'massDelete']);
+        Route::resource('/notice', NoticeController::class)->only(['index', 'store', 'show', 'update']);
     });
 
     // Route::group([
