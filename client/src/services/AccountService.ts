@@ -15,8 +15,8 @@ export const indexAccount = (
   );
 };
 
-export const showAccount = (id: number) => {
-  return get(`${url_prefix}/${id}`);
+export const showAccount = (id: number, parsed: boolean = false) => {
+  return get(`${url_prefix}/${id}?parsed=${parsed}`);
 };
 
 export const storeAccount = (data: AdminRegistrationFormAttribute) => {

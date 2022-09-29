@@ -1,113 +1,111 @@
-import { Dialog, DialogContent, DialogTitle, Paper, Stack, Typography } from "@mui/material";
-import { FormContainer } from "react-hook-form-mui";
+import { Avatar, Grid, Paper, Stack, Typography } from "@mui/material";
 import Button from "@/components/atoms/Button";
-import {
-  DatePicker,
-  Selection,
-  TextField,
-} from "../../molecules/LabeledHookForms";
 import DisabledComponentContextProvider from "@/providers/DisabledComponentContextProvider";
-import { useState } from "react";
-import MaterialTable from "material-table";
-import Link from "@/components/atoms/Link";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-// import AccountManagementForm from "@/components/organisms/AccountManagementFragment/AccountManagementForm";
+import { userInit } from "@/interfaces/AuthAttributes";
+import useAlerter from "@/hooks/useAlerter";
+import { showAccount } from "@/services/AccountService";
+import { MembershipTypeJp } from "@/enums/membershipTypes";
 
 function AccountManagementDetails() {
+  const mounted = useRef(true);
   const navigate = useNavigate();
   const { accountId } = useParams();
-  const [applyOpen, setApplyOpen] = useState(false);
-  const handleApplyOpen = () => {
-    setApplyOpen(true);
-  };
-  const handleApplyClose = () => {
-    setApplyOpen(false);
-  };
+  const [user, setUser] = useState(userInit);
+  const [initialized, setInitialized] = useState(false);
+  const { errorSnackbar } = useAlerter();
 
-  const [dataOne, setDataOne] = useState([
-    { 
-      attending_course: "Course 1-1", 
-      start_date: "2022-09-18", 
-      progress_rate: "100%",
-      score: 100,
-      course_complete_date: "2022-09-18",
-      end_date: "2022-09-18"
-    },
-    { 
-      attending_course: "Course 1-2", 
-      start_date: "2022-09-18", 
-      progress_rate: "100%",
-      score: 100,
-      course_complete_date: "2022-09-18",
-      end_date: "2022-09-18"
-    },
-  ]);
+  useEffect(() => {
+    mounted.current = true;
 
-  const [dataTwo, setDataTwo] = useState([
-    { 
-      attending_course: "Course 2-1", 
-      start_date: "2022-09-18", 
-      progress_rate: "100%",
-      score: 100,
-      course_complete_date: "2022-09-18",
-      end_date: "2022-09-18"
-    },
-    { 
-      attending_course: "Course 2-2", 
-      start_date: "2022-09-18", 
-      progress_rate: "100%",
-      score: 100,
-      course_complete_date: "2022-09-18",
-      end_date: "2022-09-18"
-    },
-  ]);
+    if (accountId) {
+      (async () => {
+        try {
+          const res = await showAccount(+accountId, true);
+          const { affiliation_id, department_1, department_2, ...data } =
+            res.data.data;
 
-  const [dataThree, setDataThree] = useState([
-    { 
-      attending_course: "Course 1-1", 
-      start_date: "2022-09-18", 
-      progress_rate: "100%",
-      score: 100,
-      course_complete_date: "2022-09-18",
-      end_date: "2022-09-18"
-    },
-    { 
-      attending_course: "Course 1-2", 
-      start_date: "2022-09-18", 
-      progress_rate: "100%",
-      score: 100,
-      course_complete_date: "2022-09-18",
-      end_date: "2022-09-18"
-    },
-  ]);
-  
+          setUser({
+            ...data,
+            affiliation_id: affiliation_id ?? 0,
+            department_1: department_1 ?? 0,
+            department_2: department_2 ?? 0,
+          });
+        } catch (e: any) {
+          errorSnackbar(e.message);
+        } finally {
+          setInitialized(true);
+        }
+      })();
+    }
+
+    return () => {
+      mounted.current = false;
+    };
+  }, [accountId]);
+
   return (
     <Paper variant="outlined">
+      <DisabledComponentContextProvider showLoading value={!initialized}>
         <Stack spacing={3}>
-          <Typography variant="sectiontitle2">アカウントを作成</Typography>
+          <Typography variant="sectiontitle2">アカウント情報</Typography>
+          <Grid container item spacing={2} xs={12}>
+            <Grid item xs={0} sm={5} />
+            <Grid item xs={12} sm={7}>
+              <Avatar
+                src={user.image ?? undefined}
+                alt={user.name}
+                sx={{ m: "auto", height: 100, width: 100 }}
+              />
+            </Grid>
+            <Informer label="氏名" value={user.name} />
+            <Informer label="メールアドレス" value={user.email} />
+            <Informer label="性別" value={["", "男性", "女性"][user.sex!]} />
+            <Informer label="生年月日" value={user.birthday} />
+            <Informer
+              label="権限"
+              value={MembershipTypeJp[user.membership_type_id]}
+            />
+            <Informer label="所属" value={user.affiliation_id_parsed} />
+            <Informer label="部署１" value={user.department_1_parsed} />
+            <Informer label="部署２" value={user.department_2_parsed} />
+            <Informer label="備考" value={user.remarks} />
+          </Grid>
+          <Stack direction="row" spacing={2} justifyContent="center">
+            <Button
+              color="secondary"
+              variant="contained"
+              rounded
+              large
+              type="button"
+              onClick={() =>
+                navigate(`/account-management/${accountId}/edit`, {
+                  state: user,
+                })
+              }
+            >
+              編集
+            </Button>
+          </Stack>
+
           <Paper variant="sectionsubpaper">
-            <Typography variant="sectiontitle3">アカウントを作成</Typography>
-            <Paper variant="outlined" sx={{ m: { xs: 2, md: 4 }, p: 2 }}>
-              <DisabledComponentContextProvider value>
-                {/* <AccountManagementForm
-                  viewable={true}
-                /> */}
-                <Stack direction="row" spacing={2} justifyContent="center">
-                  <Button
-                    color="secondary"
-                    variant="contained"
-                    rounded
-                    large
-                    type="button"
-                    onClick={() => navigate(`/account-management/${accountId}/edit`)}
-                    // disabled={!(isValid && isDirty)}
-                  >
-                    edit
-                  </Button>
-                </Stack>
-              </DisabledComponentContextProvider>
-            </Paper>
-            {/* <Paper variant="outlined" sx={{ m: { xs: 2, md: 4 }, p: 2 }}>
+            <Typography variant="sectiontitle3">受講状況</Typography>
+            <Paper
+              variant="outlined"
+              sx={{ m: { xs: 2, md: 4 }, p: 2 }}
+            ></Paper>
+          </Paper>
+
+          <Paper variant="sectionsubpaper">
+            <Typography variant="sectiontitle3">過去受講コース</Typography>
+            <Paper
+              variant="outlined"
+              sx={{ m: { xs: 2, md: 4 }, p: 2 }}
+            ></Paper>
+          </Paper>
+
+          {/* <Paper variant="outlined" sx={{ m: { xs: 2, md: 4 }, p: 2 }}>
               <Typography variant="sectiontitle2">コース情報</Typography>
               <Stack spacing={2} pt={3}>
                 <MaterialTable 
@@ -168,7 +166,7 @@ function AccountManagementDetails() {
                 />
               </Stack>
             </Paper> */}
-            {/* <Paper variant="outlined" sx={{ m: { xs: 2, md: 4 }, p: 2 }}>
+          {/* <Paper variant="outlined" sx={{ m: { xs: 2, md: 4 }, p: 2 }}>
               <Typography variant="sectiontitle2">コース情報</Typography>
               <Stack spacing={2} direction="row" justifyContent="flex-end" alignItems="center">
                 <Selection
@@ -224,10 +222,9 @@ function AccountManagementDetails() {
                 </Button>
               </Stack>
             </Paper> */}
-          </Paper>
         </Stack>
 
-      {/* <FormContainer>
+        {/* <FormContainer>
         <Dialog 
           open={applyOpen} 
           maxWidth="sm"
@@ -286,8 +283,33 @@ function AccountManagementDetails() {
           </DialogContent>
         </Dialog>
       </FormContainer> */}
+      </DisabledComponentContextProvider>
     </Paper>
   );
 }
 
 export default AccountManagementDetails;
+
+const Informer = ({
+  label,
+  value,
+}: {
+  label: string;
+  value?: number | string | null;
+}) => (
+  <>
+    <Grid item xs={5}>
+      <Typography fontWeight="bold">{label}</Typography>
+    </Grid>
+    <Grid item xs={7}>
+      <Typography
+        variant="body2"
+        fontSize={{ xs: 14, sm: 16 }}
+        textAlign={{ xs: "left", sm: "center" }}
+        sx={{ wordBreak: "break-all" }}
+      >
+        {value ?? ""}
+      </Typography>
+    </Grid>
+  </>
+);

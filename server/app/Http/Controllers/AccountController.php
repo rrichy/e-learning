@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\AccountRequest;
 use App\Http\Resources\AccountIndexResource;
+use App\Http\Resources\AccountShowParsedResource;
 use App\Http\Resources\AccountShowResource;
 use App\Models\User;
 use Carbon\Carbon;
@@ -72,6 +73,13 @@ class AccountController extends Controller
     {
         Gate::authorize('view-account', $account);
 
+        if (request()->input('parsed') === 'true') {
+            return new AccountShowParsedResource($account->load([
+                'affiliation' => fn ($q) => $q->select('id', 'name'),
+                'departments',
+            ]));
+        }
+
         return new AccountShowResource($account->load('departments'));
     }
 
@@ -85,7 +93,7 @@ class AccountController extends Controller
     public function update(AccountRequest $request, User $account)
     {
         Gate::authorize('update-account', $account);
-        
+
         $valid = $request->validated();
 
         DB::transaction(function () use ($valid, $account) {

@@ -2,7 +2,7 @@ export interface UserAttributes {
   id?: number;
   name: string;
   email: string;
-  birthday: Date;
+  birthday: string | null;
   sex: number | null;
   membership_type_id: number;
   remarks: string | null;
@@ -30,6 +30,9 @@ export interface UserAttributes {
   affiliation_id: number | null;
   department_1: number | null;
   department_2: number | null;
+  affiliation_id_parsed?: string;
+  department_1_parsed?: string;
+  department_2_parsed?: string;
 }
 
 export interface AuthAttributes {
@@ -45,7 +48,7 @@ export interface AuthAttributes {
 export const userInit: UserAttributes = {
   name: "",
   email: "",
-  birthday: new Date(),
+  birthday: null,
   sex: 1,
   membership_type_id: 2,
   remarks: null,

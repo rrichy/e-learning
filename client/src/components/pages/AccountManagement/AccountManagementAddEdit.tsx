@@ -22,7 +22,6 @@ import {
   updateAccount,
 } from "@/services/AccountService";
 import {
-  OptionAttribute,
   OptionsAttribute,
 } from "@/interfaces/CommonInterface";
 import OptionsContextProvider from "@/providers/OptionsContextProvider";
@@ -51,7 +50,6 @@ function AccountManagementAddEdit() {
       { id: 2, name: "女性" },
     ],
   });
-  // const [departments, setDepartments] = useState([{ id: 0, name: "未選択", selectionType: "disabled" }]);
   const { isConfirmed } = useConfirm();
   const { successSnackbar, errorSnackbar, handleError } = useAlerter();
   const { membershipTypeId } = useAuth();
@@ -175,12 +173,13 @@ function AccountManagementAddEdit() {
 
         if (!isCreate) {
           if (shouldFetch) {
-            const { departments, affiliation_id, ...data } = res[1].data.data;
+            const { department_1, department_2, affiliation_id, ...data } =
+              res[1].data.data;
             formContext.reset({
               ...data,
               affiliation_id: affiliation_id ?? 0,
-              department_1: departments[0] ?? 0,
-              department_2: departments[1] ?? 0,
+              department_1: department_1 ?? 0,
+              department_2: department_2 ?? 0,
             });
           } else formContext.reset(account);
         }
@@ -265,7 +264,10 @@ function AccountManagementAddEdit() {
       <Stack spacing={3}>
         <Typography variant="sectiontitle2">アカウントを登録</Typography>
         <OptionsContextProvider options={options}>
-          <DisabledComponentContextProvider value={isSubmitting} showLoading>
+          <DisabledComponentContextProvider
+            showLoading
+            value={isSubmitting || !initialized}
+          >
             <FormContainer
               formContext={formContext}
               handleSubmit={handleSubmit}
