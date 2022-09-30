@@ -39,6 +39,9 @@ yup.addMethod(
 );
 
 yup.setLocale({
+  array: {
+    min: "${path}は、${min}つ選んでください。"
+  },
   mixed: {
     required: "${path}は、必ず入力してください。",
     notType: "${path}は、必ず入力してください。",

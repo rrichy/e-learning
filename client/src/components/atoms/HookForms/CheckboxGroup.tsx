@@ -20,7 +20,7 @@ function CheckboxGroup({
   const options = optionsProp || optionsChild?.[rest.name] || [];
 
   return (
-    <CheckboxButtonGroup disabled={disabled} options={options} {...rest} />
+    <CheckboxButtonGroup disabled={disabled} options={options} labelKey="name" {...rest} />
   );
 }
 

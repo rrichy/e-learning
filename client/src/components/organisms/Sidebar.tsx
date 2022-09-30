@@ -204,11 +204,11 @@ const adminSidebarContent: SidebarItemProps[] = [
     label: "コース管理",
     to: "/course-management",
   },
-  {
-    icon: <LectureIcon />,
-    label: "受講履歴",
-    to: "/home",
-  },
+  // {
+  //   icon: <LectureIcon />,
+  //   label: "受講履歴",
+  //   to: "/home",
+  // },
   {
     icon: <UserIcon />,
     label: "アカウント管理",
@@ -227,7 +227,7 @@ const adminSidebarContent: SidebarItemProps[] = [
   {
     icon: <AnnouncementIcon />,
     label: "お知らせ管理",
-    to: "/home",
+    to: "/notice-management",
   },
   {
     icon: <AssignmentOutlined />,
@@ -239,11 +239,11 @@ const adminSidebarContent: SidebarItemProps[] = [
     label: "メールテンプレート管理",
     to: "/organize-mail-management",
   },
-  {
-    icon: <InquiryIcon />,
-    label: "お問い合わせ",
-    to: "/inquiries",
-  },
+  // {
+  //   icon: <InquiryIcon />,
+  //   label: "お問い合わせ",
+  //   to: "/inquiries",
+  // },
 ];
 
 const corporateSidebarContent: SidebarItemProps[] = [
@@ -259,8 +259,23 @@ const corporateSidebarContent: SidebarItemProps[] = [
   },
   {
     icon: <DepartmentIcon />,
-    label: "所属・部署管理",
+    label: "部署管理",
     to: "/affiliations-departments-management",
+  },
+  {
+    icon: <CategoryIcon />,
+    label: "カテゴリー管理",
+    to: "/category-management",
+  },
+  {
+    icon: <AnnouncementIcon />,
+    label: "お知らせ管理",
+    to: "/notice-management",
+  },
+  {
+    icon: <TemplateIcon />,
+    label: "メールテンプレート管理",
+    to: "/organize-mail-management",
   },
   {
     icon: <InquiryIcon />,
