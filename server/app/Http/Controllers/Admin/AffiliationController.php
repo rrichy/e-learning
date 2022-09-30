@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\AffiliationResource;
 use App\Models\Affiliation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
 class AffiliationController extends Controller
@@ -17,6 +18,8 @@ class AffiliationController extends Controller
      */
     public function index()
     {
+        Gate::authorize('viewAny-affiliation');
+
         $order = request()->input('order', 'asc');
         $per_page = request()->input('per_page', '10');
         $sort = request()->input('sort', 'id');
@@ -32,6 +35,8 @@ class AffiliationController extends Controller
      */
     public function store(Request $request)
     {
+        Gate::authorize('create-affiliation');
+
         $valid = $request->validate([
             'name' => 'required|string|unique:affiliations,name',
             'priority' => 'required|numeric|min:1|unique:affiliations,priority',
@@ -51,8 +56,10 @@ class AffiliationController extends Controller
      * @param  \App\Models\Affiliation  $affiliation
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, \App\Models\Affiliation $affiliation)
+    public function update(Request $request, Affiliation $affiliation)
     {
+        Gate::authorize('update-affiliation', $affiliation);
+
         $valid = $request->validate([
             'name' => 'required|string|unique:affiliations,name,' . $affiliation->id,
             'priority' => 'required|numeric|min:1|unique:affiliations,priority,' . $affiliation->id,
@@ -73,6 +80,8 @@ class AffiliationController extends Controller
      */
     public function destroy(string $affiliation)
     {
+        Gate::authorize('massDelete-affiliation');
+        
         $ids = explode(",", $affiliation);
         $deleted_count = \App\Models\Affiliation::destroy($ids);
 

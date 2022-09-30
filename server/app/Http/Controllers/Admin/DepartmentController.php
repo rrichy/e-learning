@@ -7,6 +7,7 @@ use App\Http\Resources\DepartmentResource;
 use App\Models\Department;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
 class DepartmentController extends Controller
@@ -18,6 +19,8 @@ class DepartmentController extends Controller
      */
     public function index()
     {
+        Gate::authorize('viewAny-department');
+        
         $order = request()->input('order', 'asc');
         $per_page = request()->input('per_page', '10');
         $sort = request()->input('sort', 'id');
@@ -33,6 +36,8 @@ class DepartmentController extends Controller
      */
     public function store(Request $request)
     {
+        Gate::authorize('create-department');
+
         $valid = $request->validate([
             'affiliation_id' => 'required|numeric|exists:affiliations,id',
             'name' => 'required|string|unique:departments,name',
@@ -68,6 +73,8 @@ class DepartmentController extends Controller
      */
     public function update(Request $request, Department $department)
     {
+        Gate::authorize('update-department', $department);
+        
         $valid = $request->validate([
             'affiliation_id' => 'required|numeric|exists:affiliations,id',
             'name' => ['required', 'string', Rule::unique('departments')->where(fn ($q) => $q->where('affiliation_id', $department->affiliation_id)->whereNull('parent_id'))->ignore($department->id)],
@@ -109,6 +116,8 @@ class DepartmentController extends Controller
      */
     public function destroy(string $department)
     {
+        Gate::authorize('massDelete-department');
+
         $ids = explode(",", $department);
         $deleted_count = \App\Models\Department::destroy($ids);
 
