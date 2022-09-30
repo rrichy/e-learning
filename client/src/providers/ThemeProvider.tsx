@@ -191,6 +191,7 @@ const theme = createTheme({
               },
             },
             "& .MuiTableRow-root": {
+              backgroundColor: "#fff",
               "&:hover": {
                 backgroundColor: "#0000000a",
               },

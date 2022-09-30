@@ -106,7 +106,7 @@ function UserHopup() {
           },
         }}
       >
-        <MenuItem>
+        <MenuItem onClick={(e) => e.stopPropagation()}>
           <Avatar>{user.name}</Avatar>
           <Stack
             justifyContent="center"
@@ -128,10 +128,10 @@ function UserHopup() {
           アカウントを編集
         </MenuItem>
         <Divider />
-        <MenuItem component={Link} to="/change-plan">
+        {/* <MenuItem component={Link} to="/change-plan">
           <ChangePlanIcon />
           受講履歴
-        </MenuItem>
+        </MenuItem> */}
         <Divider />
         <MenuItem component={Link} to="/contact">
           <InquiryIcon />

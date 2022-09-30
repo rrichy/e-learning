@@ -5,18 +5,22 @@ import MaterialTable, {
   MaterialTableProps,
   MTableHeader,
 } from "material-table";
+import { DragDropContext, Draggable, Droppable, DropResult } from "react-beautiful-dnd";
+import MTableBody from "./MTableBody";
+import MTableBodyRow from "./MTableBodyRow";
 
 interface TableProps extends Omit<MaterialTableProps<any>, "data"> {
   state: PaginatedData<any>;
+  onDragEnd?: (result: DropResult) => void
   fetchData: (
     page?: number,
     pageSize?: number,
     sort?: any,
-    order?: OrderType
+    order?: OrderType,
   ) => void;
 }
 
-function Table({ state, fetchData, columns, options, components, ...props }: TableProps) {
+function Table({ state, fetchData, columns, options, components, onDragEnd, ...props }: TableProps) {
   return (
     <MaterialTable
       columns={columns}
@@ -38,6 +42,39 @@ function Table({ state, fetchData, columns, options, components, ...props }: Tab
           />
         ),
         Container: (props) => <Paper {...props} variant="table" />,
+        ...(onDragEnd ? {
+          Body: (props) => (
+            <DragDropContext onDragEnd={onDragEnd}>
+              <Droppable
+                droppableId={"singleColumnDroppableAreaThusStaticInput"}
+              >
+                {(provided) => (
+                  <>
+                    <MTableBody {...props} forwardedRef={provided.innerRef} />
+                    {provided.placeholder}
+                  </>
+                )}
+              </Droppable>
+            </DragDropContext>
+          ),
+          Row: (props) => (
+            <Draggable
+              draggableId={props.data.tableData.id.toString()}
+              index={props.data.tableData.id}
+            >
+              {(provided) => {
+                return (
+                  <MTableBodyRow
+                    {...props}
+                    {...provided.draggableProps}
+                    dragHandleProps={provided.dragHandleProps}
+                    forwardedRef={provided.innerRef}
+                  />
+                );
+              }}
+            </Draggable>
+          )
+        } : {}),
         ...components,
       }}
       options={{

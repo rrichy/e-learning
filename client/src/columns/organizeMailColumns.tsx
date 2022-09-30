@@ -14,11 +14,6 @@ export default function generate({
 }) {
   const columns: Column<OrganizeMailFormAttributeWithId>[] = [
     {
-      field: "id",
-      render: () => <DragIndicator sx={{ cursor: "grab" }} />,
-      width: "0%",
-    },
-    {
       field: "title",
       title: "タイトル",
       render: (row) => (
