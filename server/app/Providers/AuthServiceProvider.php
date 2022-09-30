@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\User;
 use App\Policies\AccountPolicy;
+use App\Policies\AffiliationPolicy;
 use App\Policies\CoursePolicy;
 use App\Policies\NoticePolicy;
 use Illuminate\Auth\Notifications\ResetPassword;
@@ -55,6 +56,13 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('create-notice', [NoticePolicy::class, 'create']);
         Gate::define('update-notice', [NoticePolicy::class, 'update']);
         Gate::define('massDelete-notice', [NoticePolicy::class, 'massDelete']);
+
+        //affiliation
+        Gate::define('viewAny-affiliation', [AffiliationPolicy::class, 'viewAny']);
+        Gate::define('view-affiliation', [AffiliationPolicy::class, 'view']);
+        Gate::define('create-affiliation', [AffiliationPolicy::class, 'create']);
+        Gate::define('update-affiliation', [AffiliationPolicy::class, 'update']);
+        Gate::define('massDelete-affiliation', [AffiliationPolicy::class, 'massDelete']);
 
     }
 }

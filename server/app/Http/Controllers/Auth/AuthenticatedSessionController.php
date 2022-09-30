@@ -51,10 +51,12 @@ class AuthenticatedSessionController extends Controller
                 // Count individuals under the same affiliation as the Corporate (UNFINISHED)
                 return response()->json([
                     'user' => auth()->user(),
-                    'users_count' => User::where('membership_type_id', MembershipType::INDIVIDUAL)
-                        ->select(DB::raw('count(membership_type_id) as count, (CASE WHEN membership_type_id = 1 THEN "trial" WHEN membership_type_id = 2 THEN "individual" ELSE "corporate" END) AS membership_type'))
-                        ->groupBy('membership_type_id')->get()
-                        ->mapWithKeys(fn ($item) => [$item['membership_type'] => $item['count']]),
+                    'users_count' => [
+                        'individual' => User::query()
+                            ->where('membership_type_id', MembershipType::INDIVIDUAL)
+                            ->where('affiliation_id', auth()->user()->affiliation_id)
+                            ->count()
+                    ],
                     'message' => 'Login Successful!',
                 ]);
             case 1:
