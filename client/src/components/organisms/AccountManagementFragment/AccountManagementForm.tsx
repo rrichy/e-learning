@@ -95,16 +95,20 @@ function AccountManagementForm({
           </>
         )}
 
-        <Selection name="membership_type_id" label="権限" />
-        <Selection
-          name="affiliation_id"
-          label="所属"
-          onChange={
-            optionUpdateFn
-              ? (e) => optionUpdateFn("parent_departments", e as number)
-              : undefined
-          }
-        />
+        {membershipTypeId === MembershipType.admin && (
+          <>
+            <Selection name="membership_type_id" label="権限" />
+            <Selection
+              name="affiliation_id"
+              label="所属"
+              onChange={
+                optionUpdateFn
+                  ? (e) => optionUpdateFn("parent_departments", e as number)
+                  : undefined
+              }
+            />
+          </>
+        )}
         <Selection
           name="department_1"
           label="部署１"

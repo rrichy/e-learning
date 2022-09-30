@@ -19,7 +19,13 @@ export const registrationFormSchema = Yup.object({
 
 export const adminRegistrationFormSchema = registrationFormSchema.shape({
   membership_type_id: number().label("権限").selectionId(),
-  affiliation_id: number().label("所属").selectionId(),
+  affiliation_id: number()
+    .label("所属")
+    .when("membership_type_id", {
+      is: (val: number | string) => val == MembershipType.corporate,
+      then: (schema) => schema.selectionId(true),
+      otherwise: (schema) => schema.selectionId(),
+    }),
   department_1: number().label("部署1").selectionId(),
   department_2: number().label("部署2").selectionId(),
   remarks: string().label("備考"),

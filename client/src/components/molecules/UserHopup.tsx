@@ -107,7 +107,7 @@ function UserHopup() {
         }}
       >
         <MenuItem onClick={(e) => e.stopPropagation()}>
-          <Avatar>{user.name}</Avatar>
+          <Avatar src={user.image || undefined}>{user.name}</Avatar>
           <Stack
             justifyContent="center"
             ml={1}

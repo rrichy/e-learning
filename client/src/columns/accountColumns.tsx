@@ -42,7 +42,7 @@ export default function generate({
     {
       field: "last_login_date",
       title: "最終ログイン日",
-      render: (row) => jpDate(row.last_login_date),
+      render: (row) => jpDate(row.last_login_date) ?? "-",
     },
   ];
 
