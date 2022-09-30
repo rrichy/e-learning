@@ -2,19 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\AccountRequest;
-use App\Http\Resources\AccountIndexResource;
-use App\Http\Resources\AccountShowParsedResource;
-use App\Http\Resources\AccountShowResource;
+use App\Http\Requests\AccountStoreUpdateRequest;
 use App\Models\User;
-use Carbon\Carbon;
-use Illuminate\Auth\Events\Registered;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use App\Services\AccountService;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules;
 
 class AccountController extends Controller
 {
@@ -23,40 +14,24 @@ class AccountController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(AccountService $service)
     {
         Gate::authorize('viewAny-account');
 
-        $order = request()->input('order', 'asc');
-        $per_page = request()->input('per_page', '10');
-        $sort = request()->input('sort', 'id');
-
-        return AccountIndexResource::collection(
-            User::whereNot('id', auth()->id())
-                ->with(['parentDepartment', 'childDepartment'])
-                ->orderBy($sort, $order)
-                ->paginate($per_page)
-        )->additional(['message' => 'Users successfully fetched!']);
+        return $service->list();
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  App\Http\Requests\AccountRequest  $request
+     * @param  \App\Http\Requests\AccountStoreUpdateRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(AccountRequest $request)
+    public function store(AccountStoreUpdateRequest $request, AccountService $service)
     {
-        $valid = $request->validated();
+        Gate::authorize('create-account');
 
-        $parsed = array_merge($valid, [
-            'password' => Hash::make($request->password),
-        ]);
-
-        $user = User::create($parsed);
-
-        // ignore but do not comment out
-        event(new Registered($user));
+        $service->store($request);
 
         return response()->json([
             'message' => 'Successfully registered a new account!'
@@ -69,53 +44,25 @@ class AccountController extends Controller
      * @param  \App\Models\User  $account
      * @return \Illuminate\Http\Response
      */
-    public function show(User $account)
+    public function show(User $account, AccountService $service)
     {
         Gate::authorize('view-account', $account);
-
-        if (request()->input('parsed') === 'true') {
-            return new AccountShowParsedResource($account->load([
-                'affiliation' => fn ($q) => $q->select('id', 'name'),
-                'departments',
-            ]));
-        }
-
-        return new AccountShowResource($account->load('departments'));
+        
+        return $service->details($account);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  App\Http\Requests\AccountRequest  $request
+     * @param  \App\Http\Requests\AccountStoreUpdateRequest  $request
      * @param  \App\Models\User  $account
      * @return \Illuminate\Http\Response
      */
-    public function update(AccountRequest $request, User $account)
+    public function update(AccountStoreUpdateRequest $request, User $account, AccountService $service)
     {
         Gate::authorize('update-account', $account);
 
-        $valid = $request->validated();
-
-        DB::transaction(function () use ($valid, $account) {
-            $account->update($valid);
-
-            $newdepartments = [];
-            if (isset($valid['department_1'])) {
-                $newdepartments[] = $account->departmentUsers()->updateOrCreate([
-                    'department_id' => $valid['department_1'],
-                    'order' => 1,
-                ])->id;
-
-                if (isset($valid['department_2'])) {
-                    $newdepartments[] = $account->departmentUsers()->updateOrCreate([
-                        'department_id' => $valid['department_2'],
-                        'order' => 2,
-                    ])->id;
-                }
-            }
-
-            $account->departmentUsers()->whereNotIn('id', $newdepartments)->delete();
-        });
+        $service->update($request, $account);
 
         return response()->json([
             'message' => 'Successfully updated an account!'
@@ -125,26 +72,14 @@ class AccountController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\User  $account
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(User $account)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
      * @param  string  $ids
      * @return \Illuminate\Http\Response
      */
-    public function massDelete($ids)
+    public function massDelete(string $ids, AccountService $service)
     {
-        $ids = explode(',', $ids);
         Gate::authorize('massDelete-account', $ids);
 
-        $deleted_count = \App\Models\User::destroy($ids);
+        $deleted_count = $service->deleteIds($ids);
 
         return response()->json([
             'message' => 'Successfully deleted ' . $deleted_count . ' users!',

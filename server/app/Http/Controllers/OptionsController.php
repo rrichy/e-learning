@@ -27,17 +27,17 @@ class OptionsController extends Controller
                 $value = [];
                 switch ($field) {
                     case 'affiliations': {
-                            $value = auth()->user()->membership_type_id === MembershipType::ADMIN
-                                ? Affiliation::get(['id', 'name'])
-                                : [];
+                            $value = Affiliation::query()
+                                ->when(!auth()->user()->isAdmin(), fn ($q) => $q->where('id', auth()->user()->affiliation_id))
+                                ->get(['id', 'name']);
+                                
                             break;
                         }
                     case 'departments': {
-                            // $value = DepartmentOptionsResource::collection(Department::whereNull('parent_id')->with('childDepartments')->get());
-                            // use commented upon creating the relationship between affiliation and user
-                            $value = auth()->user()->membership_type_id === MembershipType::ADMIN
-                                ? Department::get(['id', 'name'])
-                                : Department::where('affiliation_id', auth()->user()->affiliation_id)->get(['id', 'name']);
+                            $value = Department::query()
+                                ->when(!auth()->user()->isAdmin(), fn ($q) => $q->where('affiliation_id', auth()->user()->affiliation_id))
+                                ->get(['id', 'name']);
+
                             break;
                         }
                     case 'categories': {
@@ -45,7 +45,7 @@ class OptionsController extends Controller
                             break;
                         }
                     case 'signatures': {
-                            $value = auth()->user()->membership_type_id === MembershipType::ADMIN
+                            $value = auth()->user()->isAdmin()
                                 ? Signature::get(['id', 'name'])
                                 : [];
                             break;

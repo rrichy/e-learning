@@ -2,11 +2,12 @@
 
 namespace App\Http\Requests;
 
+use App\Models\MembershipType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 
-class AccountRequest extends FormRequest
+class AccountStoreUpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,11 +26,20 @@ class AccountRequest extends FormRequest
      */
     protected function prepareForValidation()
     {
-        $this->merge([
+        $auth = auth()->user();
+
+        $merge = [
             'affiliation_id' => request()->affiliation_id ?: null,
             'department_1' => request()->department_1 ?: null,
             'department_2' => request()->department_2 ?: null,
-        ]);
+        ];
+        
+        if($auth->isCorporate()) {
+            $merge['membership_type_id'] = MembershipType::INDIVIDUAL;
+            $merge['affiliation_id'] = $auth->affiliation_id;
+        }
+
+        $this->merge($merge);
     }
 
     /**
@@ -44,7 +54,8 @@ class AccountRequest extends FormRequest
             'image' => ['nullable', 'string', 'max:255'],
             'sex' => ['required', 'integer', 'in:1,2'],
             'birthday' => ['required', 'date_format:Y-m-d', 'before:today'],
-            'affiliation_id' => ['nullable', 'required_with:department_1,department_2', 'integer', 'exists:affiliations,id'],
+            'membership_type_id' => ['required', 'integer', Rule::in(MembershipType::TYPES)],
+            'affiliation_id' => ['nullable', 'required_if:membership_type_id,' . MembershipType::CORPORATE, 'required_with:department_1,department_2', 'integer', 'exists:affiliations,id'],
             'department_1' => [
                 'nullable',
                 'required_with:department_2',

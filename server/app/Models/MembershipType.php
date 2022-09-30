@@ -17,6 +17,13 @@ class MembershipType extends Model
     public const CORPORATE = 3;
     public const ADMIN = 4;
 
+    public const TYPES = [
+        self::TRIAL,
+        self::INDIVIDUAL,
+        self::CORPORATE,
+        self::ADMIN,
+    ];
+
     public function users(): HasMany
     {
         return $this->hasMany(User::class);

@@ -25,6 +25,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'image',
         'password',
         'birthday',
         'sex',
@@ -106,5 +107,15 @@ class User extends Authenticatable
     public function notices(): HasMany
     {
         return $this->hasMany(Notice::class);
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->membership_type_id === MembershipType::ADMIN;
+    }
+
+    public function isCorporate(): bool
+    {
+        return $this->membership_type_id === MembershipType::CORPORATE;
     }
 }
