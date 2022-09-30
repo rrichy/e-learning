@@ -1,4 +1,4 @@
-import { InferType } from "yup";
+import { array, InferType } from "yup";
 import Yup from "./localizedYup";
 
 const { string, number } = Yup;
@@ -14,29 +14,26 @@ export interface NoticeTableRowAttribute {
   shown_in_mail: boolean;
 }
 
-// export const noticeFormSchema = Yup.object({
-//   name: string().label("登録名").required(),
-//   from_name: string().required(),
-//   from_email: string().required(),
-//   content: string().label("署名").required(),
-//   priority: number().label("並び順").required(),
-// });
+export const noticeFormSchema = Yup.object({
+  subject: string().label("件名").required(),
+  content: string().label("内容").required(),
+  posting_method: array(number()).label("掲載方法").min(1),
+  date_publish_start: string().label("掲載開始日").required(),
+  date_publish_end: string().label("掲載終了日").required(),
+  signature_id: number().label("署名").required().selectionId(),
+});
 
-// export type SignatureFormAttribute = Omit<
-//   InferType<typeof noticeFormSchema>,
-//   "priority"
-// > & {
-//   priority: string | null;
-// };
+export interface NoticeFormAttribute extends InferType<typeof noticeFormSchema> {};
 
 // export type SignatureFormAttributeWithId = SignatureFormAttribute & {
 //   id: number;
 // };
 
-// export const signatureFormInit: SignatureFormAttribute = {
-//   name: "",
-//   from_name: "",
-//   from_email: "",
-//   content: "",
-//   priority: "",
-// };
+export const noticeFormInit: NoticeFormAttribute = {
+  subject: "",
+  content: "",
+  posting_method: [],
+  date_publish_start: "",
+  date_publish_end: "",
+  signature_id: 0,
+};

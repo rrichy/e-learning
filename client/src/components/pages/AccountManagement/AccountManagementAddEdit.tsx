@@ -262,7 +262,7 @@ function AccountManagementAddEdit() {
   return (
     <Paper variant="outlined">
       <Stack spacing={3}>
-        <Typography variant="sectiontitle2">アカウントを登録</Typography>
+        <Typography variant="sectiontitle2">アカウントを{isCreate ? "登録" : "編集"}</Typography>
         <OptionsContextProvider options={options}>
           <DisabledComponentContextProvider
             showLoading

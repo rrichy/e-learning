@@ -1,4 +1,5 @@
 import { OrderType } from "@/interfaces/CommonInterface";
+import { NoticeFormAttribute } from "@/validations/NoticeFormValidation";
 // import { NoticeFormAttribute } from "@/validations/NoticeFormValidation";
 import { destroy, get, post, put } from "./ApiService";
 
@@ -15,13 +16,17 @@ export const indexNotice = (
   );
 };
 
-// export const storeNotice = (data: NoticeFormAttribute) => {
-//   return post(url_prefix, data);
-// };
+export const showNotice = (id: number) => {
+  return get(`${url_prefix}/${id}`);
+};
 
-// export const updateNotice = (id: number, data: NoticeFormAttribute) => {
-//   return put(`${url_prefix}/${id}`, data);
-// };
+export const storeNotice = (data: NoticeFormAttribute) => {
+  return post(url_prefix, data);
+};
+
+export const updateNotice = (id: number, data: NoticeFormAttribute) => {
+  return put(`${url_prefix}/${id}`, data);
+};
 
 export const destroyNotice = (ids: number[]) => {
   return destroy(`${url_prefix}/${ids.join(",")}`);

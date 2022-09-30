@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\NoticeStoreUpdateRequest;
 use App\Http\Resources\NoticeIndexResource;
+use App\Http\Resources\NoticeShowResource;
 use App\Models\Notice;
+use App\Services\NoticeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
@@ -28,35 +31,50 @@ class NoticeController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\NoticeStoreUpdateRequest  $request
+     * @param  \App\Services\NoticeService  $service
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(NoticeStoreUpdateRequest $request, NoticeService $service)
     {
-        //
+        Gate::authorize('create-notice');
+
+        $service->store($request);
+
+        return response()->json([
+            'message' => 'Successfully posted a new notice!'
+        ]);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  \App\Models\Notice  $notice
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Notice $notice)
     {
-        //
+        Gate::authorize('view-notice', $notice);
+
+        return new NoticeShowResource($notice);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \App\Http\Requests\NoticeStoreUpdateRequest  $request
+     * @param  \App\Models\Notice  $notice
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(NoticeStoreUpdateRequest $request, Notice $notice, NoticeService $service)
     {
-        //
+        Gate::authorize('update-notice', $notice);
+
+        $service->update($request, $notice);
+
+        return response()->json([
+            'message' => 'Successfully updated notice!'
+        ]);
     }
 
     /**

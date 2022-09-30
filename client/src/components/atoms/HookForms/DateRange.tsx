@@ -1,4 +1,6 @@
+import { localeDate } from "@/utils/localeDateString";
 import { Stack, Typography } from "@mui/material";
+import { useWatch } from "react-hook-form";
 import DatePicker, { DatePickerElementProps } from "./DatePicker";
 
 function DateRange({
@@ -10,6 +12,7 @@ function DateRange({
   maxDateProps: DatePickerElementProps;
   disabled?: boolean;
 }) {
+  const minDateVal = useWatch({ name: minDateProps.name });
   return (
     <Stack
       direction={{ xs: "column", md: "row" }}
@@ -17,9 +20,18 @@ function DateRange({
       alignItems="center"
       width={1}
     >
-      <DatePicker {...minDateProps} disabled={disabled} />
+      <DatePicker
+        {...minDateProps}
+        disabled={disabled}
+        parseDate={localeDate}
+      />
       <Typography>~</Typography>
-      <DatePicker {...maxDateProps} disabled={disabled} />
+      <DatePicker
+        {...maxDateProps}
+        minDate={new Date(minDateVal)}
+        disabled={disabled}
+        parseDate={localeDate}
+      />
     </Stack>
   );
 }

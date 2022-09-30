@@ -45,7 +45,9 @@ class OptionsController extends Controller
                             break;
                         }
                     case 'signatures': {
-                            $value = auth()->user()->membership_type_id === MembershipType::ADMIN ? Signature::get(['id', 'name']) : [];
+                            $value = auth()->user()->membership_type_id === MembershipType::ADMIN
+                                ? Signature::get(['id', 'name'])
+                                : [];
                             break;
                         }
                 }
