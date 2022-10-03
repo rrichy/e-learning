@@ -15,10 +15,16 @@ class MailTemplate extends Model
         'content',
         'signature_id',
         'priority',
+        'affiliation_id',
     ];
 
     public function signature(): BelongsTo
     {
         return $this->belongsTo(Signature::class);
+    }
+
+    public function affiliation(): BelongsTo
+    {
+        return $this->belongsTo(Affiliation::class);
     }
 }

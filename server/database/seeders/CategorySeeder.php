@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Affiliation;
 use App\Models\Category;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class CategorySeeder extends Seeder
@@ -15,6 +15,7 @@ class CategorySeeder extends Seeder
      */
     public function run()
     {
+        $affiliations = Affiliation::all();
         $category_names = [
             'ネットワーク',
             'クラウド',
@@ -23,21 +24,24 @@ class CategorySeeder extends Seeder
 
         $child_categories = [];
         foreach ($category_names as $index => $category_name) {
+            // a category has an 80% chance of having an affiliation_id
+            $affiliation_id = fake()->boolean(80) ? $affiliations->random()->id : null;
+            
             $category = Category::create([
                 'name' => $category_name,
                 'priority' => $index + 1,
                 'start_period' => now()->addDays(rand(4, 40)),
                 'end_period' => now()->addDays(rand(90, 120)),
+                'affiliation_id' => $affiliation_id,
             ]);
 
             $child_data = Category::factory(rand(0, 2))->make([
                 'parent_id' => $category->id,
+                'affiliation_id' => $affiliation_id,
             ]);
             
             foreach($child_data->toArray() as $index => $child_category) {
                 $child_category['priority'] = $index + 1;
-                // $child_category['start_period'] = substr($child_category['start_period'], 0, 10);
-                // $child_category['end_period'] = substr($child_category['end_period'], 0, 10);
                 $child_category['created_at'] = now();
                 $child_category['updated_at'] = now();
 

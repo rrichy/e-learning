@@ -23,6 +23,7 @@ class Notice extends Model
         'date_publish_start',
         'date_publish_end',
         'signature_id',
+        'affiliation_id',
     ];
 
     public function signature(): BelongsTo
@@ -33,5 +34,10 @@ class Notice extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function affiliation(): BelongsTo
+    {
+        return $this->belongsTo(Affiliation::class);
     }
 }

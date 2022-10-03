@@ -17,6 +17,7 @@ class Category extends Model
         'priority',
         'start_period',
         'end_period',
+        'affiliation_id',
     ];
 
     public function parentCategory(): BelongsTo
@@ -32,5 +33,10 @@ class Category extends Model
     public function courses(): HasMany
     {
         return $this->hasMany(Course::class);
+    }
+
+    public function affiliation(): BelongsTo
+    {
+        return $this->belongsTo(Affiliation::class);
     }
 }

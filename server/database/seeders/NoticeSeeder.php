@@ -26,8 +26,9 @@ class NoticeSeeder extends Seeder
             $notice_type = rand(0, 2);
 
             if(fake()->boolean(80)) {
+                $author = $authors->random();
                 $notices[] = [
-                    'user_id' => $authors->random()->id,
+                    'user_id' => $author->id,
                     'subject' => fake()->text(10),
                     'content' => fake()->text(40),
                     'priority' => ++$priority,
@@ -38,6 +39,7 @@ class NoticeSeeder extends Seeder
                     'signature_id' => $signature->id,
                     'created_at' => now(),
                     'updated_at' => now(),
+                    'affiliation_id' => $author->affiliation_id,
                 ];
             }
         });

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 class Course extends Model
 {
@@ -51,6 +52,11 @@ class Course extends Model
     public function signature(): BelongsTo
     {
         return $this->belongsTo(Signature::class);
+    }
+
+    public function affiliation(): HasOneThrough
+    {
+        return $this->hasOneThrough(Affiliation::class, Category::class, 'id', 'id', 'category_id', 'affiliation_id');
     }
 
     // public function groups(): HasMany
