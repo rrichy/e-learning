@@ -5,8 +5,8 @@ const { string, number, date, array, object } = Yup;
 export const categoryFormSchema = Yup.object({
   name: string().label("部署名").required(),
   priority: number().label("並び順").required(),
-  start_period: date().label("開始期間").required(),
-  end_period: date().label("終了期間").required(),
+  start_period: string().label("開始期間").required(),
+  end_period: string().label("終了期間").required(),
   child_categories: array(
     object({
       name: string().label("子部署名").required(),

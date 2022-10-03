@@ -33,7 +33,8 @@ function useNotice() {
           per_page: pageSize,
           loading: true,
         }));
-
+        setStateSelected([]);
+        
         const res = await indexNotice(page, pageSize, sort, order);
         const { data, meta } = res.data;
         if (mounted.current)

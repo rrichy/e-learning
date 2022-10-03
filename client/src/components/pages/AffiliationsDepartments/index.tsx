@@ -1,7 +1,6 @@
 import { Link, Paper, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
 import Button from "@/components/atoms/Button";
-import { GridSelectionModel } from "@mui/x-data-grid";
 import { useCallback, useEffect, useRef, useState } from "react";
 import AffiliationAddEdit from "./AffiliationAddEdit";
 import {
@@ -68,6 +67,7 @@ function AffiliationsDepartments() {
           per_page: pageSize,
           loading: true,
         }));
+        setAffiliationSelected([]);
 
         const res = await Promise.all([
           indexAffiliation(page, pageSize, sort, order),
@@ -117,6 +117,7 @@ function AffiliationsDepartments() {
           per_page: pageSize,
           loading: true,
         }));
+        setDepartmentSelected([]);
 
         const res = await indexDepartment(page, pageSize, sort, order);
         const { data, meta } = res.data;

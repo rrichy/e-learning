@@ -65,6 +65,7 @@ function useOrganizeMail() {
           loading: true,
         }));
         setChanges([]);
+        setStateSelected([]);
 
         const res = await indexOrganizeMail(page, pageSize, sort, order);
         const { data, meta } = res.data;
