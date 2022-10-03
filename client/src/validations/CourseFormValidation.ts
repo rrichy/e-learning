@@ -33,7 +33,8 @@ export const videoFormSchema = object({
   id: number().nullable(),
   title: string().label("解説動画タイトル").required(),
   content: string().label("解説動画内容").required(),
-  video_file_path: string().label("動画ファイル").required(),
+  video_file_path: string().label("動画ファイル").nullable(),
+  // video_file_path: string().label("動画ファイル").required(),
 });
 
 export const videosFieldArraySchema = object({
@@ -56,12 +57,12 @@ export const courseFormSchema = object({
   study_time: number().label("標準学習時間").required(),
   priority: number().label("カテゴリ内の並び順").required(),
   is_whole_period: number().required(),
-  start_period: date().when("is_whole_period", {
+  start_period: string().when("is_whole_period", {
     is: (val: number | string) => val == 1,
     then: (schema) => schema.nullable(),
     otherwise: (schema) => schema.required(),
   }),
-  end_period: date().when("is_whole_period", {
+  end_period: string().when("is_whole_period", {
     is: (val: number | string) => val == 1,
     then: (schema) => schema.nullable(),
     otherwise: (schema) => schema.required(),

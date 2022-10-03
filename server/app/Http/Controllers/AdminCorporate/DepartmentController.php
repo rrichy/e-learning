@@ -9,11 +9,6 @@ use App\Services\DepartmentService;
 
 class DepartmentController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index(DepartmentService $service)
     {
         return $service->list();
@@ -37,12 +32,6 @@ class DepartmentController extends Controller
         ]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  string  $department
-     * @return \Illuminate\Http\Response
-     */
     public function destroy(string $department, DepartmentService $service)
     {
         $deleted_count = $service->deleteIds($department);
