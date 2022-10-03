@@ -50,13 +50,6 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('create-account', [AccountPolicy::class, 'create']);
         Gate::define('update-account', [AccountPolicy::class, 'update']);
         Gate::define('massDelete-account', [AccountPolicy::class, 'massDelete']);
-     
-        //notice
-        Gate::define('viewAny-notice', [NoticePolicy::class, 'viewAny']);
-        Gate::define('view-notice', [NoticePolicy::class, 'view']);
-        Gate::define('create-notice', [NoticePolicy::class, 'create']);
-        Gate::define('update-notice', [NoticePolicy::class, 'update']);
-        Gate::define('massDelete-notice', [NoticePolicy::class, 'massDelete']);
 
         //affiliation
         Gate::define('viewAny-affiliation', [AffiliationPolicy::class, 'viewAny']);

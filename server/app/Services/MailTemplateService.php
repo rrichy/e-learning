@@ -18,7 +18,7 @@ class MailTemplateService
 
         return MailTemplateIndexResource::collection(
             MailTemplate::when(
-                auth()->user()->isCorporate(), 
+                auth()->user()->isCorporate(),
                 fn ($q) => $q->where('affiliation_id', auth()->user()->affiliation_id)
             )->orderBy($sort, $order)->paginate($per_page)
         )->additional(['message' => 'Mail templates successfully fetched!']);
@@ -27,6 +27,12 @@ class MailTemplateService
 
     public function update(MailTemplateStoreUpdateRequest $request, MailTemplate $mail_template)
     {
+        abort_if(
+            auth()->user()->isCorporate() && auth()->user()->affiliation_id !== $mail_template->affiliation_id,
+            403,
+            "This action is unauthorized."
+        );
+        
         $valid = $request->validated();
 
         $mail_template->update($valid);
@@ -46,7 +52,7 @@ class MailTemplateService
         $auth = auth()->user();
         $ids = explode(',', $ids);
 
-        if($auth->isAdmin()) return MailTemplate::destroy($ids);
+        if ($auth->isAdmin()) return MailTemplate::destroy($ids);
 
         $validIdCount = MailTemplate::where('affiliation_id', $auth->affiliation_id)->whereIn('id', $ids)->count();
         abort_if(
@@ -61,6 +67,7 @@ class MailTemplateService
 
     public function updatePriorities(Request $request)
     {
+        $auth = auth()->user();
         $template_ids = array_map(fn ($q) => $q['id'], $request->payload);
 
         $rules = [
@@ -78,8 +85,20 @@ class MailTemplateService
             ]
         ];
 
+        $valid = $request->validate($rules);
+
+        if ($auth->isCorporate()) {
+            $ids = array_map(fn ($item) => $item['id'], $valid['payload']);
+            $validIdCount = MailTemplate::where('affiliation_id', $auth->affiliation_id)->whereIn('id', $ids)->count();
+            abort_if(
+                count($ids) !== $validIdCount,
+                403,
+                'You have no authority of updating some of there mail templates!'
+            );
+        }
+
         $count = 0;
-        foreach ($request->validate($rules)['payload'] as $template) {
+        foreach ($valid['payload'] as $template) {
             MailTemplate::find($template['id'])->update(['priority' => $template['priority']]);
             $count++;
         }

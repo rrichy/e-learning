@@ -3,10 +3,41 @@
 namespace App\Services;
 
 use App\Http\Requests\NoticeStoreUpdateRequest;
+use App\Http\Resources\NoticeIndexResource;
+use App\Http\Resources\NoticeShowResource;
 use App\Models\Notice;
 
 class NoticeService
 {
+    public function list()
+    {
+        $order = request()->input('order', 'asc');
+        $per_page = request()->input('per_page', '10');
+        $sort = request()->input('sort', 'id');
+
+        return NoticeIndexResource::collection(
+            Notice::with('user')
+                ->when(
+                    auth()->user()->isCorporate(), 
+                    fn ($q) => $q->where('affiliation_id', auth()->user()->affiliation_id)
+                )->orderBy($sort, $order)
+                ->paginate($per_page)
+        )->additional(['message' => 'Notices successfully fetched!']);
+    }
+
+
+    public function details(Notice $notice)
+    {
+        abort_if(
+            auth()->user()->isCorporate() && auth()->user()->affiliation_id !== $notice->affiliation_id,
+            403,
+            "This action is unauthorized."
+        );
+        
+        return new NoticeShowResource($notice);
+    }
+
+
     public function store(NoticeStoreUpdateRequest $request)
     {
         $valid = $request->validated();
@@ -27,6 +58,12 @@ class NoticeService
 
     public function update(NoticeStoreUpdateRequest $request, Notice $notice)
     {
+        abort_if(
+            auth()->user()->isCorporate() && auth()->user()->affiliation_id !== $notice->affiliation_id,
+            403,
+            "This action is unauthorized."
+        );
+
         $valid = $request->validated();
 
         $notice->update(array_merge(
@@ -40,5 +77,23 @@ class NoticeService
         // event(new NoticePost($notice));
 
         return $notice;
+    }
+
+
+    public function deleteIds(string $ids)
+    {
+        $auth = auth()->user();
+        $ids = explode(',', $ids);
+
+        if ($auth->isAdmin()) return Notice::destroy($ids);
+
+        $validIdCount = Notice::where('affiliation_id', $auth->affiliation_id)->whereIn('id', $ids)->count();
+        abort_if(
+            count($ids) !== $validIdCount,
+            403,
+            'You have no authority of deleting some of these notices'
+        );
+
+        return Notice::destroy($ids);
     }
 }

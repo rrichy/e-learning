@@ -19,8 +19,11 @@ class NoticeStoreUpdateRequest extends FormRequest
 
     protected function prepareForValidation()
     {
+        $auth = auth()->user();
+        
         $this->merge([
             'user_id' => auth()->id(),
+            'affiliation_id' => $auth->isCorporate() ? $auth->affiliation_id : request()->affiliation_id,
         ]);
     }
 
@@ -31,8 +34,7 @@ class NoticeStoreUpdateRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            'user_id' => 'required|integer|exists:users,id',
+        $rules = [
             'subject' => 'required|string',
             'content' => 'required|string',
             'posting_method' => 'array|min:1', // not a model attribute
@@ -40,6 +42,13 @@ class NoticeStoreUpdateRequest extends FormRequest
             'date_publish_start' => ['required', 'date_format:Y-m-d'],
             'date_publish_end' => ['required', 'date_format:Y-m-d', 'after:date_publish_start'],
             'signature_id' => 'required|integer|exists:signatures,id',
+            'affiliation_id' => 'nullable|integer|exists:affiliations,id',
         ];
+
+        if (request()->method() === 'POST') {
+            $rules['user_id'] = 'required|integer|exists:users,id';
+        }
+
+        return $rules;
     }
 }
