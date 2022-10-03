@@ -47,6 +47,12 @@ class DepartmentService
 
     public function update(DepartmentStoreUpdateRequest $request, Department $department)
     {
+        abort_if(
+            auth()->user()->isCorporate() && auth()->user()->affiliation_id !== $department->affiliation_id,
+            403,
+            "This action is unauthorized."
+        );
+
         $valid = $request->validated();
 
         DB::transaction(function () use ($valid, $department) {
