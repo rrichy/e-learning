@@ -65,12 +65,5 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('update-affiliation', [AffiliationPolicy::class, 'update']);
         Gate::define('massDelete-affiliation', [AffiliationPolicy::class, 'massDelete']);
 
-        //department
-        Gate::define('viewAny-department', [DepartmentPolicy::class, 'viewAny']);
-        Gate::define('view-department', [DepartmentPolicy::class, 'view']);
-        Gate::define('create-department', [DepartmentPolicy::class, 'create']);
-        Gate::define('update-department', [DepartmentPolicy::class, 'update']);
-        Gate::define('massDelete-department', [DepartmentPolicy::class, 'massDelete']);
-
     }
 }

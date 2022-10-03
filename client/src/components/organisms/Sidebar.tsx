@@ -260,7 +260,7 @@ const corporateSidebarContent: SidebarItemProps[] = [
   {
     icon: <DepartmentIcon />,
     label: "部署管理",
-    to: "/affiliations-departments-management",
+    to: "/departments-management",
   },
   {
     icon: <CategoryIcon />,

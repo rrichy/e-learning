@@ -18,13 +18,15 @@ class AffiliationController extends Controller
      */
     public function index()
     {
-        Gate::authorize('viewAny-affiliation');
-
         $order = request()->input('order', 'asc');
         $per_page = request()->input('per_page', '10');
         $sort = request()->input('sort', 'id');
 
-        return AffiliationResource::collection(Affiliation::orderBy($sort, $order)->paginate($per_page))->additional(['message' => 'Affiliations successfully fetched!']);
+        return AffiliationResource::collection(
+            Affiliation::orderBy($sort, $order)
+                ->when(auth()->user()->isCorporate(), fn ($q) => $q->where('id', auth()->user()->affiliation_id))
+                ->paginate($per_page)
+        )->additional(['message' => 'Affiliations successfully fetched!']);
     }
 
     /**

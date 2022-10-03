@@ -191,7 +191,15 @@ export default function Pages() {
     {
       path: "/affiliations-departments-management",
       element: (
-        <PrivateRoute membershipTypes={[admin, corporate]}>
+        <PrivateRoute membershipTypes={[admin]}>
+          <AffiliationsDepartments />
+        </PrivateRoute>
+      ),
+    },
+    {
+      path: "/departments-management",
+      element: (
+        <PrivateRoute membershipTypes={[corporate]}>
           <AffiliationsDepartments />
         </PrivateRoute>
       ),

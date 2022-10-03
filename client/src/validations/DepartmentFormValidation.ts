@@ -18,6 +18,7 @@ export interface DepartmentFormAttribute {
   affiliation_id: number;
   name: string;
   priority: string | null;
+  parent_id: number | null;
   child_departments: {
     name: string;
     priority: string | null;
@@ -32,5 +33,6 @@ export const departmentFormInit: DepartmentFormAttribute = {
   affiliation_id: 0,
   name: "",
   priority: null,
+  parent_id: null,
   child_departments: [],
 };

@@ -94,6 +94,10 @@ export default function DatePickerElement({
             return (
               <TextField
                 {...tempParams}
+                inputProps={{
+                  ...tempParams["inputProps"],
+                  onChange: undefined
+                }}
                 {...inputProps}
                 required={!!required}
                 error={invalid}

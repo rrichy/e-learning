@@ -27,9 +27,12 @@ import { getOptions } from "@/services/CommonService";
 import OptionsContextProvider from "@/providers/OptionsContextProvider";
 import Table from "@/components/atoms/Table";
 import { Column } from "material-table";
+import useAuth from "@/hooks/useAuth";
+import { MembershipType } from "@/enums/membershipTypes";
 
 function AffiliationsDepartments() {
   const mounted = useRef(true);
+  const { membershipTypeId } = useAuth();
   const { successSnackbar, errorSnackbar } = useAlerter();
   const [options, setOptions] = useState<OptionsAttribute>({});
   const [affiliationsState, setAffiliationsState] = useState(
@@ -178,7 +181,12 @@ function AffiliationsDepartments() {
       field: "name",
       title: "所属",
       render: (row) => (
-        <Link component="button" onClick={() => setDepartmentDialog(row)}>
+        <Link component="button" onClick={() => 
+          setDepartmentDialog(
+            row.parent_id
+              ? departmentsState.data.find((a) => a.id === row.parent_id)!
+              : row
+          )}>
           {row.name}
         </Link>
       ),
@@ -194,106 +202,112 @@ function AffiliationsDepartments() {
     return () => {
       mounted.current = false;
     };
-  }, []);
+  }, [membershipTypeId]);
 
   return (
-    <>
-      <Stack spacing={3}>
-        <Paper variant="outlined">
-          <Stack spacing={3}>
-            <Typography variant="sectiontitle2">所属の管理</Typography>
-            <Stack spacing={1} direction="row">
-              <Button
-                variant="contained"
-                color="secondary"
-                sx={{ width: "fit-content", borderRadius: 6 }}
-                onClick={() => handleDelete("affiliation")}
-                disabled={affiliationSelected.length === 0}
-              >
-                削除
-              </Button>
-              <Button
-                variant="contained"
-                sx={{ width: "fit-content", borderRadius: 6 }}
-                onClick={() => setAffiliationDialog("add")}
-              >
-                追加
-              </Button>
+    <Stack spacing={3}>
+      {membershipTypeId === MembershipType.admin && (
+        <>
+          <Paper variant="outlined">
+            <Stack spacing={3}>
+              <Typography variant="sectiontitle2">所属の管理</Typography>
+              <Stack spacing={1} direction="row">
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  sx={{ width: "fit-content", borderRadius: 6 }}
+                  onClick={() => handleDelete("affiliation")}
+                  disabled={affiliationSelected.length === 0}
+                >
+                  削除
+                </Button>
+                <Button
+                  variant="contained"
+                  sx={{ width: "fit-content", borderRadius: 6 }}
+                  onClick={() => setAffiliationDialog("add")}
+                >
+                  追加
+                </Button>
+              </Stack>
+              <Table
+                columns={affiliationsColumns}
+                state={affiliationsState}
+                fetchData={fetchAffiliations}
+                onSelectionChange={(rows) => setAffiliationSelected(rows)}
+                options={{
+                  selection: true,
+                }}
+              />
             </Stack>
-            <Table
-              columns={affiliationsColumns}
-              state={affiliationsState}
-              fetchData={fetchAffiliations}
-              onSelectionChange={(rows) => setAffiliationSelected(rows)}
-              options={{
-                selection: true,
-              }}
-            />
-          </Stack>
-        </Paper>
-        <Paper variant="outlined">
-          <Stack spacing={3}>
-            <Typography variant="sectiontitle2">部署の管理</Typography>
-            <Stack spacing={1} direction="row">
-              <Button
-                variant="contained"
-                color="secondary"
-                sx={{ width: "fit-content", borderRadius: 6 }}
-                onClick={() => handleDelete("department")}
-                disabled={departmentSelected.length === 0}
-              >
-                削除
-              </Button>
-              <Button
-                variant="contained"
-                sx={{ width: "fit-content", borderRadius: 6 }}
-                onClick={() => setDepartmentDialog("add")}
-              >
-                追加
-              </Button>
+          </Paper>
+          <AffiliationAddEdit
+            state={affiliationDialog}
+            closeFn={() => setAffiliationDialog(null)}
+            resolverFn={() =>
+              fetchAffiliations(
+                affiliationsState.page,
+                affiliationsState.per_page,
+                affiliationsState.sort,
+                affiliationsState.order
+              )
+            }
+          />
+        </>
+      )}
+      {membershipTypeId >= MembershipType.corporate && (
+        <>
+          <Paper variant="outlined">
+            <Stack spacing={3}>
+              <Typography variant="sectiontitle2">部署の管理</Typography>
+              <Stack spacing={1} direction="row">
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  sx={{ width: "fit-content", borderRadius: 6 }}
+                  onClick={() => handleDelete("department")}
+                  disabled={departmentSelected.length === 0}
+                >
+                  削除
+                </Button>
+                <Button
+                  variant="contained"
+                  sx={{ width: "fit-content", borderRadius: 6 }}
+                  onClick={() => setDepartmentDialog("add")}
+                >
+                  追加
+                </Button>
+              </Stack>
+              <Table
+                columns={departmentsColumns}
+                state={departmentsState}
+                fetchData={fetchDepartments}
+                onSelectionChange={(rows) => setDepartmentSelected(rows)}
+                parentChildData={(row, rows) =>
+                  rows.find((a) => a.id === row.parent_id)
+                }
+                options={{
+                  selection: true,
+                }}
+              />
             </Stack>
-            <Table
-              columns={departmentsColumns}
-              state={departmentsState}
-              fetchData={fetchDepartments}
-              onSelectionChange={(rows) => setDepartmentSelected(rows)}
-              parentChildData={(row, rows) =>
-                rows.find((a) => a.id === row.parent_id)
+          </Paper>
+          <OptionsContextProvider options={options}>
+            <DepartmentAddEdit
+              state={departmentDialog}
+              closeFn={() => setDepartmentDialog(null)}
+              resolverFn={() =>
+                fetchDepartments(
+                  departmentsState.page,
+                  departmentsState.per_page,
+                  departmentsState.sort,
+                  departmentsState.order
+                )
               }
-              options={{
-                selection: true,
-              }}
             />
-          </Stack>
-        </Paper>
-      </Stack>
-      <AffiliationAddEdit
-        state={affiliationDialog}
-        closeFn={() => setAffiliationDialog(null)}
-        resolverFn={() =>
-          fetchAffiliations(
-            affiliationsState.page,
-            affiliationsState.per_page,
-            affiliationsState.sort,
-            affiliationsState.order
-          )
-        }
-      />
-      <OptionsContextProvider options={options}>
-        <DepartmentAddEdit
-          state={departmentDialog}
-          closeFn={() => setDepartmentDialog(null)}
-          resolverFn={() =>
-            fetchDepartments(
-              departmentsState.page,
-              departmentsState.per_page,
-              departmentsState.sort,
-              departmentsState.order
-            )
-          }
-        />
-      </OptionsContextProvider>
-    </>
+          </OptionsContextProvider>
+        </>
+      )}
+    </Stack>
   );
 }
 
