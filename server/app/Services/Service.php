@@ -2,19 +2,19 @@
 
 namespace App\Services;
 
-class Services
+class Service
 {
     public function list()
     {
     }
 
 
-    public function details(Model $user)
+    public function details(Model $model)
     {
     }
 
 
-    public function update(Request $request, Model $user)
+    public function update(Request $request, Model $model)
     {
     }
 
@@ -30,6 +30,11 @@ class Services
 
 
     public function updatePriorities(Request $request)
+    {
+    }
+
+
+    public function clone(Model $model)
     {
     }
 }

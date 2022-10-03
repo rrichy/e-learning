@@ -3,9 +3,9 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
 
-class NoticeStoreUpdateRequest extends FormRequest
+class CategoryStoreUpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -20,7 +20,6 @@ class NoticeStoreUpdateRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            'user_id' => auth()->id(),
             'affiliation_id' => auth()->user()->affiliation_id,
         ]);
     }
@@ -33,17 +32,16 @@ class NoticeStoreUpdateRequest extends FormRequest
     public function rules()
     {
         $rules = [
-            'subject' => 'required|string',
-            'content' => 'required|string',
-            'posting_method' => 'array|min:1', // not a model attribute
-            'posting_method.*' => 'integer|in:1,2',            
-            'date_publish_start' => ['required', 'date_format:Y-m-d'],
-            'date_publish_end' => ['required', 'date_format:Y-m-d', 'after:date_publish_start'],
-            'signature_id' => 'required|integer|exists:signatures,id',
+            'name' => ['required', 'string', Rule::unique('categories', 'name')->when(request()->id > 0, fn ($q) => $q->ignore(request()->id))],
+            'start_period' => 'required|date',
+            'end_period' => 'required|date|after:start_period',
+            'child_categories' => 'present|array',
+            'child_categories.*.name' => 'required|string|distinct',
+            'child_categories.*.priority' => 'required|numeric|min:1|distinct',
+            'priority' => ['required', 'numeric', 'min:1', Rule::unique('categories')->where(fn ($q) => $q->whereNull('parent_id'))->when(request()->id > 0, fn ($q) => $q->ignore(request()->id))],
         ];
 
         if (request()->method() === 'POST') {
-            $rules['user_id'] = 'required|integer|exists:users,id';
             $rules['affiliation_id'] = 'nullable|integer|exists:affiliations,id';
         }
 

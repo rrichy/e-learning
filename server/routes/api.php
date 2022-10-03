@@ -35,6 +35,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     ], function () {
         Route::get('/affiliation', [AffiliationController::class, 'index']);
 
+        Route::delete('/account/{ids}', [AccountController::class, 'massDelete']);
+        Route::resource('/account', AccountController::class)->except(['create', 'edit', 'destroy']);
+
         Route::resource('/department', DepartmentController::class)->except([
             'create', 'edit', 'show'
         ]);
@@ -42,9 +45,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/category/{category}/duplicate', [CategoryController::class, 'duplicate']);
         Route::delete('/category/{ids}', [CategoryController::class, 'massDelete']);
         Route::resource('/category', CategoryController::class)->only(['index', 'store', 'update']);
-
-        Route::delete('/signature/{ids}', [SignatureController::class, 'massDelete']);
-        Route::resource('/signature', SignatureController::class)->only(['index', 'store', 'update']);
 
         Route::put('/mail-template/mass', [MailTemplateController::class, 'massUpdate']);
         Route::delete('/mail-template/{ids}', [MailTemplateController::class, 'massDelete']);
@@ -57,18 +57,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
             'index', 'store', 'show', 'update',
         ]);
 
-        Route::delete('/account/{ids}', [AccountController::class, 'massDelete']);
-        Route::resource('/account', AccountController::class)->except(['create', 'edit', 'destroy']);
-
         Route::delete('/notice/{ids}', [NoticeController::class, 'massDelete']);
         Route::resource('/notice', NoticeController::class)->only(['index', 'store', 'show', 'update']);
     });
 
-    Route::group([
-        'prefix' => 'admin',
-        'middleware' => ['membership:admin'],
-    ], function () {
+    Route::group(['middleware' => ['membership:admin']], function () {
         Route::resource('/affiliation', AffiliationController::class)->only(['store', 'update', 'destroy']);
+
+        Route::delete('/signature/{ids}', [SignatureController::class, 'massDelete']);
+        Route::resource('/signature', SignatureController::class)->only(['index', 'store', 'update']);
     });
 });
 
