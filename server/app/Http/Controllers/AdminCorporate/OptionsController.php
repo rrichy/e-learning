@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\AdminCorporate;
 
+use App\Http\Controllers\Controller;
 use App\Models\Affiliation;
 use App\Models\Category;
 use App\Models\Department;

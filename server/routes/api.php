@@ -1,15 +1,15 @@
 <?php
 
 use App\Http\Controllers\AccountController;
-use App\Http\Controllers\Admin\AffiliationController;
-use App\Http\Controllers\Admin\CategoryController;
-use App\Http\Controllers\Admin\DepartmentController;
+use App\Http\Controllers\AdminCorporate\AffiliationController;
+use App\Http\Controllers\AdminCorporate\CategoryController;
+use App\Http\Controllers\AdminCorporate\DepartmentController;
+use App\Http\Controllers\AdminCorporate\CourseController;
+use App\Http\Controllers\AdminCorporate\MailTemplateController;
+use App\Http\Controllers\AdminCorporate\NoticeController;
+use App\Http\Controllers\AdminCorporate\OptionsController;
+use App\Http\Controllers\AdminCorporate\SignatureController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\CourseController;
-use App\Http\Controllers\MailTemplateController;
-use App\Http\Controllers\NoticeController;
-use App\Http\Controllers\OptionsController;
-use App\Http\Controllers\SignatureController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -33,9 +33,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::group([
         'middleware' => ['membership:admin,corporate']
     ], function () {
-        Route::resource('/affiliation', AffiliationController::class)->except([
-            'create', 'edit', 'show'
-        ]);
+        Route::get('/affiliation', [AffiliationController::class, 'index']);
 
         Route::resource('/department', DepartmentController::class)->except([
             'create', 'edit', 'show'
@@ -44,7 +42,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/category/{category}/duplicate', [CategoryController::class, 'duplicate']);
         Route::delete('/category/{ids}', [CategoryController::class, 'massDelete']);
         Route::resource('/category', CategoryController::class)->only(['index', 'store', 'update']);
-        
+
         Route::delete('/signature/{ids}', [SignatureController::class, 'massDelete']);
         Route::resource('/signature', SignatureController::class)->only(['index', 'store', 'update']);
 
@@ -66,11 +64,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::resource('/notice', NoticeController::class)->only(['index', 'store', 'show', 'update']);
     });
 
-    // Route::group([
-    //     'prefix' => 'admin',
-    //     'middleware' => ['membership:admin'],
-    // ], function () {
-    // });
+    Route::group([
+        'prefix' => 'admin',
+        'middleware' => ['membership:admin'],
+    ], function () {
+        Route::resource('/affiliation', AffiliationController::class)->only(['store', 'update', 'destroy']);
+    });
 });
 
 require __DIR__ . '/auth.php';

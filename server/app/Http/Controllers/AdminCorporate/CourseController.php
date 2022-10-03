@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\AdminCorporate;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\CourseRequest;
 use App\Http\Resources\CourseIndexResource;
 use App\Models\Course;

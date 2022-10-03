@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\AdminCorporate;
 
+use App\Http\Controllers\Controller;
 use App\Http\Resources\SignatureIndexResource;
 use App\Models\Signature;
 use Illuminate\Http\Request;

@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\AdminCorporate;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\NoticeStoreUpdateRequest;
 use App\Http\Resources\NoticeIndexResource;
 use App\Http\Resources\NoticeShowResource;

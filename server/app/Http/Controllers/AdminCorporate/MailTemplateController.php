@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\AdminCorporate;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\MailTemplateStoreUpdateRequest;
 use App\Models\MailTemplate;
 use App\Services\MailTemplateService;
