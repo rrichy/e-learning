@@ -251,7 +251,6 @@ function CourseList({ open, onClose }: CourseListProps) {
           }}
           options={{
             actionsColumnIndex: 5,
-            maxBodyHeight: undefined,
             paging: false,
             sorting: false,
             rowStyle: {

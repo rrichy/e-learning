@@ -83,7 +83,6 @@ function Table({ state, fetchData, columns, options, components, onDragEnd, ...p
         pageSizeOptions: TABLE_ROWS_PER_PAGE,
         pageSize: state.per_page,
         minBodyHeight: 300,
-        maxBodyHeight: 600,
         ...options,
       }}
       onChangePage={(page, per_page) =>

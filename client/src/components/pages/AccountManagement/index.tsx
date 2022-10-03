@@ -196,7 +196,6 @@ function AccountManagement() {
                 onSelectionChange={(rows) => setStateSelected(rows)}
                 options={{
                   selection: true,
-                  maxBodyHeight: undefined,
                 }}
               />
             </Box>

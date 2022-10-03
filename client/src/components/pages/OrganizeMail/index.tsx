@@ -78,7 +78,6 @@ function OrganizeMail() {
             onDragEnd={handleDragEnd}
             options={{
               selection: true,
-              maxBodyHeight: "unset",
               sorting: false,
             }}
           />
