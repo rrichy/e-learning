@@ -45,9 +45,8 @@ class OptionsController extends Controller
                             break;
                         }
                     case 'signatures': {
-                            $value = auth()->user()->isAdmin()
-                                ? Signature::get(['id', 'name'])
-                                : [];
+                            $value = Signature::get(['id', 'name']);
+
                             break;
                         }
                 }
