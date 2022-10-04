@@ -22,7 +22,7 @@ class SignatureSeeder extends Seeder
             $signature['updated_at'] = now();
 
             return $signature;
-        }, Signature::factory(rand(4, 12))->make()->toArray());
+        }, Signature::factory(rand(40, 50))->make()->toArray());
 
         Signature::insert($signatures);
     }

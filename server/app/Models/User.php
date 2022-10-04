@@ -118,4 +118,9 @@ class User extends Authenticatable
     {
         return $this->membership_type_id === MembershipType::CORPORATE;
     }
+    
+    public function isIndividual(): bool
+    {
+        return $this->membership_type_id === MembershipType::INDIVIDUAL;
+    }
 }

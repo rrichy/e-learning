@@ -24,7 +24,7 @@ return new class extends Migration
                 ->cascadeOnDelete()
                 ->cascadeOnUpdate();
             $table->string('subject');
-            $table->string('content');
+            $table->text('content');
             $table->integer('priority');
             $table->boolean('shown_in_bulletin')->default(false);
             $table->boolean('shown_in_mail')->default(false);

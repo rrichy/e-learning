@@ -25,12 +25,12 @@ class NoticeSeeder extends Seeder
         $signatures->each(function ($signature) use ($authors, &$notices, &$priority) {
             $notice_type = rand(0, 2);
 
-            if(fake()->boolean(80)) {
+        if(fake()->boolean(90)) {
                 $author = $authors->random();
                 $notices[] = [
                     'user_id' => $author->id,
-                    'subject' => fake()->text(10),
-                    'content' => fake()->text(40),
+                    'subject' => fake()->words(10, true),
+                    'content' => fake()->words(50, true),
                     'priority' => ++$priority,
                     'shown_in_bulletin' => $notice_type === 0 || $notice_type === 2,
                     'shown_in_mail' => $notice_type >= 1,
