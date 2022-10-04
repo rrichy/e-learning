@@ -222,7 +222,7 @@ function CourseList({ open, onClose }: CourseListProps) {
         <Close fontSize="large" sx={{ color: "white" }} />
       </IconButton>
       <DialogTitle sx={{ px: 0, pt: 0 }}>
-        <Typography variant="sectiontitle1">公開中のコース状況</Typography>
+        <Typography variant="sectiontitle1">コース状況</Typography>
       </DialogTitle>
       <DialogContent>
         <Table
