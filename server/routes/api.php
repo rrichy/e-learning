@@ -30,17 +30,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/me', [AuthenticatedSessionController::class, 'update']);
     Route::get('/options', [OptionsController::class, 'index']);
 
-    Route::group([
-        'middleware' => ['membership:admin,corporate']
-    ], function () {
+    Route::group(['middleware' => ['membership:admin,corporate']], function () {
         Route::get('/affiliation', [AffiliationController::class, 'index']);
 
         Route::delete('/account/{ids}', [AccountController::class, 'massDelete']);
         Route::resource('/account', AccountController::class)->except(['create', 'edit', 'destroy']);
 
-        Route::resource('/department', DepartmentController::class)->except([
-            'create', 'edit', 'show'
-        ]);
+        Route::resource('/department', DepartmentController::class)->except(['create', 'edit', 'show']);
 
         Route::post('/category/{category}/duplicate', [CategoryController::class, 'duplicate']);
         Route::delete('/category/{ids}', [CategoryController::class, 'massDelete']);
@@ -53,9 +49,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('/course/mass', [CourseController::class, 'massUpdate']);
         Route::put('/course/toggle', [CourseController::class, 'toggleStatus']);
         Route::delete('/course/{ids}', [CourseController::class, 'massDelete']);
-        Route::resource('/course', CourseController::class)->only([
-            'index', 'store', 'show', 'update',
-        ]);
+        Route::resource('/course', CourseController::class)->only(['index', 'store', 'show', 'update']);
 
         Route::delete('/notice/{ids}', [NoticeController::class, 'massDelete']);
         Route::resource('/notice', NoticeController::class)->only(['index', 'store', 'show', 'update']);

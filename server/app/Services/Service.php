@@ -37,4 +37,9 @@ class Service
     public function clone(Model $model)
     {
     }
+
+
+    public function updateStatus(Request $request)
+    {
+    }
 }
