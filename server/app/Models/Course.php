@@ -59,6 +59,16 @@ class Course extends Model
         return $this->hasOneThrough(Affiliation::class, Category::class, 'id', 'id', 'category_id', 'affiliation_id');
     }
 
+    public function attendingCourses(): HasMany
+    {
+        return $this->hasMany(AttendingCourse::class);
+    }
+
+    // public function users(): HasManyThrough
+    // {
+    //     return $this->hasManyThrough(User::class, AttendingCourse::class);
+    // }
+
     // public function groups(): HasMany
     // {
     //     return $this->hasMany(Group::class);

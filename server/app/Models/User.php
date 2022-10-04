@@ -123,4 +123,14 @@ class User extends Authenticatable
     {
         return $this->membership_type_id === MembershipType::INDIVIDUAL;
     }
+    
+    public function attendingCourses(): HasMany
+    {
+        return $this->hasMany(AttendingCourse::class);
+    }
+
+    // public function courses(): HasManyThrough
+    // {
+    //     return $this->hasManyThrough(Course::class, AttendingCourse::class);
+    // }
 }
