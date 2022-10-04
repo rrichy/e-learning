@@ -33,6 +33,9 @@ import Signature from "./Signature"
 import NoticeManagement from "./NoticeManagement";
 import NoticeManagementAddEdit from "./NoticeManagement/NoticeManagementAddEdit";
 import OrganizeMail from "./OrganizeMail";
+import Unsubscribe from "./Unsubscribe";
+import UnsubscribeReason from "./Unsubscribe/UnsubscribeReason";
+import UnsubscribeMessage from "./Unsubscribe/UnsubscribeMessage";
 import Contact from "./Contact";
 import Sidebar from "../organisms/Sidebar";
 import { Container, Stack, useMediaQuery, useTheme } from "@mui/material";
@@ -93,10 +96,10 @@ export default function Pages() {
       ),
     },
     {
-      path: "/inquiry",
+      path: "/inquiries",
       element: (
         <PrivateRoute membershipTypes={registered}>
-          <Inquiries />
+          <Contact />
         </PrivateRoute>
       ),
     },
@@ -249,6 +252,28 @@ export default function Pages() {
           <Contact />
         </PrivateRoute>
       ),
+    },
+    {
+      path: "/unsubscribe",
+      element: (
+        <PrivateRoute membershipTypes={registered}>
+          <Outlet />
+        </PrivateRoute>
+      ),
+      children: [
+        {
+          index: true,
+          element: <Unsubscribe />,
+        },
+        {
+          path: "reason",
+          element: <UnsubscribeReason />,
+        },
+        {
+          path: "message",
+          element: <UnsubscribeMessage />,
+        },
+      ],
     },
     {
       path: "/*",
