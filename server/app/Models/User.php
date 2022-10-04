@@ -129,8 +129,8 @@ class User extends Authenticatable
         return $this->hasMany(AttendingCourse::class);
     }
 
-    // public function courses(): HasManyThrough
-    // {
-    //     return $this->hasManyThrough(Course::class, AttendingCourse::class);
-    // }
+    public function courses(): HasManyThrough
+    {
+        return $this->hasManyThrough(Course::class, AttendingCourse::class, 'user_id', 'id', 'id', 'course_id');
+    }
 }
