@@ -27,8 +27,8 @@ return new class extends Migration
             $table->decimal('progress_rate', 3, 2);
             $table->integer('highest_score');
             $table->integer('latest_score');
-            $table->timestamp('start_date');
-            $table->timestamp('completion_date');
+            $table->timestamp('start_date')->nullable();
+            $table->timestamp('completion_date')->nullable();
             $table->timestamps();
         });
     }

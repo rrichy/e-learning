@@ -28,9 +28,12 @@ class Course extends Model
         'signature_id',
     ];
 
+    public const PRIVATE = 1;
+    public const PUBLIC = 2;
+
     public const STATUS = [
-        'private' => 1,
-        'public' => 2,
+        'private' => self::PRIVATE,
+        'public' => self::PUBLIC,
     ];
 
     public const TARGET = [
