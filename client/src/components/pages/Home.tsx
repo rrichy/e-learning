@@ -21,6 +21,11 @@ function Home() {
       <Link to='/notice-management'>Notice Management</Link> <br />
       <Link to='/organize-mail-management'>Organize Mail - メールテンプレート管理</Link> <br />
       <Link to='/contact'>Contact - お問い合わせ</Link> <br /><br />
+      STUDENT/INDIVIUDAL Links <br />
+      <Link to='/course-management'>Course list</Link> <br />
+      <Link to='/account-management'>Exam History</Link> <br />
+      <Link to='/contact'>Contact - お問い合わせ</Link> <br />
+      <Link to='/unsubscribe'>Unsubscribe</Link> <br /><br />
     </div>;
 }
 
