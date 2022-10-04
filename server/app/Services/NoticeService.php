@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Http\Requests\NoticeStoreUpdateRequest;
+use App\Http\Resources\NoticeHomepageResource;
 use App\Http\Resources\NoticeIndexResource;
 use App\Http\Resources\NoticeShowResource;
 use App\Models\Notice;
@@ -15,6 +16,16 @@ class NoticeService
         $per_page = request()->input('per_page', '10');
         $sort = request()->input('sort', 'id');
 
+        if (auth()->user()->isIndividual()) {
+            return NoticeHomepageResource::collection(
+                Notice::with('user')
+                    ->where(fn ($q) => $q->where('affiliation_id', auth()->user()->affiliation_id)->orWhereNull('affiliation_id'))
+                    ->where('shown_in_bulletin', true)
+                    ->orderBy($sort, $order)
+                    ->paginate($per_page)
+            );
+        }
+        
         return NoticeIndexResource::collection(
             Notice::with('user')
                 ->when(
@@ -29,7 +40,7 @@ class NoticeService
     public function details(Notice $notice)
     {
         abort_if(
-            auth()->user()->isCorporate() && auth()->user()->affiliation_id !== $notice->affiliation_id,
+            !auth()->user()->isAdmin() && $notice->affiliation_id && auth()->user()->affiliation_id !== $notice->affiliation_id,
             403,
             "This action is unauthorized."
         );

@@ -23,7 +23,17 @@ export const noticeFormSchema = Yup.object({
   signature_id: number().label("署名").required().selectionId(),
 });
 
-export interface NoticeFormAttribute extends InferType<typeof noticeFormSchema> {};
+export interface NoticeFormAttribute extends InferType<typeof noticeFormSchema> {
+  author?: string;
+  created_at?: string;
+  shown_in_bulletin?: boolean;
+  shown_in_mail?: boolean;
+};
+
+export interface NoticeItemAttribute extends Omit<NoticeFormAttribute, "posting_method"> {
+  id: number;
+  created_at: string;
+}
 
 // export type SignatureFormAttributeWithId = SignatureFormAttribute & {
 //   id: number;

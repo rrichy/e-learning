@@ -1,13 +1,12 @@
 import { Link, Stack, Typography } from "@mui/material";
-import React from "react";
-import { NoticeFormAttribute } from "@/validations/NoticeFormValidation";
+import { NoticeItemAttribute } from "@/validations/NoticeFormValidation";
 import { jpDate } from "@/mixins/jpFormatter";
+import NoticeDetails from "../molecules/NoticeDetails";
+import { useState } from "react";
 
-interface NoticeItemProps extends Omit<NoticeFormAttribute, "posting_method"> {
-  created_at: string;
-}
+function NoticeItem({ created_at, subject, id }: NoticeItemAttribute) {
+  const [selected, setSelected] = useState<number | null>(null);
 
-function NoticeItem({ created_at, subject }: NoticeItemProps) {
   return (
     <Stack direction="row" spacing={2}>
       <Typography whiteSpace="nowrap">{jpDate(created_at)}</Typography>
@@ -16,9 +15,11 @@ function NoticeItem({ created_at, subject }: NoticeItemProps) {
         color="secondary"
         textAlign="left"
         underline="hover"
+        onClick={() => setSelected(id)}
       >
         {subject}
       </Link>
+      <NoticeDetails id={selected} onClose={() => setSelected(null)} />
     </Stack>
   );
 }

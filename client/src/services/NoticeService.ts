@@ -16,8 +16,12 @@ export const indexNotice = (
   );
 };
 
-export const showNotice = (id: number) => {
-  return get(`${url_prefix}/${id}`);
+export const showNotice = (id: number, parseAuthor?: boolean) => {
+  let url = `${url_prefix}/${id}`;
+
+  if (parseAuthor) url += "?parse_author=true";
+
+  return get(url);
 };
 
 export const storeNotice = (data: NoticeFormAttribute) => {

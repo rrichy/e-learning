@@ -30,36 +30,43 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/me', [AuthenticatedSessionController::class, 'update']);
     Route::get('/options', [OptionsController::class, 'index']);
 
-    Route::group(['middleware' => ['membership:admin,corporate']], function () {
-        Route::get('/affiliation', [AffiliationController::class, 'index']);
+    Route::group(['middleware' => ['membership:admin,corporate,individual']], function () {
+        Route::get('/notice', [NoticeController::class, 'index']);
+        Route::get('/notice/{notice}', [NoticeController::class, 'show']);
 
-        Route::delete('/account/{ids}', [AccountController::class, 'massDelete']);
-        Route::resource('/account', AccountController::class)->except(['create', 'edit', 'destroy']);
-
-        Route::resource('/department', DepartmentController::class)->except(['create', 'edit', 'show']);
-
-        Route::post('/category/{category}/duplicate', [CategoryController::class, 'duplicate']);
-        Route::delete('/category/{ids}', [CategoryController::class, 'massDelete']);
-        Route::resource('/category', CategoryController::class)->only(['index', 'store', 'update']);
-
-        Route::put('/mail-template/mass', [MailTemplateController::class, 'massUpdate']);
-        Route::delete('/mail-template/{ids}', [MailTemplateController::class, 'massDelete']);
-        Route::resource('/mail-template', MailTemplateController::class)->only(['index', 'store', 'update']);
-
-        Route::put('/course/mass', [CourseController::class, 'massUpdate']);
-        Route::put('/course/toggle', [CourseController::class, 'toggleStatus']);
-        Route::delete('/course/{ids}', [CourseController::class, 'massDelete']);
-        Route::resource('/course', CourseController::class)->only(['index', 'store', 'show', 'update']);
-
-        Route::delete('/notice/{ids}', [NoticeController::class, 'massDelete']);
-        Route::resource('/notice', NoticeController::class)->only(['index', 'store', 'show', 'update']);
-    });
-
-    Route::group(['middleware' => ['membership:admin']], function () {
-        Route::resource('/affiliation', AffiliationController::class)->only(['store', 'update', 'destroy']);
-
-        Route::delete('/signature/{ids}', [SignatureController::class, 'massDelete']);
-        Route::resource('/signature', SignatureController::class)->only(['index', 'store', 'update']);
+        Route::get('/course', [CourseController::class, 'index']);
+        
+        Route::group(['middleware' => ['membership:admin,corporate']], function () {
+            Route::get('/affiliation', [AffiliationController::class, 'index']);
+    
+            Route::delete('/account/{ids}', [AccountController::class, 'massDelete']);
+            Route::resource('/account', AccountController::class)->except(['create', 'edit', 'destroy']);
+    
+            Route::resource('/department', DepartmentController::class)->except(['create', 'edit', 'show']);
+    
+            Route::post('/category/{category}/duplicate', [CategoryController::class, 'duplicate']);
+            Route::delete('/category/{ids}', [CategoryController::class, 'massDelete']);
+            Route::resource('/category', CategoryController::class)->only(['index', 'store', 'update']);
+    
+            Route::put('/mail-template/mass', [MailTemplateController::class, 'massUpdate']);
+            Route::delete('/mail-template/{ids}', [MailTemplateController::class, 'massDelete']);
+            Route::resource('/mail-template', MailTemplateController::class)->only(['index', 'store', 'update']);
+    
+            Route::put('/course/mass', [CourseController::class, 'massUpdate']);
+            Route::put('/course/toggle', [CourseController::class, 'toggleStatus']);
+            Route::delete('/course/{ids}', [CourseController::class, 'massDelete']);
+            Route::resource('/course', CourseController::class)->only(['store', 'show', 'update']);
+    
+            Route::delete('/notice/{ids}', [NoticeController::class, 'massDelete']);
+            Route::resource('/notice', NoticeController::class)->only(['store', 'update']);
+        });
+    
+        Route::group(['middleware' => ['membership:admin']], function () {
+            Route::resource('/affiliation', AffiliationController::class)->only(['store', 'update', 'destroy']);
+    
+            Route::delete('/signature/{ids}', [SignatureController::class, 'massDelete']);
+            Route::resource('/signature', SignatureController::class)->only(['index', 'store', 'update']);
+        });
     });
 });
 
