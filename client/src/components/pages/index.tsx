@@ -286,9 +286,9 @@ export default function Pages() {
     //   )
     // },
     {
-      path: "/course",
+      path: "/course/:courseId",
       element: (
-        <PrivateRoute membershipTypes={registered}>
+        <PrivateRoute membershipTypes={[individual]}>
           <Outlet />
         </PrivateRoute>
       ),

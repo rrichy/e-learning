@@ -7,22 +7,34 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { Link as RouterLink } from "react-router-dom";
 
-interface CourseCardProps {}
+interface CourseCardProps {
+  id: number;
+  title: string;
+  image: string;
+}
 
-function CourseCard({}: CourseCardProps) {
+function CourseCard({ id, title, image }: CourseCardProps) {
   return (
     <Grid item xs={6} md={4}>
       <Card elevation={0} sx={{ bgcolor: "transparent" }}>
-        <CardActionArea>
+        <CardActionArea
+          sx={{
+            textDecoration: "none !important",
+            position: "relative",
+          }}
+          component={RouterLink}
+          to={`/course/${id}`}
+        >
           <CardMedia
             component="img"
-            src="https://mui.com/static/images/cards/contemplative-reptile.jpg"
-            sx={{ aspectRatio: "1 / .45", borderRadius: 1 }}
+            src={image}
+            sx={{ aspectRatio: "1 / .45", borderRadius: 1, objectFit: "cover" }}
           />
           <CardContent sx={{ p: 0, pt: 1 }}>
             <Typography gutterBottom fontWeight="bold" component="h5">
-              CCNAコース【前編】
+              {title}【前編】
             </Typography>
             <Stack
               direction={{ xs: "column", md: "row" }}

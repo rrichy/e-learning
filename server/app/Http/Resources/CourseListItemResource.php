@@ -21,7 +21,8 @@ class CourseListItemResource extends JsonResource
             'title' => $this->title, 
             'is_whole_period' => $this->is_whole_period, 
             'start_period' => $this->start_period, 
-            'end_period' => $this->end_period, 
+            'end_period' => $this->end_period,
+            'image' => $this->when(auth()->user()->isIndividual(), $this->image),
         ];
     }
 }

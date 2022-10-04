@@ -26,6 +26,15 @@ class CourseService
 
         abort_if($status === null, 400, "No status parameter");
 
+        if ($auth->isIndividual()) {
+            return CourseListResource::collection(
+                Category::whereHas('courses', fn ($q) => $q->where('status', Course::STATUS['public']))
+                ->with(
+                    ['courses' => fn ($q) => $q->where('status', Course::STATUS['public'])]
+                )->get()
+            );
+        }
+        
         if ($status === "both") {
             return CourseIndexResource::collection(
                 Category::with(['courses' => function ($q) {

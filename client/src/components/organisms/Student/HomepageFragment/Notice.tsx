@@ -84,7 +84,7 @@ function Notice() {
     };
   }, []);
   return (
-    <Paper variant="outlined">
+    <Paper variant="outlined" sx={{ mb: 8}}>
       <Grid container>
         <Grid item xs={12} md={3}>
           <Stack

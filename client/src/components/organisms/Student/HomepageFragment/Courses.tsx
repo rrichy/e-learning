@@ -16,6 +16,7 @@ function Courses() {
     (async () => {
       try {
         const res = await indexCourse("public");
+        setCategories(res.data.data);
       } catch (e: any) {
         errorSnackbar(e.message);
       }
@@ -27,16 +28,16 @@ function Courses() {
   }, []);
 
   return (
-    <Grid container mt={8}>
-      {categories.map(({ name }) => (
-        <Grid item xs={12}>
+    <Grid container spacing={6}>
+      {categories.map(({ name, courses, id }) => (
+        <Grid item xs={12} key={id}>
           <Typography variant="h2" fontSize={28} fontWeight="bold" gutterBottom>
             {name}
           </Typography>
           <Grid container spacing={2}>
-            <CourseCard />
-            <CourseCard />
-            <CourseCard />
+            {courses.map(({ id, title, image }) => (
+              <CourseCard key={id} id={id} title={title} image={image} />
+            ))}
           </Grid>
         </Grid>
       ))}
