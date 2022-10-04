@@ -133,6 +133,7 @@ const theme = createTheme({
             backgroundColor: "#ffffff",
             boxShadow: "0 0 3px 0 rgb(0 0 0 / 10%)",
             borderRadius: 0,
+            zIndex: 300,
           },
         },
         {

@@ -277,6 +277,14 @@ export default function Pages() {
         },
       ],
     },
+    // {
+    //   path: "/notice",
+    //   element: (
+    //     <PrivateRoute membershipTypes={[individual]}>
+    //       <Notice />
+    //     </PrivateRoute>
+    //   )
+    // },
     {
       path: "/course",
       element: (

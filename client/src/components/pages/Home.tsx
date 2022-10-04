@@ -1,7 +1,14 @@
+import { MembershipType } from "@/enums/membershipTypes";
+import useAuth from "@/hooks/useAuth";
 import React from "react";
 import { Link } from "react-router-dom";
+import StudentHomepage from "./Student/StudentHomepage";
 
 function Home() {
+  const { membershipTypeId } = useAuth();
+
+  if (membershipTypeId === MembershipType.individual) return <StudentHomepage />
+  
   return <div>
       Home Page (Sidebar) <br /><br />
       ADMIN Links <br />
