@@ -1,3 +1,6 @@
+import { AttendingCourseStatus } from "@/enums/attendingCourseStatus";
+import dateDifference from "@/utils/dateDifference";
+import { AttendingCourseAttribute } from "@/validations/CourseFormValidation";
 import {
   Card,
   CardActionArea,
@@ -13,9 +16,29 @@ interface CourseCardProps {
   id: number;
   title: string;
   image: string;
+  attendingCourse?: AttendingCourseAttribute | null;
 }
 
-function CourseCard({ id, title, image }: CourseCardProps) {
+const { attending, completed } = AttendingCourseStatus;
+
+function CourseCard({ id, title, image, attendingCourse }: CourseCardProps) {
+  const { progress_rate, status, start_date, completion_date } =
+    attendingCourse || {
+      progress_rate: 0,
+      status: attending,
+      start_date: null,
+      completion_date: null,
+    };
+
+  const parsedDate = !start_date
+    ? "0"
+    : "" + Math.ceil(
+        dateDifference(
+          start_date,
+          status === completed ? completion_date! : new Date()
+        )
+      );
+
   return (
     <Grid item xs={6} md={4}>
       <Card elevation={0} sx={{ bgcolor: "transparent" }}>
@@ -34,7 +57,7 @@ function CourseCard({ id, title, image }: CourseCardProps) {
           />
           <CardContent sx={{ p: 0, pt: 1 }}>
             <Typography gutterBottom fontWeight="bold" component="h5">
-              {title}【前編】
+              {title}【??前編??】
             </Typography>
             <Stack
               direction={{ xs: "column", md: "row" }}
@@ -51,10 +74,10 @@ function CourseCard({ id, title, image }: CourseCardProps) {
                 whiteSpace="nowrap"
               >
                 進捗率：
-                <strong>100</strong>%
+                <strong>{progress_rate}</strong>%
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                受講開始から000日経過
+                受講開始から{parsedDate.padStart(3, "0")}日経過
               </Typography>
             </Stack>
           </CardContent>

@@ -35,8 +35,14 @@ function Courses() {
             {name}
           </Typography>
           <Grid container spacing={2}>
-            {courses.map(({ id, title, image }) => (
-              <CourseCard key={id} id={id} title={title} image={image} />
+            {courses.map(({ id, title, image, attending_course }) => (
+              <CourseCard
+                key={id}
+                id={id}
+                title={title}
+                image={image}
+                attendingCourse={attending_course}
+              />
             ))}
           </Grid>
         </Grid>

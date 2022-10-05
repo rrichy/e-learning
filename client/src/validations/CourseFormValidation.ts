@@ -126,8 +126,16 @@ export interface CourseFormAttribute
   chapters: ChapterAttributes[];
 }
 
+export type AttendingCourseAttribute = {
+  progress_rate: number;
+  status: number;
+  start_date: string | null;
+  completion_date: string | null;
+};
+
 export type CourseFormAttributeWithId = CourseFormAttribute & {
   id: number;
+  attending_course?: AttendingCourseAttribute | null;
 };
 
 export type CourseListAttribute = {
