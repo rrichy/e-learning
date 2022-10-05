@@ -9,10 +9,13 @@ import {
 } from "@mui/material";
 import Button from "@/components/atoms/Button";
 import { ArrowForward, CheckBoxOutlineBlank } from "@mui/icons-material";
+import { ChapterAttributes } from "@/validations/CourseFormValidation";
 
-interface CourseChapterListProps {}
+interface CourseChapterListProps {
+  chapters: (ChapterAttributes & { item_number: number })[];
+}
 
-function CourseChapterList({}: CourseChapterListProps) {
+function CourseChapterList({ chapters }: CourseChapterListProps) {
   return (
     <Grid item xs={12}>
       <Paper variant="softoutline" sx={{ width: 1, height: 1 }}>
@@ -25,7 +28,7 @@ function CourseChapterList({}: CourseChapterListProps) {
             dense
             subheader={
               <Typography component="h4" fontWeight="bold" fontSize={20}>
-                額種の流れ
+                学習の流れ
               </Typography>
             }
             sx={{
@@ -53,13 +56,18 @@ function CourseChapterList({}: CourseChapterListProps) {
                 borderTop: "1px solid gray",
               },
               "& > div:not(:nth-of-type(2n))": {
-                bgcolor: "#0000000f"
+                bgcolor: "#0000000f",
               },
             }}
           >
-            <Chapter />
-            <Chapter />
-            <Chapter />
+            {chapters.map(({ id, item_number, title }) => (
+              <Chapter
+                key={id}
+                id={id!}
+                chapterNumber={item_number}
+                title={title}
+              />
+            ))}
           </Box>
         </Stack>
       </Paper>
@@ -69,7 +77,15 @@ function CourseChapterList({}: CourseChapterListProps) {
 
 export default CourseChapterList;
 
-const Chapter = () => (
+const Chapter = ({
+  id,
+  chapterNumber,
+  title,
+}: {
+  id: number;
+  chapterNumber: number;
+  title: string;
+}) => (
   <Stack
     direction={{ xs: "column", md: "row" }}
     spacing={2}
@@ -84,10 +100,10 @@ const Chapter = () => (
       width={60}
       height={60}
     >
-      1章
+      {chapterNumber}章
     </Typography>
     <Typography fontWeight="bold" flex={1}>
-      コンピュータの基礎
+      {title}
     </Typography>
     <Stack
       direction="row"
@@ -103,6 +119,7 @@ const Chapter = () => (
         // startIcon={<CheckBox />}
         startIcon={<CheckBoxOutlineBlank />}
         endIcon={<ArrowForward />}
+        to={`chapter/${id}/lecture`}
       >
         解説動画
       </Button>
@@ -113,6 +130,7 @@ const Chapter = () => (
         // startIcon={<CheckBox />}
         startIcon={<CheckBoxOutlineBlank />}
         endIcon={<ArrowForward />}
+        to={`chapter/${id}/chapter-test`}
       >
         章末テスト
       </Button>

@@ -2,6 +2,7 @@ import { Avatar, Grid, Paper, Stack, Typography } from "@mui/material";
 import { AccessTime } from "@mui/icons-material";
 
 interface CourseDetailProps {
+  image: string | null;
   title: string;
   content: string;
   studyTime: number;
@@ -9,6 +10,7 @@ interface CourseDetailProps {
 }
 
 function CourseDetail({
+  image,
   title,
   content,
   studyTime,
@@ -20,7 +22,7 @@ function CourseDetail({
         <Paper variant="softoutline" sx={{ width: 1 }}>
           <Stack direction="row" spacing={2} p={2} alignItems="center">
             <Avatar
-              src="https://www.techhub.tokyo/th-demo/images/common/sample-user-icon.jpg"
+              src={image || undefined}
               alt="course-image"
               sx={{ width: 70, height: 70 }}
             />

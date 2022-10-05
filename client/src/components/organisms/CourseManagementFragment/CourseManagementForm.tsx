@@ -94,6 +94,7 @@ function CourseManagementForm({
                 value={0}
                 type="number"
                 inputProps={{ min: 0 }}
+                suffix="分"
               />
               <TextField
                 name="priority"

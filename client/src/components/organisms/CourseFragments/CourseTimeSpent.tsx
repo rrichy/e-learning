@@ -1,8 +1,32 @@
+import { AttendingCourseStatus } from "@/enums/attendingCourseStatus";
+import dateDifference from "@/utils/dateDifference";
+import { AttendingCourseAttribute } from "@/validations/CourseFormValidation";
 import { Grid, Paper, Stack, Typography } from "@mui/material";
 
-interface CourseTimeSpentProps {}
+interface CourseTimeSpentProps {
+  attendingCourse?: AttendingCourseAttribute | null;
+}
 
-function CourseTimeSpent({}: CourseTimeSpentProps) {
+const { attending, completed } = AttendingCourseStatus;
+
+function CourseTimeSpent({attendingCourse}: CourseTimeSpentProps) {
+  const { progress_rate, status, start_date, completion_date } =
+    attendingCourse || {
+      progress_rate: 0,
+      status: attending,
+      start_date: null,
+      completion_date: null,
+    };
+
+  const parsedDate = !start_date
+    ? "NaN"
+    : "" + Math.ceil(
+        dateDifference(
+          start_date,
+          status === completed ? completion_date! : new Date()
+        )
+      );
+  
   return (
     <Grid item xs={12} md={4}>
       <Paper variant="softoutline" sx={{ width: 1, height: 1 }}>
@@ -20,7 +44,7 @@ function CourseTimeSpent({}: CourseTimeSpentProps) {
               受講開始から
             </Typography>
             <Typography color="tertiary.main" fontSize={20} fontWeight="bold">
-              NaN日経過
+              {parsedDate.padStart(3, "0")}日経過
             </Typography>
           </Stack>
           <Typography>
