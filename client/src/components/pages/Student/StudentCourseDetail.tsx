@@ -1,7 +1,7 @@
 import { Grid, Paper, Typography } from "@mui/material";
-import CourseDetail from "@/components/organisms/CourseFragments/CourseDetail";
-import CourseTimeSpent from "@/components/organisms/CourseFragments/CourseTimeSpent";
-import CourseChapterList from "@/components/organisms/CourseFragments/CourseChapterList";
+import CourseDetail from "@/components/organisms/Student/CourseFragments/CourseDetail";
+import CourseTimeSpent from "@/components/organisms/Student/CourseFragments/CourseTimeSpent";
+import CourseChapterList from "@/components/organisms/Student/CourseFragments/CourseChapterList";
 import { useEffect, useRef, useState } from "react";
 import {
   CourseFormAttributeWithId,

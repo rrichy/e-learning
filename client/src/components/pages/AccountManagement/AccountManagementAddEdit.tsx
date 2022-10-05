@@ -1,6 +1,6 @@
 import { Paper, Stack, Typography } from "@mui/material";
 import { FormContainer, useForm } from "react-hook-form-mui";
-import AccountManagementForm from "@/components/organisms/AccountManagementFragment/AccountManagementForm";
+import AccountManagementForm from "@/components/organisms/AccountManagementFragments/AccountManagementForm";
 import DisabledComponentContextProvider from "@/providers/DisabledComponentContextProvider";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";

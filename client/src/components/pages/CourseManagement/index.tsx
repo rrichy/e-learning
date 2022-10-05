@@ -1,8 +1,8 @@
 import { Stack } from "@mui/system";
 import Button from "@/components/atoms/Button";
 import { FormContainer } from "react-hook-form-mui";
-import CourseManagementAccordion from "@/components/organisms/CourseManagementFragment/CourseManagementAccordion";
-import CourseManagementSearchAccordion from "@/components/organisms/CourseManagementFragment/CourseManagementSearchAccordion";
+import CourseManagementAccordion from "@/components/organisms/CourseManagementFragments/CourseManagementAccordion";
+import CourseManagementSearchAccordion from "@/components/organisms/CourseManagementFragments/CourseManagementSearchAccordion";
 import CourseList from "./CourseList";
 import useCourse from "@/hooks/pages/useCourse";
 

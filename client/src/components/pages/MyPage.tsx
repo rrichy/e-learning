@@ -1,6 +1,6 @@
 import { Paper, Stack, Typography } from "@mui/material";
 import { FormContainer, useForm } from "react-hook-form-mui";
-import AccountManagementForm from "@/components/organisms/AccountManagementFragment/AccountManagementForm";
+import AccountManagementForm from "@/components/organisms/AccountManagementFragments/AccountManagementForm";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { registrationFormSchema } from "@/validations/RegistrationFormValidation";
 import useConfirm from "@/hooks/useConfirm";

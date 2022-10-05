@@ -25,11 +25,11 @@ import {
 } from "@/validations/CourseFormValidation";
 import { getOptions } from "@/services/CommonService";
 import { OptionAttribute } from "@/interfaces/CommonInterface";
-import CourseManagementForm from "@/components/organisms/CourseManagementFragment/CourseManagementForm";
+import CourseManagementForm from "@/components/organisms/CourseManagementFragments/CourseManagementForm";
 import DisabledComponentContextProvider from "@/providers/DisabledComponentContextProvider";
-import TestForm from "@/components/organisms/CourseManagementFragment/TestForm";
+import TestForm from "@/components/organisms/CourseManagementFragments/TestForm";
 import useConfirm from "@/hooks/useConfirm";
-import ExplainerVideoForm from "@/components/organisms/CourseManagementFragment/ExplainerVideoForm";
+import ExplainerVideoForm from "@/components/organisms/CourseManagementFragments/ExplainerVideoForm";
 
 function CourseManagementAddEdit() {
   const mounted = useRef(true);

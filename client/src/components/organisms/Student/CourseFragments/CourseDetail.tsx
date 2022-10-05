@@ -1,5 +1,6 @@
-import { Avatar, Grid, Paper, Stack, Typography } from "@mui/material";
+import { Grid, Paper, Stack, Typography } from "@mui/material";
 import { AccessTime } from "@mui/icons-material";
+import CommonHeader from "../CommonHeader";
 
 interface CourseDetailProps {
   image: string | null;
@@ -18,20 +19,7 @@ function CourseDetail({
 }: CourseDetailProps) {
   return (
     <>
-      <Grid item xs={12}>
-        <Paper variant="softoutline" sx={{ width: 1 }}>
-          <Stack direction="row" spacing={2} p={2} alignItems="center">
-            <Avatar
-              src={image || undefined}
-              alt="course-image"
-              sx={{ width: 70, height: 70 }}
-            />
-            <Typography variant="h2" fontSize={24} fontWeight="bold">
-              {title}対策講座
-            </Typography>
-          </Stack>
-        </Paper>
-      </Grid>
+      <CommonHeader image={image} title={title} preview={preview} />
       <Grid item xs={12} md={8}>
         <Paper variant="softoutline" sx={{ width: 1, height: 1 }}>
           <Typography variant="sectiontitle1" component="h3">

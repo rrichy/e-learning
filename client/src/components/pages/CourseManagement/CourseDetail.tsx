@@ -17,7 +17,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import MaterialTable from "material-table";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Button from "@/components/atoms/Button";
-import AccountManagementSearch from "@/components/organisms/AccountManagementFragment/AccountManagementSearchAccordion";
+import AccountManagementSearch from "@/components/organisms/AccountManagementFragments/AccountManagementSearchAccordion";
 import { FormContainer, useForm } from "react-hook-form-mui";
 import {
   DatePicker,

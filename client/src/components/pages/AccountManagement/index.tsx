@@ -25,7 +25,7 @@ import {
   OrderType,
   PageDialogProps,
 } from "@/interfaces/CommonInterface";
-import AccountManagementSearch from "@/components/organisms/AccountManagementFragment/AccountManagementSearchAccordion";
+import AccountManagementSearch from "@/components/organisms/AccountManagementFragments/AccountManagementSearchAccordion";
 import Table from "@/components/atoms/Table";
 import useAlerter from "@/hooks/useAlerter";
 import useConfirm from "@/hooks/useConfirm";
