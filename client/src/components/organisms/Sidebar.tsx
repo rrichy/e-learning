@@ -86,6 +86,7 @@ function Sidebar({
                 key={id}
                 name={name}
                 courses={courses}
+                onClick={closeFn}
                 defaultOpen
               />
             ))}
@@ -335,10 +336,12 @@ const SidebarCategory = ({
   name,
   courses,
   defaultOpen,
+  onClick,
 }: {
   name: string;
   courses: { id: number; title: string }[];
   defaultOpen?: boolean;
+  onClick?: () => void;
 }) => {
   const [open, setOpen] = useState(defaultOpen);
 
@@ -365,6 +368,7 @@ const SidebarCategory = ({
             color="secondary"
             underline="hover"
             ml={4}
+            onClick={onClick}
             sx={{
               position: "relative",
               "&:before": {
