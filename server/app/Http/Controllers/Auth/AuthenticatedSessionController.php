@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\Category;
+use App\Models\Course;
 use App\Models\MembershipType;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -37,8 +39,7 @@ class AuthenticatedSessionController extends Controller
     public function show(Request $request)
     {
         switch (auth()->user()->membership_type_id) {
-            case 4:
-                // Count all users that are not admin
+            case MembershipType::ADMIN:
                 return response()->json([
                     'user' => auth()->user(),
                     'users_count' => User::where('membership_type_id', '<', MembershipType::ADMIN)
@@ -47,7 +48,7 @@ class AuthenticatedSessionController extends Controller
                         ->mapWithKeys(fn ($item) => [$item['membership_type'] => $item['count']]),
                     'message' => 'Login Successful!',
                 ]);
-            case 3:
+            case MembershipType::CORPORATE:
                 // Count individuals under the same affiliation as the Corporate (UNFINISHED)
                 return response()->json([
                     'user' => auth()->user(),
@@ -59,11 +60,15 @@ class AuthenticatedSessionController extends Controller
                     ],
                     'message' => 'Login Successful!',
                 ]);
-            case 1:
-                // Get Categories and its courses (UNFINISHED)
+            case MembershipType::INDIVIDUAL:
                 return response()->json([
                     'user' => auth()->user(),
                     'message' => 'Login Successful!',
+                    'categories' => Category::query()
+                        ->whereHas('courses', fn ($q) => $q->where('status', Course::STATUS['public']))
+                        ->with(
+                            ['courses' => fn ($q) => $q->where('status', Course::STATUS['public'])->select('id', 'title', 'category_id')]
+                        )->get(['id', 'name'])
                 ]);
             default:
                 return response()->json([

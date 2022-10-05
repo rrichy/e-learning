@@ -1,9 +1,10 @@
 import { MembershipType } from "@/enums/membershipTypes";
 import useAuth from "@/hooks/useAuth";
 import { HEADER_HEIGHT } from "@/settings/appconfig";
-import { AssignmentOutlined, Close } from "@mui/icons-material";
+import { AssignmentOutlined, Close, ExpandMore } from "@mui/icons-material";
 import {
   Box,
+  Collapse,
   Divider,
   List,
   ListItem,
@@ -11,8 +12,8 @@ import {
   ListItemIcon,
   ListItemText,
 } from "@mui/material";
-import React, { useMemo } from "react";
-import { Link, To } from "react-router-dom";
+import React, { useMemo, useState } from "react";
+import { Link as RouterLink, To } from "react-router-dom";
 import Button from "../atoms/Button";
 import {
   AnnouncementIcon,
@@ -24,6 +25,7 @@ import {
   TemplateIcon,
   UserIcon,
 } from "../atoms/Icons";
+import Link from "../atoms/Link";
 
 const { admin, corporate, individual, trial, guest } = MembershipType;
 
@@ -34,7 +36,7 @@ function Sidebar({
   closeFn?: () => void;
   useDarkColorScheme?: boolean;
 }) {
-  const { userCount, authData } = useAuth();
+  const { userCount, categories, authData } = useAuth();
 
   const CountContent = () => {
     switch (authData?.membership_type_id) {
@@ -72,12 +74,22 @@ function Sidebar({
         );
       case individual:
         return (
-          <ListItem>
-            <ListItemIcon>
-              <CourseManagementIcon sx={{ color: "common.black" }} />
-            </ListItemIcon>
-            <ListItemText primary="コース一覧" />
-          </ListItem>
+          <>
+            <ListItem>
+              <ListItemIcon>
+                <CourseManagementIcon sx={{ color: "common.black" }} />
+              </ListItemIcon>
+              <ListItemText primary="コース一覧" />
+            </ListItem>
+            {categories?.map(({ id, name, courses }) => (
+              <SidebarCategory
+                key={id}
+                name={name}
+                courses={courses}
+                defaultOpen
+              />
+            ))}
+          </>
         );
       default:
         return null;
@@ -310,11 +322,67 @@ const individualSidebarContent: SidebarItemProps[] = [
 const SidebarItem = ({ icon, label, to = "/home" }: SidebarItemProps) => {
   return (
     <>
-      <ListItemButton component={Link} to={to}>
+      <ListItemButton component={RouterLink} to={to}>
         <ListItemIcon>{icon}</ListItemIcon>
         <ListItemText primary={label} />
       </ListItemButton>
       <Divider />
+    </>
+  );
+};
+
+const SidebarCategory = ({
+  name,
+  courses,
+  defaultOpen,
+}: {
+  name: string;
+  courses: { id: number; title: string }[];
+  defaultOpen?: boolean;
+}) => {
+  const [open, setOpen] = useState(defaultOpen);
+
+  return (
+    <>
+      <ListItemButton onClick={() => setOpen(!open)}>
+        <ListItemIcon>
+          <ExpandMore
+            color="primary"
+            sx={{
+              transition: "transform 200ms",
+              transform: open ? "rotate(180deg)" : undefined,
+            }}
+          />
+        </ListItemIcon>
+        <ListItemText primary={name} />
+      </ListItemButton>
+      <Collapse in={open} timeout="auto" unmountOnExit>
+        {courses.map(({ id, title }) => (
+          <Link
+            key={"course-" + id}
+            to={"/course/" + id}
+            variant="caption"
+            color="secondary"
+            underline="hover"
+            ml={4}
+            sx={{
+              position: "relative",
+              "&:before": {
+                content: "''",
+                top: 6,
+                left: -8,
+                position: "absolute",
+                bgcolor: "#999999",
+                height: 4,
+                width: 4,
+                borderRadius: 8,
+              },
+            }}
+          >
+            {title}
+          </Link>
+        ))}
+      </Collapse>
     </>
   );
 };

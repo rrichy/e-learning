@@ -42,7 +42,15 @@ export interface AuthAttributes {
     individual?: number;
     corporate?: number;
     trial?: number;
-  }
+  },
+  categories: {
+    id: number;
+    name: string;
+    courses: {
+      id: number;
+      title: string;
+    }[]
+  }[]
 }
 
 export const userInit: UserAttributes = {

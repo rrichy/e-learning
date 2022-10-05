@@ -17,6 +17,7 @@ function AuthContextProvider({ children }: { children: React.ReactNode }) {
     isLoggedIn: Boolean(getBearerToken()),
     data: null,
     count: {},
+    categories: [],
   });
 
   useEffect(() => {
@@ -29,6 +30,7 @@ function AuthContextProvider({ children }: { children: React.ReactNode }) {
             isLoggedIn: true,
             data: res.data.user,
             count: res.data.users_count,
+            categories: res.data.categories ?? [],
           });
         } catch (e: any) {
           errorSnackbar(e.message);
@@ -36,6 +38,7 @@ function AuthContextProvider({ children }: { children: React.ReactNode }) {
             isLoggedIn: false,
             data: null,
             count: {},
+            categories: [],
           });
           localStorage.clear();
         }
@@ -45,6 +48,7 @@ function AuthContextProvider({ children }: { children: React.ReactNode }) {
         isLoggedIn: true,
         data: null,
         count: {},
+        categories: [],
       });
     }
   }, [auth.isLoggedIn, errorSnackbar]);
