@@ -27,10 +27,12 @@ declare module "@mui/material/AppBar" {
 
 declare module "@mui/material/styles" {
   interface Palette {
+    tertiary: Palette["primary"];
     dull: Palette["primary"];
   }
 
   interface PaletteOptions {
+    tertiary?: PaletteOptions["primary"];
     dull?: PaletteOptions["primary"];
   }
 
@@ -43,6 +45,7 @@ declare module "@mui/material/styles" {
 declare module "@mui/material/Button" {
   interface ButtonPropsColorOverrides {
     dull: true;
+    tertiary: true;
   }
 }
 
@@ -98,6 +101,9 @@ const theme = createTheme({
     },
     secondary: {
       main: "#ff4f00",
+    },
+    tertiary: {
+      main: "#f59700",
     },
     dull: {
       main: "#222222",

@@ -6,6 +6,7 @@ use App\Http\Requests\CourseRequest;
 use App\Http\Resources\CourseIndexResource;
 use App\Http\Resources\CourseListResource;
 use App\Http\Resources\CourseShowResource;
+use App\Http\Resources\Student\StudentCourseShowResource;
 use App\Models\Category;
 use App\Models\Chapter;
 use App\Models\Course;
@@ -60,6 +61,20 @@ class CourseService
 
     public function details(Course $course)
     {
+        if (auth()->user()->isIndividual()) {
+            // return CourseListResource::collection(
+            //     Category::whereHas('courses', fn ($q) => $q->where('status', Course::STATUS['public']))
+            //     ->with(
+            //         ['courses' => fn ($q) => $q->where('status', Course::STATUS['public'])]
+            //     )->get()
+            // );
+            return new StudentCourseShowResource(
+                $course->load([
+                    'chapters' => fn ($chapter) => $chapter->orderBy('item_number', 'asc')->orderBy('item_number', 'asc')
+                ])
+            );
+        }
+        
         abort_if(
             auth()->user()->isCorporate() && auth()->user()->affiliation_id !== $course->category->affiliation_id,
             403,

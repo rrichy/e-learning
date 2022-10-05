@@ -41,7 +41,7 @@ import Sidebar from "../organisms/Sidebar";
 import { Container, Stack, useMediaQuery, useTheme } from "@mui/material";
 import Footer from "../molecules/Footer";
 import pageGlobalStyle from "./indexStyle";
-import Course from "./Student";
+import StudentCourseDetail from "./Student/StudentCourseDetail";
 import CourseHistory from "./Student/CourseHistory";
 
 const { trial, individual, corporate, admin, guest } = MembershipType;
@@ -277,14 +277,6 @@ export default function Pages() {
         },
       ],
     },
-    // {
-    //   path: "/notice",
-    //   element: (
-    //     <PrivateRoute membershipTypes={[individual]}>
-    //       <Notice />
-    //     </PrivateRoute>
-    //   )
-    // },
     {
       path: "/course/:courseId",
       element: (
@@ -295,12 +287,28 @@ export default function Pages() {
       children: [
         {
           index: true,
-          element: <Course />,
+          element: <StudentCourseDetail />,
         },
         {
           path: "course-history",
           element: <CourseHistory />,
         },
+        {
+          path: "chapter/:chapterId",
+          element: <Outlet />,
+          children: [
+            {
+              path: "lecture",
+              // not yet implemented
+              element: <Home />
+            },
+            {
+              path: "chapter-test",
+              // not yet implemented
+              element: <Home />
+            }
+          ]
+        }
       ],
     },
     {

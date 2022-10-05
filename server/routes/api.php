@@ -35,6 +35,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/notice/{notice}', [NoticeController::class, 'show']);
 
         Route::get('/course', [CourseController::class, 'index']);
+        Route::get('/course/{course}', [CourseController::class, 'show']);
         
         Route::group(['middleware' => ['membership:admin,corporate']], function () {
             Route::get('/affiliation', [AffiliationController::class, 'index']);
@@ -55,7 +56,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::put('/course/mass', [CourseController::class, 'massUpdate']);
             Route::put('/course/toggle', [CourseController::class, 'toggleStatus']);
             Route::delete('/course/{ids}', [CourseController::class, 'massDelete']);
-            Route::resource('/course', CourseController::class)->only(['store', 'show', 'update']);
+            Route::resource('/course', CourseController::class)->only(['store', 'update']);
     
             Route::delete('/notice/{ids}', [NoticeController::class, 'massDelete']);
             Route::resource('/notice', NoticeController::class)->only(['store', 'update']);
