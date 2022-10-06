@@ -10,6 +10,7 @@ use App\Http\Controllers\AdminCorporate\NoticeController;
 use App\Http\Controllers\AdminCorporate\OptionsController;
 use App\Http\Controllers\AdminCorporate\SignatureController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Student\ChapterController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -61,13 +62,17 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::delete('/notice/{ids}', [NoticeController::class, 'massDelete']);
             Route::resource('/notice', NoticeController::class)->only(['store', 'update']);
         });
+    });
+
+    Route::group(['middleware' => ['membership:individual']], function () {
+        Route::resource('/chapter', ChapterController::class);
+    });
     
-        Route::group(['middleware' => ['membership:admin']], function () {
-            Route::resource('/affiliation', AffiliationController::class)->only(['store', 'update', 'destroy']);
-    
-            Route::delete('/signature/{ids}', [SignatureController::class, 'massDelete']);
-            Route::resource('/signature', SignatureController::class)->only(['index', 'store', 'update']);
-        });
+    Route::group(['middleware' => ['membership:admin']], function () {
+        Route::resource('/affiliation', AffiliationController::class)->only(['store', 'update', 'destroy']);
+
+        Route::delete('/signature/{ids}', [SignatureController::class, 'massDelete']);
+        Route::resource('/signature', SignatureController::class)->only(['index', 'store', 'update']);
     });
 });
 

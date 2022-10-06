@@ -89,6 +89,10 @@ export interface QuestionAttributes {
 }
 
 export interface TestAttributes {
+  chapter_title?: string;
+  image?: string;
+  questions_count?: number;
+  questions_sum_score?: number;
   passing_score: number;
   title: string;
   overview: string;

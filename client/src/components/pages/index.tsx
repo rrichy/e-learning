@@ -43,6 +43,7 @@ import Footer from "../molecules/Footer";
 import pageGlobalStyle from "./indexStyle";
 import StudentCourseDetail from "./Student/StudentCourseDetail";
 import CourseHistory from "./Student/CourseHistory";
+import StudentTest from "./Student/StudentTest";
 
 const { trial, individual, corporate, admin, guest } = MembershipType;
 const registered = [trial, individual, corporate, admin];
@@ -303,9 +304,9 @@ export default function Pages() {
               element: <Home />
             },
             {
-              path: "chapter-test",
+              path: ":testType",
               // not yet implemented
-              element: <Home />
+              element: <StudentTest />
             }
           ]
         }
