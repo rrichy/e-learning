@@ -1,21 +1,33 @@
 import Button from "@/components/atoms/Button";
 import CommonHeader from "@/components/organisms/Student/CommonHeader";
 import useAlerter from "@/hooks/useAlerter";
-import { showTest } from "@/services/TestService";
+import { proceedTest, showTest } from "@/services/TestService";
 import { TestAttributes, testInit } from "@/validations/CourseFormValidation";
 import { ArrowForward } from "@mui/icons-material";
 import Close from "@mui/icons-material/Close";
 import { Box, Grid, List, ListItem, Paper, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 function StudentTest() {
   const mounted = useRef(true);
+  const navigate = useNavigate();
   const { errorSnackbar } = useAlerter();
   const { courseId, chapterId, testType } = useParams();
   const [test, setTest] = useState<TestAttributes>(testInit);
   console.log({ courseId, chapterId, testType });
+
+  const handleProceed = async () => {
+    try {
+      const res = await proceedTest(
+        +chapterId!,
+        testType === "chapter-test" ? 1 : 2
+      );
+    } catch (e: any) {
+      errorSnackbar(e.message);
+    }
+  };
 
   useEffect(() => {
     mounted.current = true;
@@ -111,6 +123,7 @@ function StudentTest() {
             variant="contained"
             color="tertiary"
             endIcon={<ArrowForward />}
+            onClick={handleProceed}
           >
             テストを開始する
           </Button>

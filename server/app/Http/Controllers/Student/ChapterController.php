@@ -46,9 +46,14 @@ class ChapterController extends Controller
      * @param  \App\Models\Chapter  $chapter
      * @return \Illuminate\Http\Response
      */
-    public function show(Chapter $chapter, ChapterService $service)
+    public function showTest(Chapter $chapter, ChapterService $service)
     {
-        return $service->details($chapter);
+        return $service->testDetails($chapter);
+    }
+
+    public function proceedTest(Chapter $chapter, ChapterService $service)
+    {
+        return $service->proceedTest($chapter);
     }
 
     /**

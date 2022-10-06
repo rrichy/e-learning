@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Student;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class QuestionResource extends JsonResource
+class StudentQuestionResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -14,7 +14,7 @@ class QuestionResource extends JsonResource
      */
     public function toArray($request)
     {
-        return parent::toArray($request);
+        // return parent::toArray($request);
         return [
             'test_id' => $this->test_id,
             'item_number' => $this->item_number,
@@ -22,8 +22,9 @@ class QuestionResource extends JsonResource
             'statement' => $this->statement,
             'format' => $this->format,
             'score' => $this->score,
-            'explaination' => $this->explaination,
-            'options' => QuestionOptionResource::collection($this->whenLoaded('options')),
+            'user_answer' => $this->userAnswers()->where('user_id', auth()->id())->first()?->answer,
+            // 'explaination' => $this->explaination,
+            'options' => StudentQuestionOptionResource::collection($this->whenLoaded('options')),
         ];
     }
 }

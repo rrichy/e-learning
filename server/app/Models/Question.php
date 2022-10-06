@@ -32,10 +32,10 @@ class Question extends Model
         return $this->belongsTo(Test::class);
     }
 
-    // public function results(): HasMany
-    // {
-    //     return $this->hasMany(Result::class);
-    // }
+    public function userAnswers(): HasMany
+    {
+        return $this->hasMany(UserAnswer::class);
+    }
 
     public function options(): HasMany
     {

@@ -16,7 +16,15 @@ const url_prefix = "/api/chapter";
 // };
 
 export const showTest = (id: number, type: 1 | 2) => {
-  return get(`${url_prefix}/${id}?test_type=${type}`);
+  return get(`${url_prefix}/${id}/test?test_type=${type}`);
+};
+
+export const proceedTest = (id: number, type: 1 | 2, item_number?: number) => {
+  let url = `${url_prefix}/${id}/proceed-test?test_type=${type}`;
+
+  if (item_number) url += `&item_number=${item_number}`;
+
+  return get(url);
 };
 
 // export const storeTest = (data: TestAttributes) => {

@@ -65,7 +65,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     Route::group(['middleware' => ['membership:individual']], function () {
-        Route::resource('/chapter', ChapterController::class);
+        Route::get('/chapter/{chapter}/test', [ChapterController::class, 'showTest']);
+        Route::get('/chapter/{chapter}/proceed-test', [ChapterController::class, 'proceedTest']);
+        // Route::resource('/chapter', ChapterController::class);
     });
     
     Route::group(['middleware' => ['membership:admin']], function () {

@@ -6,6 +6,8 @@ use App\Http\Requests\NoticeStoreUpdateRequest;
 use App\Http\Resources\NoticeHomepageResource;
 use App\Http\Resources\NoticeIndexResource;
 use App\Http\Resources\NoticeShowResource;
+use App\Http\Resources\QuestionResource;
+use App\Http\Resources\Student\StudentQuestionResource;
 use App\Http\Resources\TestDetailResource;
 use App\Models\Chapter;
 use App\Models\Course;
@@ -41,7 +43,7 @@ class ChapterService
     // }
 
 
-    public function details(Chapter $chapter)
+    public function testDetails(Chapter $chapter)
     {
         $test_type = intval(request('test_type')) === Test::CHAPTER ? 'chapterTest' : 'comprehensionTest';
 
@@ -52,6 +54,27 @@ class ChapterService
                 $test_type => fn ($q) => $q->withCount('questions')->withSum('questions', 'score')
             ])
         );
+    }
+
+    public function proceedTest(Chapter $chapter)
+    {
+        $test_type = intval(request('test_type')) === Test::CHAPTER ? 'chapterTest' : 'comprehensionTest';
+
+        $this->check_if_chapter_is_accessible($chapter);
+
+        $test = $chapter[$test_type];
+        
+        $item_number = intval(request('item_number'))
+            ?: $test->questions()
+                ->whereHas('userAnswers', fn ($u) => $u->where('user_id', auth()->id())->whereNull('answer'))
+                ->first()
+            ?: 1;
+
+        $this->check_if_item_number_exists($test, $item_number);
+
+        return StudentQuestionResource::collection(
+            $test->questions->load('options')
+        )->additional(['current_item' => $item_number]);
     }
 
 
@@ -124,6 +147,15 @@ class ChapterService
             $chapter->course->status !== Course::PUBLIC,
             403,
             'This chapter is not accessible'
+        );
+    }
+
+    private function check_if_item_number_exists(Test $test, int $item_number)
+    {
+        abort_if(
+            $test->questions()->where('item_number', $item_number) === null,
+            404,
+            'No such item_number found'
         );
     }
 }
