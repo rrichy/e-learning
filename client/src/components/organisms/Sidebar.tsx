@@ -371,6 +371,7 @@ const SidebarCategory = ({
             onClick={onClick}
             sx={{
               position: "relative",
+              display:"block",
               "&:before": {
                 content: "''",
                 top: 6,

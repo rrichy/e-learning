@@ -19,7 +19,7 @@ class QuestionSeeder extends Seeder
 
         $questions = [];
         $tests->each(function ($test) use (&$questions) {
-            $minTestTotal = floor($test->passing_score * .25);
+            $minTestTotal = floor($test->passing_score * 1.25);
             $currentTotal = 0;
             $item_number = 0;
             do {

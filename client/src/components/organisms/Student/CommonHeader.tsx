@@ -17,7 +17,7 @@ function CommonHeader({ image, title, preview }: CommonHeaderProps) {
             sx={{ width: 70, height: 70 }}
           />
           <Typography variant="h2" fontSize={24} fontWeight="bold">
-            {title}対策講座
+            {title}
           </Typography>
         </Stack>
       </Paper>
