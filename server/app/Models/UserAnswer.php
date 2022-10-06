@@ -14,6 +14,7 @@ class UserAnswer extends Model
         'question_id',
         'user_id',
         'answer',
+        'order',
         'date_submitted',
     ];
 

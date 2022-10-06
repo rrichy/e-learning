@@ -24,6 +24,7 @@ return new class extends Migration
                 ->cascadeOnDelete()
                 ->cascadeOnUpdate();
             $table->string('answer')->nullable();
+            $table->integer('order')->default(1);
             $table->timestamp('date_submitted')->nullable();
             $table->timestamps();
         });

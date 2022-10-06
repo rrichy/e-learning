@@ -16,15 +16,16 @@ class StudentQuestionResource extends JsonResource
     {
         // return parent::toArray($request);
         return [
-            'test_id' => $this->test_id,
+            'id' => $this->id,
             'item_number' => $this->item_number,
             'title' => $this->title,
             'statement' => $this->statement,
             'format' => $this->format,
             'score' => $this->score,
-            'user_answer' => $this->userAnswers()->where('user_id', auth()->id())->first()?->answer,
+            'user_answer' => $this->userAnswers()->where('user_id', auth()->id())->orderBy('order', 'asc')->get(['answer', 'order']),
             // 'explaination' => $this->explaination,
             'options' => StudentQuestionOptionResource::collection($this->whenLoaded('options')),
+            'correct_answers_count' => $this->correct_answers_count,
         ];
     }
 }

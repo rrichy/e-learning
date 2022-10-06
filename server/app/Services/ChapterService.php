@@ -31,7 +31,7 @@ class ChapterService
     //                 ->paginate($per_page)
     //         );
     //     }
-        
+
     //     return NoticeIndexResource::collection(
     //         Notice::with('user')
     //             ->when(
@@ -48,7 +48,7 @@ class ChapterService
         $test_type = intval(request('test_type')) === Test::CHAPTER ? 'chapterTest' : 'comprehensionTest';
 
         $this->check_if_chapter_is_accessible($chapter);
-        
+
         return new TestDetailResource(
             $chapter->load([
                 $test_type => fn ($q) => $q->withCount('questions')->withSum('questions', 'score')
@@ -63,18 +63,31 @@ class ChapterService
         $this->check_if_chapter_is_accessible($chapter);
 
         $test = $chapter[$test_type];
-        
-        $item_number = intval(request('item_number'))
+
+        $req_item_number = request('item_number');
+
+        $item_number = intval($req_item_number)
             ?: $test->questions()
-                ->whereHas('userAnswers', fn ($u) => $u->where('user_id', auth()->id())->whereNull('answer'))
-                ->first()
+            ->whereHas('userAnswers', fn ($u) => $u->where('user_id', auth()->id())->whereNull('answer'))
+            ->first()
             ?: 1;
 
         $this->check_if_item_number_exists($test, $item_number);
 
         return StudentQuestionResource::collection(
-            $test->questions->load('options')
-        )->additional(['current_item' => $item_number]);
+            $test->questions()
+                ->with('options')
+                ->withCount(['options as correct_answers_count' => fn ($q) => $q->whereNotNull('correction_order')])
+                ->get()
+        )->additional([
+            'current_item' => $item_number,
+            'test_details' => $req_item_number
+                ?   [
+                    'chapter_title' => $chapter->item_number . "章 " . ($test_type === 'chapterTest' ? "章末テスト" : "理解度テスト"),
+                    'image' => $chapter->course->image,
+                ]
+                : null
+        ]);
     }
 
 
@@ -90,7 +103,7 @@ class ChapterService
     //             'priority' => Notice::max('priority') + 1,
     //         ]
     //     ));
-        
+
     //     // event(new NoticePost($notice));
 
     //     return $notice;
@@ -113,7 +126,7 @@ class ChapterService
     //             'shown_in_mail' => in_array(2, $valid['posting_method']),
     //         ]
     //     ));
-        
+
     //     // event(new NoticePost($notice));
 
     //     return $notice;

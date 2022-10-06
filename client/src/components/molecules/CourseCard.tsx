@@ -57,14 +57,18 @@ function CourseCard({ id, title, image, attendingCourse }: CourseCardProps) {
           />
           <CardContent sx={{ p: 0, pt: 1 }}>
             <Typography gutterBottom fontWeight="bold" component="h5">
-              {title}【??前編??】
+              {title}
             </Typography>
             <Stack
               direction={{ xs: "column", md: "row" }}
               spacing={{ xs: 1, md: 2 }}
               alignItems={{ xs: "flex-start", md: "center" }}
+              justifyContent="space-between"
               sx={{ strong: { fontSize: 18 } }}
             >
+              <Typography variant="body2" color="text.secondary">
+                受講開始から{parsedDate.padStart(3, "0")}日経過
+              </Typography>
               <Typography
                 variant="body2"
                 color="common.white"
@@ -75,9 +79,6 @@ function CourseCard({ id, title, image, attendingCourse }: CourseCardProps) {
               >
                 進捗率：
                 <strong>{progress_rate}</strong>%
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                受講開始から{parsedDate.padStart(3, "0")}日経過
               </Typography>
             </Stack>
           </CardContent>
