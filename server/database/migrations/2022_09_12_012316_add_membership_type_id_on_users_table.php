@@ -17,7 +17,7 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->foreignId('membership_type_id')
                 ->nullable()
-                ->default(MembershipType::INDIVIDUAL)
+                ->default(MembershipType::TRIAL)
                 ->constrained()
                 ->nullOnDelete()
                 ->cascadeOnUpdate();
