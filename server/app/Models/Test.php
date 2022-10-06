@@ -19,9 +19,12 @@ class Test extends Model
         'passing_score',
     ];
 
+    public const CHAPTER = 1;
+    public const COMPREHENSION = 1;
+
     public const TEST_TYPES = [
-        'chapter' => 1,
-        'comprehension' => 2,
+        'chapter' => self::CHAPTER,
+        'comprehension' => self::COMPREHENSION,
     ];
 
     public const PASSING_SCORES = [25, 50, 75, 100];

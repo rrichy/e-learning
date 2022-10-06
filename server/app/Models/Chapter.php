@@ -35,11 +35,11 @@ class Chapter extends Model
 
     public function chapterTest(): HasOne
     {
-        return $this->hasOne(Test::class)->where('test_type', Test::TEST_TYPES['chapter']);
+        return $this->hasOne(Test::class)->where('test_type', Test::CHAPTER);
     }
 
     public function comprehensionTest(): HasOne
     {
-        return $this->hasOne(Test::class)->where('test_type', Test::TEST_TYPES['comprehension']);
+        return $this->hasOne(Test::class)->where('test_type', Test::COMPREHENSION);
     }
 }
