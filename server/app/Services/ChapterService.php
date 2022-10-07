@@ -67,6 +67,9 @@ class ChapterService
 
         $this->check_if_chapter_is_accessible($chapter);
 
+        // check if user is allowed to take/submit test
+        //here
+
         $test = $chapter[$test_type];
 
         $req_item_number = request('item_number');
@@ -103,6 +106,10 @@ class ChapterService
         // if test_type is comprehensionTest, check if student is eligible in taking the test
         // here
 
+        // check if user is allowed to take/submit test
+        //here
+        
+        
         $valid = $request->validated();
 
         $test = $chapter[$test_type];
@@ -132,10 +139,11 @@ class ChapterService
         return response()->json([
             'message' => 'Successfully submitted test answers!',
             'result' => $result,
+            'fresh' => $this->calculateResult($test, $user_answers, true)
         ]);
     }
 
-    public function calculateResult(Test $test, array $user_answers_id)
+    public function calculateResult(Test $test, array $user_answers_id, bool $appendQuestions = false)
     {
         $test->load([
             'questions.userAnswers' => function ($ua) use ($user_answers_id) {
@@ -146,8 +154,9 @@ class ChapterService
 
         $total = 0;
         $score = 0;
+        $questions = [];
 
-        $test['questions']->each(function ($question) use (&$total, &$score) {
+        $test['questions']->each(function ($question) use (&$total, &$score, &$questions) {
             $total += $question['score'];
 
             $user_correct_count = 0;
@@ -160,11 +169,19 @@ class ChapterService
                 });
 
             if ($correct_answers->count() === $user_correct_count) $score += $question['score'];
+
+            $questions[] = $question->toArray() + [
+                'answered_correctly' => $correct_answers->count() === $user_correct_count
+            ];
         });
 
         $passed = $score >= $test['passing_score'];
         
-        return compact('total', 'score', 'passed');
+        $result = compact('total', 'score', 'passed');
+
+        if($appendQuestions) $result[] = $questions;
+        
+        return $result;
     }
     // public function store(NoticeStoreUpdateRequest $request)
     // {
