@@ -29,7 +29,7 @@ import AccountManagementAddEdit from "./AccountManagement/AccountManagementAddEd
 import AccountManagementDetails from "./AccountManagement/AccountManagementDetails";
 import CategoryManagement from "./CategoryManagement";
 import AffiliationsDepartments from "./AffiliationsDepartments";
-import Signature from "./Signature"
+import Signature from "./Signature";
 import NoticeManagement from "./NoticeManagement";
 import NoticeManagementAddEdit from "./NoticeManagement/NoticeManagementAddEdit";
 import OrganizeMail from "./OrganizeMail";
@@ -43,7 +43,9 @@ import Footer from "../molecules/Footer";
 import pageGlobalStyle from "./indexStyle";
 import StudentCourseDetail from "./Student/StudentCourseDetail";
 import CourseHistory from "./Student/CourseHistory";
-import StudentTest from "./Student/StudentTest";
+import StudentChapterDisplay from "./Student/StudentChapterDisplay";
+import TestDetailsDisplay from "../organisms/Student/TestDetailsDisplay";
+import TestAnswerScreen from "../organisms/Student/TestAnswerScreen";
 
 const { trial, individual, corporate, admin, guest } = MembershipType;
 const registered = [trial, individual, corporate, admin];
@@ -296,26 +298,29 @@ export default function Pages() {
         },
         {
           path: "chapter/:chapterId",
-          element: <Outlet />,
+          element: <StudentChapterDisplay />,
           children: [
             {
-              path: "lecture",
               // not yet implemented
-              element: <Home />
+              path: "lecture",
+              element: <Home />,
             },
             {
-              path: ":testType",
-              // not yet implemented
-              element: <StudentTest />
-            }
-          ]
-        }
+              path: ":testType", // chapter-test | comprehension-test
+              element: <TestDetailsDisplay />,
+            },
+            {
+              path: ":testType/:itemNumber",
+              element: <TestAnswerScreen />,
+            },
+          ],
+        },
       ],
     },
     {
       path: "/*",
-      element: <Navigate to="/home" />
-    }
+      element: <Navigate to="/home" />,
+    },
   ]);
 
   return routes;

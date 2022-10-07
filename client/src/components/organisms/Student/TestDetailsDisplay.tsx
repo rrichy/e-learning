@@ -1,65 +1,27 @@
 import Button from "@/components/atoms/Button";
-import CommonHeader from "@/components/organisms/Student/CommonHeader";
-import useAlerter from "@/hooks/useAlerter";
-import { proceedTest, showTest } from "@/services/TestService";
+import useChapter from "@/hooks/pages/Students/useChapter";
 import { TestAttributes, testInit } from "@/validations/CourseFormValidation";
 import { ArrowForward } from "@mui/icons-material";
 import Close from "@mui/icons-material/Close";
-import { Box, Grid, List, ListItem, Paper, Typography } from "@mui/material";
-import { Stack } from "@mui/system";
-import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Grid, List, ListItem, Stack, Paper, Typography } from "@mui/material";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 
-function StudentTest() {
-  const mounted = useRef(true);
-  const navigate = useNavigate();
-  const { errorSnackbar } = useAlerter();
-  const { courseId, chapterId, testType } = useParams();
-  const [test, setTest] = useState<TestAttributes>(testInit);
-  console.log({ courseId, chapterId, testType });
+// ENSURE NO DATA FETCHING IN THIS COMPONENT
 
-  const handleProceed = async () => {
-    try {
-      const res = await proceedTest(
-        +chapterId!,
-        testType === "chapter-test" ? 1 : 2
-      );
-    } catch (e: any) {
-      errorSnackbar(e.message);
-    }
-  };
+function TestDetailsDisplay({ testState }: { testState?: TestAttributes }) {
+  const [test, setTest] = useState(testInit);
+  const chapter = useChapter();
+  const { courseId } = useParams();
+
+  const isPreview = Boolean(testState);
 
   useEffect(() => {
-    mounted.current = true;
-
-    if (chapterId) {
-      (async () => {
-        try {
-          const res = await showTest(
-            +chapterId!,
-            testType === "chapter-test" ? 1 : 2
-          );
-          if (mounted.current) {
-            console.log("yes mounted");
-            setTest(res.data.data);
-          } else console.log("not mounted");
-        } catch (e: any) {
-          errorSnackbar(e.message);
-        }
-      })();
-    }
-
-    return () => {
-      mounted.current = false;
-    };
-  }, [chapterId, testType]);
+    if (!isPreview && chapter?.test) setTest(chapter.test);
+  }, [isPreview, chapter?.test]);
 
   return (
-    <Grid container spacing={2}>
-      <CommonHeader
-        image={test.image || null}
-        title={test.chapter_title || ""}
-      />
+    <>
       <Grid item xs={12} md={8}>
         <Paper variant="softoutline" sx={{ width: 1, height: 1 }}>
           <Typography variant="sectiontitle1" component="h3">
@@ -123,7 +85,7 @@ function StudentTest() {
             variant="contained"
             color="tertiary"
             endIcon={<ArrowForward />}
-            onClick={handleProceed}
+            onClick={() => chapter.handleNext(true)}
           >
             テストを開始する
           </Button>
@@ -141,8 +103,8 @@ function StudentTest() {
           </Button>
         </Stack>
       </Grid>
-    </Grid>
+    </>
   );
 }
 
-export default StudentTest;
+export default TestDetailsDisplay;
