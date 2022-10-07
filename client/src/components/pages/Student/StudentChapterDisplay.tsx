@@ -1,6 +1,7 @@
 import CommonHeader from "@/components/organisms/Student/CommonHeader";
 import useAlerter from "@/hooks/useAlerter";
-import { proceedTest, showTest } from "@/services/TestService";
+import useConfirm from "@/hooks/useConfirm";
+import { proceedTest, showTest, submitAnswers } from "@/services/TestService";
 import createMap from "@/utils/createMap";
 import {
   QuestionAttributes as FQuestionAttributes,
@@ -29,7 +30,8 @@ type QuestionAttributes = FQuestionAttributes & {
 function StudentChapterDisplay({}: StudentChapterDisplayProps) {
   const mounted = useRef(true);
   const navigate = useNavigate();
-  const { errorSnackbar } = useAlerter();
+  const { isConfirmed } = useConfirm();
+  const { errorSnackbar, successSnackbar } = useAlerter();
   const { courseId, chapterId, testType, itemNumber } = useParams();
   const [test, setTest] = useState<TestAttributes>(testInit);
   const [questions, setQuestions] = useState<QuestionAttributes[]>([]);
@@ -51,21 +53,23 @@ function StudentChapterDisplay({}: StudentChapterDisplayProps) {
         testType === "chapter-test" ? 1 : 2,
         item_number
       );
-      setQuestions(res.data.data);
-      setMappedQuestions(
-        createMap<QuestionAttributes, number>(res.data.data, "item_number")
-      );
-      form.reset({
-        answers: res.data.data.map((q: QuestionAttributes) =>
-          Array(q.correct_answers_count)
-            .fill("")
-            .map((c, index) => ({
-              question_id: q.id,
-              answer: q.user_answer[index]?.answer || null,
-              order: index + 1,
-            }))
-        ),
-      });
+      if (mounted.current) {
+        setQuestions(res.data.data);
+        setMappedQuestions(
+          createMap<QuestionAttributes, number>(res.data.data, "item_number")
+        );
+        form.reset({
+          answers: res.data.data.map((q: QuestionAttributes) =>
+            Array(q.correct_answers_count)
+              .fill("")
+              .map((c, index) => ({
+                question_id: q.id,
+                answer: q.user_answer[index]?.answer || null,
+                order: index + 1,
+              }))
+          ),
+        });
+      }
       return res.data.current_item as number;
     } catch (e: any) {
       errorSnackbar(e.message);
@@ -96,7 +100,24 @@ function StudentChapterDisplay({}: StudentChapterDisplayProps) {
     }
   };
 
-  const handleSubmit = form.handleSubmit((raw) => {
+  const handleSubmit = form.handleSubmit(async (raw) => {
+    const confirmed = await isConfirmed({
+      title: "final answer?",
+      content: "bigyan ng dyaket yan!!",
+    });
+
+    if (confirmed) {
+      try {
+        const res = await submitAnswers(
+          +chapterId!,
+          testType === "chapter-test" ? 1 : 2,
+          raw.answers
+        );
+        successSnackbar(res.data.message);
+      } catch (e: any) {
+        errorSnackbar(e.message);
+      }
+    }
     console.log(raw);
   });
 

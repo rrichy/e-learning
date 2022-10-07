@@ -27,6 +27,16 @@ export const proceedTest = (id: number, type: 1 | 2, item_number?: number) => {
   return get(url);
 };
 
+export const submitAnswers = (
+  id: number,
+  type: 1 | 2,
+  answers: { question_id: number; answer: string | null; order: number }[][]
+) => {
+  return post(`${url_prefix}/${id}/submit-test?test_type=${type}`, {
+    answers,
+  });
+};
+
 // export const storeTest = (data: TestAttributes) => {
 //   return post(url_prefix, data);
 // };

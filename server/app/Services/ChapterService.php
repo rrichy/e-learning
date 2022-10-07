@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Http\Requests\NoticeStoreUpdateRequest;
+use App\Http\Requests\SubmitTestRequest;
 use App\Http\Resources\NoticeHomepageResource;
 use App\Http\Resources\NoticeIndexResource;
 use App\Http\Resources\NoticeShowResource;
@@ -13,6 +14,8 @@ use App\Models\Chapter;
 use App\Models\Course;
 use App\Models\Notice;
 use App\Models\Test;
+use App\Models\UserAnswer;
+use Illuminate\Support\Facades\DB;
 
 class ChapterService
 {
@@ -56,6 +59,7 @@ class ChapterService
         );
     }
 
+
     public function proceedTest(Chapter $chapter)
     {
         $test_type = intval(request('test_type')) === Test::CHAPTER ? 'chapterTest' : 'comprehensionTest';
@@ -81,16 +85,40 @@ class ChapterService
                 ->get()
         )->additional([
             'current_item' => $item_number,
-            'test_details' => $req_item_number
-                ?   [
-                    'chapter_title' => $chapter->item_number . "章 " . ($test_type === 'chapterTest' ? "章末テスト" : "理解度テスト"),
-                    'image' => $chapter->course->image,
-                ]
-                : null
+            // 'test_details' => $req_item_number
+            //     ?   [
+            //         'chapter_title' => $chapter->item_number . "章 " . ($test_type === 'chapterTest' ? "章末テスト" : "理解度テスト"),
+            //         'image' => $chapter->course->image,
+            //     ]
+            //     : null
         ]);
     }
 
+    public function submitTest(SubmitTestRequest $request, Chapter $chapter)
+    {
+        $test_type = intval(request('test_type')) === Test::CHAPTER ? 'chapterTest' : 'comprehensionTest';
 
+        $this->check_if_chapter_is_accessible($chapter);
+        // if test_type is comprehensionTest, check if student is eligible in taking the test
+        // here
+
+        $valid = $request->validated();
+
+        DB::transaction(function () use ($valid) {
+            foreach ($valid['answers'] as $v) {
+                UserAnswer::create(array_merge($v, [
+                    'user_id' => auth()->id(),
+                    'date_submitted' => now(),
+                ]));
+            }
+        });
+
+        return response()->json([
+            'message' => 'Successfully submitted test answers!'
+        ]);
+    }
+
+    // public function 
     // public function store(NoticeStoreUpdateRequest $request)
     // {
     //     $valid = $request->validated();

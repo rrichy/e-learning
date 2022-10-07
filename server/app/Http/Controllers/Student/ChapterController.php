@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\SubmitTestRequest;
 use App\Models\Chapter;
 use App\Services\ChapterService;
 use Illuminate\Http\Request;
@@ -54,6 +55,11 @@ class ChapterController extends Controller
     public function proceedTest(Chapter $chapter, ChapterService $service)
     {
         return $service->proceedTest($chapter);
+    }
+
+    public function submitTest(SubmitTestRequest $request, Chapter $chapter, ChapterService $service)
+    {
+        return $service->submitTest($request, $chapter);
     }
 
     /**
