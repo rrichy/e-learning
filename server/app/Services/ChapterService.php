@@ -14,6 +14,7 @@ use App\Models\Chapter;
 use App\Models\Course;
 use App\Models\Notice;
 use App\Models\Test;
+use App\Models\TestResult;
 use App\Models\UserAnswer;
 use Illuminate\Support\Facades\DB;
 
@@ -104,29 +105,41 @@ class ChapterService
 
         $valid = $request->validated();
 
+        $test = $chapter[$test_type];
         $user_answers = [];
-        DB::transaction(function () use ($valid, &$user_answers) {
+        $result = "";
+        DB::transaction(function () use ($valid, &$user_answers, &$result, $test) {
             foreach ($valid['answers'] as $v) {
                 $user_answers[] = UserAnswer::create(array_merge($v, [
                     'user_id' => auth()->id(),
                     'date_submitted' => now(),
                 ]))->id;
             }
-        });
+            
+            $result = TestResult::create(
+                $this->calculateResult(
+                    $test, $user_answers)
+                    + [
+                        'number_of_tries' => (TestResult::where('user_id', auth()->id())->max('number_of_tries') ?? 0) + 1,
+                        'test_id' => $test->id,
+                        'user_id' => auth()->id(),
+                    ]
+            );
 
-        // calculating results
+            UserAnswer::whereIn('id', $user_answers)->update(['test_result_id' => $result->id]);
+        });
 
         return response()->json([
             'message' => 'Successfully submitted test answers!',
-            'result' =>$this->calculateResult($chapter[$test_type], $user_answers),
+            'result' => $result,
         ]);
     }
 
-    public function calculateResult(Test $test, array $user_answers)
+    public function calculateResult(Test $test, array $user_answers_id)
     {
         $test->load([
-            'questions.userAnswers' => function ($ua) use ($user_answers) {
-                $ua->whereIn('id', $user_answers);
+            'questions.userAnswers' => function ($ua) use ($user_answers_id) {
+                $ua->whereIn('id', $user_answers_id);
             },
             'questions.options'
         ]);

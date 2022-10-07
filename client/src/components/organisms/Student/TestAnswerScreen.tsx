@@ -101,6 +101,7 @@ function TestAnswerScreen({ testState }: { testState?: TestDetails }) {
                       .fill("")
                       .map((_, index) => (
                         <Selection
+                          key={currentQuestion.id + "-selection-" + index}
                           label={alpha[index] + ":"}
                           name={`answers.${currentItem - 1}.${index}.answer`}
                           options={currentQuestion?.options}
@@ -113,6 +114,7 @@ function TestAnswerScreen({ testState }: { testState?: TestDetails }) {
                       .fill("")
                       .map((_, index) => (
                         <TextField
+                          key={currentQuestion.id + "-textfield-" + index}
                           label={alpha[index] + ":"}
                           name={`answers.${currentItem - 1}.${index}.answer`}
                         />

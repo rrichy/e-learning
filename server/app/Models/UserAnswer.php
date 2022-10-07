@@ -16,6 +16,7 @@ class UserAnswer extends Model
         'answer',
         'order',
         'date_submitted',
+        'test_result_id',
     ];
 
     public function question(): BelongsTo

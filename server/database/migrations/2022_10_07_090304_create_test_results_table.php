@@ -25,6 +25,8 @@ return new class extends Migration
                 ->cascadeOnUpdate();
             $table->integer('number_of_tries');
             $table->integer('score');
+            $table->integer('total');
+            $table->boolean('passed');
             $table->timestamps();
         });
     }

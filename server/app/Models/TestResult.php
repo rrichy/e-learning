@@ -17,6 +17,7 @@ class TestResult extends Model
         'number_of_tries',
         'score',
         'total',
+        'passed',
     ];
 
     public function test(): BelongsTo
