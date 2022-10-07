@@ -5,22 +5,23 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class UserAnswer extends Model
+class TestResult extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'question_id',
+        'test_id',
         'user_id',
-        'answer',
-        'order',
-        'date_submitted',
+        'number_of_tries',
+        'score',
+        'total',
     ];
 
-    public function question(): BelongsTo
+    public function test(): BelongsTo
     {
-        return $this->belongsTo(Question::class);
+        return $this->belongsTo(Test::class);
     }
 
     public function user(): BelongsTo
@@ -28,8 +29,8 @@ class UserAnswer extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function testResult(): BelongsTo
+    public function userAnswers(): HasMany
     {
-        return $this->belongsTo(TestResult::class);
+        return $this->hasMany(UserAnswer::class);
     }
 }

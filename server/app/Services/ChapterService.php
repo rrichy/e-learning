@@ -104,21 +104,55 @@ class ChapterService
 
         $valid = $request->validated();
 
-        DB::transaction(function () use ($valid) {
+        $user_answers = [];
+        DB::transaction(function () use ($valid, &$user_answers) {
             foreach ($valid['answers'] as $v) {
-                UserAnswer::create(array_merge($v, [
+                $user_answers[] = UserAnswer::create(array_merge($v, [
                     'user_id' => auth()->id(),
                     'date_submitted' => now(),
-                ]));
+                ]))->id;
             }
         });
 
+        // calculating results
+
         return response()->json([
-            'message' => 'Successfully submitted test answers!'
+            'message' => 'Successfully submitted test answers!',
+            'result' =>$this->calculateResult($chapter[$test_type], $user_answers),
         ]);
     }
 
-    // public function 
+    public function calculateResult(Test $test, array $user_answers)
+    {
+        $test->load([
+            'questions.userAnswers' => function ($ua) use ($user_answers) {
+                $ua->whereIn('id', $user_answers);
+            },
+            'questions.options'
+        ]);
+
+        $total = 0;
+        $score = 0;
+
+        $test['questions']->each(function ($question) use (&$total, &$score) {
+            $total += $question['score'];
+
+            $user_correct_count = 0;
+            $user_answers = $question['userAnswers'];
+            $correct_answers = $question['options']->where('correction_order', '>', 0);
+            
+            $correct_answers->each(function ($correct_option) use (&$user_correct_count, $user_answers) {
+                    $user_correct_count += $user_answers->where('order', $correct_option['correction_order'])
+                        ->where('answer', trim(strtolower($correct_option['description'])))->count();
+                });
+
+            if ($correct_answers->count() === $user_correct_count) $score += $question['score'];
+        });
+
+        $passed = $score >= $test['passing_score'];
+        
+        return compact('total', 'score', 'passed');
+    }
     // public function store(NoticeStoreUpdateRequest $request)
     // {
     //     $valid = $request->validated();
