@@ -54,6 +54,7 @@ class ChapterService
 
         $this->check_if_chapter_is_accessible($chapter);
 
+        // APPEND is_not_allowed if user has reached the max tries
         return new TestDetailResource(
             $chapter->load([
                 $test_type => fn ($q) => $q->withCount('questions')->withSum('questions', 'score')

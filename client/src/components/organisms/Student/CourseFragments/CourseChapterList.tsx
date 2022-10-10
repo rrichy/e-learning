@@ -8,11 +8,19 @@ import {
   Typography,
 } from "@mui/material";
 import Button from "@/components/atoms/Button";
-import { ArrowForward, CheckBoxOutlineBlank } from "@mui/icons-material";
+import {
+  ArrowForward,
+  CheckBox,
+  CheckBoxOutlineBlank,
+} from "@mui/icons-material";
 import { ChapterAttributes } from "@/validations/CourseFormValidation";
 
 interface CourseChapterListProps {
-  chapters: (ChapterAttributes & { item_number: number })[];
+  chapters: (ChapterAttributes & {
+    item_number: number;
+    has_passed?: boolean;
+    latest_score?: number | null;
+  })[];
 }
 
 function CourseChapterList({ chapters }: CourseChapterListProps) {
@@ -60,14 +68,18 @@ function CourseChapterList({ chapters }: CourseChapterListProps) {
               },
             }}
           >
-            {chapters.map(({ id, item_number, title }) => (
-              <Chapter
-                key={id}
-                id={id!}
-                chapterNumber={item_number}
-                title={title}
-              />
-            ))}
+            {chapters.map(
+              ({ id, item_number, title, latest_score, has_passed }) => (
+                <Chapter
+                  key={id}
+                  id={id!}
+                  chapterNumber={item_number}
+                  title={title}
+                  score={latest_score!}
+                  passed={has_passed!}
+                />
+              )
+            )}
           </Box>
         </Stack>
       </Paper>
@@ -81,10 +93,14 @@ const Chapter = ({
   id,
   chapterNumber,
   title,
+  score,
+  passed,
 }: {
   id: number;
   chapterNumber: number;
   title: string;
+  score: number | null;
+  passed: boolean;
 }) => (
   <Stack
     direction={{ xs: "column", md: "row" }}
@@ -127,8 +143,7 @@ const Chapter = ({
         variant="contained"
         color="tertiary"
         sx={{ width: "fit-content", whiteSpace: "nowrap" }}
-        // startIcon={<CheckBox />}
-        startIcon={<CheckBoxOutlineBlank />}
+        startIcon={passed ? <CheckBox /> : <CheckBoxOutlineBlank />}
         endIcon={<ArrowForward />}
         to={`chapter/${id}/chapter-test`}
       >
@@ -151,7 +166,7 @@ const Chapter = ({
           },
         }}
       >
-        -
+        {score && score >= 0 ? score : "-"}
       </Typography>
     </Stack>
   </Stack>

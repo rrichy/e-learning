@@ -140,7 +140,11 @@ export type AttendingCourseAttribute = {
 export type CourseFormAttributeWithId = CourseFormAttribute & {
   id: number;
   attending_course?: AttendingCourseAttribute | null;
-  chapters: (ChapterAttributes & { item_number: number })[];
+  chapters: (ChapterAttributes & {
+    item_number: number;
+    has_passed?: boolean;
+    latest_score?: number | null;
+  })[];
 };
 
 export type CourseListAttribute = {

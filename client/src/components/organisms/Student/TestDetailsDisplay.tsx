@@ -86,6 +86,7 @@ function TestDetailsDisplay({ testState }: { testState?: TestAttributes }) {
             color="tertiary"
             endIcon={<ArrowForward />}
             onClick={() => chapter.handleNext(true)}
+            // disabled={test.is_not_allowed}
           >
             テストを開始する
           </Button>
