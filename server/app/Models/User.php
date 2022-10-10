@@ -133,4 +133,14 @@ class User extends Authenticatable
     {
         return $this->hasManyThrough(Course::class, AttendingCourse::class, 'user_id', 'id', 'id', 'course_id');
     }
+
+    public function userAnswer(): HasMany
+    {
+        return $this->hasMany(UserAnswer::class);
+    }
+
+    public function testResults(): HasMany
+    {
+        return $this->hasMany(TestResult::class);
+    }
 }

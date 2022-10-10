@@ -19,7 +19,7 @@ function CourseDetail({
 }: CourseDetailProps) {
   return (
     <>
-      <CommonHeader image={image} title={title} preview={preview} />
+      <CommonHeader image={image} title={title + "対策講座"} preview={preview} />
       <Grid item xs={12} md={8}>
         <Paper variant="softoutline" sx={{ width: 1, height: 1 }}>
           <Typography variant="sectiontitle1" component="h3">

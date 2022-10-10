@@ -119,7 +119,7 @@ function QuestionForm({
                 <ATextField
                   fullWidth
                   size="small"
-                  name="explaination"
+                  name="explanation"
                   label="説明"
                   multiline
                   rows={3}

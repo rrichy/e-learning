@@ -23,8 +23,8 @@ class QuestionFactory extends Factory
             'title' => fake()->text(10),
             'statement' => fake()->text(20),
             'format' => Question::FORMAT[array_rand(Question::FORMAT, 1)],
-            'score' => rand(5, 20),
-            'explaination' => fake()->text(50),
+            'score' => rand(20, 25),
+            'explanation' => fake()->text(50),
         ];
     }
 }

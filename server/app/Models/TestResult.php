@@ -7,24 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Question extends Model
+class TestResult extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'test_id',
-        'item_number',
-        'title',
-        'statement',
-        'format',
+        'user_id',
+        'number_of_tries',
         'score',
-        'explanation'
-    ];
-
-    public const FORMAT = [
-        'radio' => 1,
-        'pulldown' => 2,
-        'description' => 3
+        'total',
+        'passed',
     ];
 
     public function test(): BelongsTo
@@ -32,13 +25,13 @@ class Question extends Model
         return $this->belongsTo(Test::class);
     }
 
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function userAnswers(): HasMany
     {
         return $this->hasMany(UserAnswer::class);
-    }
-
-    public function options(): HasMany
-    {
-        return $this->hasMany(QuestionOption::class);
     }
 }
