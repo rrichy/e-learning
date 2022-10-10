@@ -108,41 +108,45 @@ class ChapterService
 
         // check if user is allowed to take/submit test
         //here
-        
-        
+
+
         $valid = $request->validated();
 
         $test = $chapter[$test_type];
         $user_answers = [];
-        $result = "";
-        DB::transaction(function () use ($valid, &$user_answers, &$result, $test) {
+        $calculated_result = "";
+        DB::transaction(function () use ($valid, &$user_answers, &$calculated_result, $test) {
             foreach ($valid['answers'] as $v) {
                 $user_answers[] = UserAnswer::create(array_merge($v, [
                     'user_id' => auth()->id(),
                     'date_submitted' => now(),
                 ]))->id;
             }
-            
-            $result = TestResult::create(
+
+            $calculated_result =
                 $this->calculateResult(
-                    $test, $user_answers)
-                    + [
-                        'number_of_tries' => (TestResult::where('user_id', auth()->id())->max('number_of_tries') ?? 0) + 1,
-                        'test_id' => $test->id,
-                        'user_id' => auth()->id(),
-                    ]
-            );
+                    $test,
+                    $user_answers,
+                    true
+                )
+                + [
+                    'number_of_tries' => (TestResult::where('user_id', auth()->id())->max('number_of_tries') ?? 0) + 1,
+                    'test_id' => $test->id,
+                    'user_id' => auth()->id(),
+                ];
+
+            $result = TestResult::create($calculated_result);
 
             UserAnswer::whereIn('id', $user_answers)->update(['test_result_id' => $result->id]);
         });
 
         return response()->json([
             'message' => 'Successfully submitted test answers!',
-            'result' => $result,
-            'fresh' => $this->calculateResult($test, $user_answers, true)
+            'result' => $calculated_result,
+            // 'fresh' => $this->calculateResult($test, $user_answers, true)
         ]);
     }
-
+    // 
     public function calculateResult(Test $test, array $user_answers_id, bool $appendQuestions = false)
     {
         $test->load([
@@ -162,11 +166,11 @@ class ChapterService
             $user_correct_count = 0;
             $user_answers = $question['userAnswers'];
             $correct_answers = $question['options']->where('correction_order', '>', 0);
-            
+
             $correct_answers->each(function ($correct_option) use (&$user_correct_count, $user_answers) {
-                    $user_correct_count += $user_answers->where('order', $correct_option['correction_order'])
-                        ->where('answer', trim(strtolower($correct_option['description'])))->count();
-                });
+                $user_correct_count += $user_answers->where('order', $correct_option['correction_order'])
+                    ->where('answer', trim(strtolower($correct_option['description'])))->count();
+            });
 
             if ($correct_answers->count() === $user_correct_count) $score += $question['score'];
 
@@ -176,11 +180,11 @@ class ChapterService
         });
 
         $passed = $score >= $test['passing_score'];
-        
+
         $result = compact('total', 'score', 'passed');
 
-        if($appendQuestions) $result[] = $questions;
-        
+        if ($appendQuestions) $result['questions'] = $questions;
+
         return $result;
     }
     // public function store(NoticeStoreUpdateRequest $request)

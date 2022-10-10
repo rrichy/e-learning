@@ -1,10 +1,10 @@
 import CommonHeader from "@/components/organisms/Student/CommonHeader";
+import { ChapterContextAttribute, QuestionAttributes } from "@/hooks/pages/Students/useChapter";
 import useAlerter from "@/hooks/useAlerter";
 import useConfirm from "@/hooks/useConfirm";
 import { proceedTest, showTest, submitAnswers } from "@/services/TestService";
 import createMap from "@/utils/createMap";
 import {
-  QuestionAttributes as FQuestionAttributes,
   TestAttributes,
   testInit,
 } from "@/validations/CourseFormValidation";
@@ -20,12 +20,13 @@ import { Outlet, useNavigate, useParams } from "react-router-dom";
 // questions will only be fetched when the subcomponents are loaded.
 interface StudentChapterDisplayProps {}
 
-type QuestionAttributes = FQuestionAttributes & {
-  correct_answers_count: number;
-  id: number;
-  user_answer: { question_id: number; answer: string | null; order: number }[];
-  item_number: number;
-};
+// type QuestionAttributes = FQuestionAttributes & {
+//   correct_answers_count: number;
+//   id: number;
+//   user_answer: { question_id: number; answer: string | null; order: number }[];
+//   item_number: number;
+//   answered_correctly: boolean;
+// };
 
 function StudentChapterDisplay({}: StudentChapterDisplayProps) {
   const mounted = useRef(true);
@@ -38,6 +39,13 @@ function StudentChapterDisplay({}: StudentChapterDisplayProps) {
   const [mappedQuestions, setMappedQuestions] = useState(
     new Map<number, QuestionAttributes>()
   );
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [result, setResult] = useState<ChapterContextAttribute["result"]>({
+    passed: true,
+    score: 0,
+    total: 0,
+    questions: [],
+  });
 
   const form = useForm<{ answers: QuestionAttributes["user_answer"][] }>({
     mode: "onChange",
@@ -113,12 +121,14 @@ function StudentChapterDisplay({}: StudentChapterDisplayProps) {
           testType === "chapter-test" ? 1 : 2,
           raw.answers
         );
+        navigate(prefix + "/result");
+        setResult(res.data.result);
+        setHasSubmitted(true);
         successSnackbar(res.data.message);
       } catch (e: any) {
         errorSnackbar(e.message);
       }
     }
-    console.log(raw);
   });
 
   useEffect(() => {
@@ -145,12 +155,17 @@ function StudentChapterDisplay({}: StudentChapterDisplayProps) {
     };
   }, [chapterId, testType]);
 
+  const headerTitle =
+    test.chapter_title +
+    (hasSubmitted
+      ? "章末テスト結果"
+      : testType === "chapterTest"
+      ? "章末テスト"
+      : "理解度テスト");
+
   return (
     <Grid container spacing={2}>
-      <CommonHeader
-        image={test.image || null}
-        title={test.chapter_title || ""}
-      />
+      <CommonHeader image={test.image || null} title={headerTitle} />
       <Outlet
         context={{
           test,
@@ -161,6 +176,8 @@ function StudentChapterDisplay({}: StudentChapterDisplayProps) {
           prefix,
           form,
           handleSubmit,
+          hasSubmitted,
+          result,
         }}
       />
     </Grid>

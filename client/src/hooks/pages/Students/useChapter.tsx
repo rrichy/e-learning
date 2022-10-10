@@ -10,9 +10,10 @@ export type QuestionAttributes = FQuestionAttributes & {
   id: number;
   user_answer: { question_id: number; answer: string | null; order: number }[];
   item_number: number;
+  answered_correctly: boolean;
 };
 
-type ContextAttribute = {
+export type ChapterContextAttribute = {
   test: TestAttributes;
   handleNext: (b?: boolean, c?: boolean) => void;
   questions: QuestionAttributes[];
@@ -23,7 +24,6 @@ type ContextAttribute = {
   >;
   fetchQuestions: (i?: number) => void;
   prefix: string;
-
   form: UseFormReturn<
     {
       answers: {
@@ -37,12 +37,19 @@ type ContextAttribute = {
   handleSubmit: (
     e?: React.BaseSyntheticEvent<object, any, any> | undefined
   ) => Promise<void>;
+  hasSubmitted: boolean;
+  result: {
+    passed: boolean;
+    score: number;
+    total: number;
+    questions: QuestionAttributes[];
+  };
 };
 
 function useChapter(preview = false) {
   // if preview {}
 
-  return useOutletContext<ContextAttribute>();
+  return useOutletContext<ChapterContextAttribute>();
 }
 
 export default useChapter;
