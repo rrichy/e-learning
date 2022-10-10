@@ -163,7 +163,7 @@ class ChapterService
 
             $correct_answers->each(function ($correct_option) use (&$user_correct_count, $user_answers) {
                 $user_correct_count += $user_answers->where('order', $correct_option['correction_order'])
-                    ->where('answer', trim(strtolower($correct_option['description'])))->count();
+                    ->where('answer', trim($correct_option['description']))->count();
             });
 
             if ($correct_answers->count() === $user_correct_count) $score += $question['score'];

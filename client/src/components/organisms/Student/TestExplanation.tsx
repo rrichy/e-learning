@@ -76,7 +76,10 @@ function TestExplanation({ question, onClose }: TestExplanationProps) {
                   key={o.id + "" + index}
                   control={
                     <Radio
-                      checked={Boolean(o.correction_order)}
+                      checked={
+                        state?.user_answer[0].answer!.toLowerCase() ===
+                        o.description.trim().toLowerCase()
+                      }
                       disableRipple
                     />
                   }
@@ -88,64 +91,50 @@ function TestExplanation({ question, onClose }: TestExplanationProps) {
 
           {state?.format === 2 && (
             <Stack spacing={1}>
-              {state?.options
-                .filter((a) => Boolean(a.correction_order))
-                .sort(
-                  (a, b) =>
-                    (a.correction_order ?? 0) - (b.correction_order ?? 0)
-                )
-                .map((a, index) =>
-                  !a.correction_order ? null : (
-                    <Stack
-                      direction="row"
-                      spacing={2}
-                      width={1}
-                      flex={1}
-                      alignItems="center"
-                      key={a.id + "" + index}
-                    >
-                      <Typography
-                        width={50}
-                        fontWeight="bold"
-                        textAlign="right"
-                      >
-                        {ALPHA[a.correction_order - 1]}:
-                      </Typography>
-                      <TextField
-                        value={a.description}
-                        select
-                        size="small"
-                        fullWidth
-                        InputProps={{
-                          readOnly: true,
-                        }}
-                      >
-                        <MenuItem value={a.description}>
-                          {a.description}
-                        </MenuItem>
-                      </TextField>
-                    </Stack>
-                  )
-                )}
-            </Stack>
-          )}
-
-          {state?.format === 3 && (
-            <Stack spacing={1}>
-              {state?.options.map((a, index) => (
+              {state?.user_answer.map((a, index) => (
                 <Stack
                   direction="row"
                   spacing={2}
                   width={1}
                   flex={1}
                   alignItems="center"
-                  key={a.id + "" + index}
+                  key={"selection-" + index}
                 >
                   <Typography width={50} fontWeight="bold" textAlign="right">
                     {ALPHA[index]}:
                   </Typography>
                   <TextField
-                    value={a.description}
+                    value={a.answer}
+                    select
+                    size="small"
+                    fullWidth
+                    InputProps={{
+                      readOnly: true,
+                    }}
+                  >
+                    <MenuItem value={a.answer!}>{a.answer}</MenuItem>
+                  </TextField>
+                </Stack>
+              ))}
+            </Stack>
+          )}
+
+          {state?.format === 3 && (
+            <Stack spacing={1}>
+              {state?.user_answer.map((a, index) => (
+                <Stack
+                  direction="row"
+                  spacing={2}
+                  width={1}
+                  flex={1}
+                  alignItems="center"
+                  key={"textfield-" + index}
+                >
+                  <Typography width={50} fontWeight="bold" textAlign="right">
+                    {ALPHA[index]}:
+                  </Typography>
+                  <TextField
+                    value={a.answer}
                     size="small"
                     fullWidth
                     InputProps={{
@@ -167,11 +156,21 @@ function TestExplanation({ question, onClose }: TestExplanationProps) {
             .sort(
               (a, b) => (a.correction_order ?? 0) - (b.correction_order ?? 0)
             )
-            .map((a) =>
-              !a.correction_order ? null : (
-                <Typography ml={3}>{a.description}</Typography>
-              )
-            )}
+            .map((a, index) => (
+              <Stack
+                direction="row"
+                spacing={2}
+                width={1}
+                flex={1}
+                alignItems="center"
+                key={"answers-" + index}
+              >
+                <Typography width={50} fontWeight="bold" textAlign="right">
+                  {ALPHA[index]}:
+                </Typography>
+                <Typography>{a.description}</Typography>
+              </Stack>
+            ))}
 
           <Typography variant="sectiontitle2" mt={3} mb={2}>
             解説

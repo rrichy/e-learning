@@ -18,7 +18,7 @@ class SubmitTestRequest extends FormRequest
 
     protected function prepareForValidation()
     {
-        // lowercase and trimming of answers
+        // trimming of answers
         $answers = [];
 
         foreach($this->answers as $question) {
@@ -26,7 +26,7 @@ class SubmitTestRequest extends FormRequest
                 $answers[] = [
                     'question_id' => $q['question_id'],
                     'order' => $q['order'],
-                    'answer' => trim(strtolower($q['answer'])),
+                    'answer' => trim($q['answer']),
                 ];
             }
         }
