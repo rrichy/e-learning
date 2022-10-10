@@ -22,7 +22,11 @@ class StudentQuestionResource extends JsonResource
             'statement' => $this->statement,
             'format' => $this->format,
             'score' => $this->score,
-            'user_answer' => $this->userAnswers()->where('user_id', auth()->id())->orderBy('order', 'asc')->get(['answer', 'order']),
+            'user_answer' => $this->userAnswers()
+                ->where('user_id', auth()->id())
+                ->whereNull('test_result_id')
+                ->orderBy('order', 'asc')
+                ->get(['answer', 'order']),
             // 'explaination' => $this->explaination,
             'options' => StudentQuestionOptionResource::collection($this->whenLoaded('options')),
             'correct_answers_count' => $this->correct_answers_count,

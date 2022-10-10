@@ -16,6 +16,7 @@ use App\Models\Notice;
 use App\Models\Test;
 use App\Models\TestResult;
 use App\Models\UserAnswer;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
 class ChapterService
@@ -89,12 +90,6 @@ class ChapterService
                 ->get()
         )->additional([
             'current_item' => $item_number,
-            // 'test_details' => $req_item_number
-            //     ?   [
-            //         'chapter_title' => $chapter->item_number . "章 " . ($test_type === 'chapterTest' ? "章末テスト" : "理解度テスト"),
-            //         'image' => $chapter->course->image,
-            //     ]
-            //     : null
         ]);
     }
 
@@ -130,7 +125,7 @@ class ChapterService
                     true
                 )
                 + [
-                    'number_of_tries' => (TestResult::where('user_id', auth()->id())->max('number_of_tries') ?? 0) + 1,
+                    'number_of_tries' => (TestResult::where([['user_id', auth()->id()], ['test_id', $test->id]])->max('number_of_tries') ?? 0) + 1,
                     'test_id' => $test->id,
                     'user_id' => auth()->id(),
                 ];
@@ -143,11 +138,10 @@ class ChapterService
         return response()->json([
             'message' => 'Successfully submitted test answers!',
             'result' => $calculated_result,
-            // 'fresh' => $this->calculateResult($test, $user_answers, true)
         ]);
     }
-    // 
-    public function calculateResult(Test $test, array $user_answers_id, bool $appendQuestions = false)
+
+    public function calculateResult(Test $test, array $user_answers_id)
     {
         $test->load([
             'questions.userAnswers' => function ($ua) use ($user_answers_id) {
@@ -174,16 +168,27 @@ class ChapterService
 
             if ($correct_answers->count() === $user_correct_count) $score += $question['score'];
 
-            $questions[] = $question->toArray() + [
+            $questions[] = [
+                'id' => $question['id'],
+                'item_number' => $question['item_number'],
+                'title' => $question['title'],
+                'statement' => $question['statement'],
+                'format' => $question['format'],
+                'score' => $question['score'],
+                'user_answer' => $question['userAnswers']->map(fn ($u) => ['answer' => $u['answer'], 'order' => $u['order']]),
+                'explaination' => $question['explaination'],
+                'options' => $question['options']->map(fn ($o) => [
+                    'correction_order' => $o['correction_order'],
+                    'description' => $o['description'],
+                    'item_number' => $o['item_number'],
+                ]),
                 'answered_correctly' => $correct_answers->count() === $user_correct_count
             ];
         });
 
         $passed = $score >= $test['passing_score'];
 
-        $result = compact('total', 'score', 'passed');
-
-        if ($appendQuestions) $result['questions'] = $questions;
+        $result = compact('total', 'score', 'passed', 'questions');
 
         return $result;
     }

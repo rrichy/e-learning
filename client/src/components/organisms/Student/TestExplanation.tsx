@@ -1,14 +1,6 @@
 import { QuestionAttributes } from "@/hooks/pages/Students/useChapter";
-import Button from "@/components/atoms/Button";
+import { CircleOutlined, Close } from "@mui/icons-material";
 import {
-  CircleOutlined,
-  Close,
-  CloseOutlined,
-  Delete,
-} from "@mui/icons-material";
-import {
-  Box,
-  Checkbox,
   Dialog,
   DialogContent,
   DialogTitle,
@@ -20,7 +12,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { MenuItem } from "@material-ui/core";
 
 interface TestExplanationProps {
@@ -77,24 +69,27 @@ function TestExplanation({ question, onClose }: TestExplanationProps) {
             {state?.statement}
           </Typography>
 
-          <Stack spacing={1}>
-            {state?.format === 1 &&
-              state?.options.map((o, index) => (
+          {state?.format === 1 && (
+            <Stack sx={{ "& *": { m: "0 !important" } }}>
+              {state?.options.map((o, index) => (
                 <FormControlLabel
                   key={o.id + "" + index}
                   control={
                     <Radio
                       checked={Boolean(o.correction_order)}
                       disableRipple
-                      disableFocusRipple
                     />
                   }
                   label={o.description}
                 />
               ))}
+            </Stack>
+          )}
 
-            {state?.format === 2 &&
-              state?.options
+          {state?.format === 2 && (
+            <Stack spacing={1}>
+              {state?.options
+                .filter((a) => Boolean(a.correction_order))
                 .sort(
                   (a, b) =>
                     (a.correction_order ?? 0) - (b.correction_order ?? 0)
@@ -114,7 +109,7 @@ function TestExplanation({ question, onClose }: TestExplanationProps) {
                         fontWeight="bold"
                         textAlign="right"
                       >
-                        {ALPHA[index]}:
+                        {ALPHA[a.correction_order - 1]}:
                       </Typography>
                       <TextField
                         value={a.description}
@@ -132,9 +127,12 @@ function TestExplanation({ question, onClose }: TestExplanationProps) {
                     </Stack>
                   )
                 )}
+            </Stack>
+          )}
 
-            {state?.format === 3 &&
-              state?.options.map((a, index) => (
+          {state?.format === 3 && (
+            <Stack spacing={1}>
+              {state?.options.map((a, index) => (
                 <Stack
                   direction="row"
                   spacing={2}
@@ -156,14 +154,16 @@ function TestExplanation({ question, onClose }: TestExplanationProps) {
                   />
                 </Stack>
               ))}
-          </Stack>
+            </Stack>
+          )}
 
           <FormControlLabel
-            label={<Typography fontWeight="bold" mt={3} mb={2}>正解</Typography>}
+            label={<Typography fontWeight="bold">正解</Typography>}
             control={<CircleOutlined sx={{ color: "red" }} />}
-            sx={{ pl: 2, cursor: "default" }}
+            sx={{ pl: 2, cursor: "default", mt: 3, mb: 2 }}
           />
           {state?.options
+            .filter((a) => Boolean(a.correction_order))
             .sort(
               (a, b) => (a.correction_order ?? 0) - (b.correction_order ?? 0)
             )
@@ -173,7 +173,9 @@ function TestExplanation({ question, onClose }: TestExplanationProps) {
               )
             )}
 
-          <Typography variant="sectiontitle2" mt={3} mb={2}>解説</Typography>
+          <Typography variant="sectiontitle2" mt={3} mb={2}>
+            解説
+          </Typography>
           <Typography variant="subtitle2">{state?.explaination}</Typography>
         </Paper>
       </DialogContent>

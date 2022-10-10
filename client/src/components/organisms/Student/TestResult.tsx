@@ -1,28 +1,18 @@
 import useChapter, {
   QuestionAttributes,
 } from "@/hooks/pages/Students/useChapter";
-import React, { useCallback, useRef } from "react";
+import { useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "@/components/atoms/Button";
-import { TestAttributes, testInit } from "@/validations/CourseFormValidation";
-import {
-  ArrowForward,
-  CircleOutlined,
-  CloseOutlined,
-} from "@mui/icons-material";
-import Close from "@mui/icons-material/Close";
+import { CircleOutlined, CloseOutlined } from "@mui/icons-material";
 import {
   Grid,
-  List,
-  ListItem,
   Stack,
   Paper,
   Typography,
   FormControlLabel,
-  Box,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import Table from "@/components/atoms/Table";
 import { Column } from "material-table";
 import { initPaginatedData, OrderType } from "@/interfaces/CommonInterface";
