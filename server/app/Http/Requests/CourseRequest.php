@@ -74,7 +74,7 @@ class CourseRequest extends FormRequest
                             'statement' => $question['statement'],
                             'format' => $question['format'],
                             'score' => $question['score'],
-                            'explaination' => $question['explaination'],
+                            'explanation' => $question['explanation'],
                             'options' => $options,
                         ];
                     }
@@ -127,7 +127,7 @@ class CourseRequest extends FormRequest
             'chapters.*.chapter_test.questions.*.statement' => 'required|string',
             'chapters.*.chapter_test.questions.*.format' => ['required', 'numeric', Rule::in(Question::FORMAT)],
             'chapters.*.chapter_test.questions.*.score' => 'required|numeric',
-            'chapters.*.chapter_test.questions.*.explaination' => 'required|string',
+            'chapters.*.chapter_test.questions.*.explanation' => 'required|string',
             'chapters.*.chapter_test.questions.*.options' => 'array',
             'chapters.*.chapter_test.questions.*.options.*.description' => 'required|string',
             'chapters.*.explainer_videos.*.title' => 'required|string',

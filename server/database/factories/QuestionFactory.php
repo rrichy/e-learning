@@ -24,7 +24,7 @@ class QuestionFactory extends Factory
             'statement' => fake()->text(20),
             'format' => Question::FORMAT[array_rand(Question::FORMAT, 1)],
             'score' => rand(20, 25),
-            'explaination' => fake()->text(50),
+            'explanation' => fake()->text(50),
         ];
     }
 }

@@ -27,7 +27,7 @@ class StudentQuestionResource extends JsonResource
                 ->whereNull('test_result_id')
                 ->orderBy('order', 'asc')
                 ->get(['answer', 'order']),
-            // 'explaination' => $this->explaination,
+            // 'explanation' => $this->explanation,
             'options' => StudentQuestionOptionResource::collection($this->whenLoaded('options')),
             'correct_answers_count' => $this->correct_answers_count,
         ];

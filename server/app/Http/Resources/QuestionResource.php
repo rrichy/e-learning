@@ -21,7 +21,7 @@ class QuestionResource extends JsonResource
             'statement' => $this->statement,
             'format' => $this->format,
             'score' => $this->score,
-            'explaination' => $this->explaination,
+            'explanation' => $this->explanation,
             'options' => QuestionOptionResource::collection($this->whenLoaded('options')),
         ];
     }

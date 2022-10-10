@@ -24,7 +24,7 @@ return new class extends Migration
             $table->text('statement');
             $table->tinyInteger('format');
             $table->integer('score');
-            $table->text('explaination');
+            $table->text('explanation');
             $table->timestamps();
         });
     }

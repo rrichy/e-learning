@@ -176,7 +176,7 @@ class ChapterService
                 'format' => $question['format'],
                 'score' => $question['score'],
                 'user_answer' => $question['userAnswers']->map(fn ($u) => ['answer' => $u['answer'], 'order' => $u['order']]),
-                'explaination' => $question['explaination'],
+                'explanation' => $question['explanation'],
                 'options' => $question['options']->map(fn ($o) => [
                     'correction_order' => $o['correction_order'],
                     'description' => $o['description'],

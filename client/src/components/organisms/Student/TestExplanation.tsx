@@ -176,7 +176,7 @@ function TestExplanation({ question, onClose }: TestExplanationProps) {
           <Typography variant="sectiontitle2" mt={3} mb={2}>
             解説
           </Typography>
-          <Typography variant="subtitle2">{state?.explaination}</Typography>
+          <Typography variant="subtitle2">{state?.explanation}</Typography>
         </Paper>
       </DialogContent>
     </Dialog>

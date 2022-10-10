@@ -9,7 +9,7 @@ export const questionFormSchema = object({
   statement: string().label("問題文").required(),
   format: number().label("問題形式").required().selectionId(true),
   score: number().label("配点").required(),
-  explaination: string().label("説明").required(),
+  explanation: string().label("説明").required(),
   options: array(
     object({
       id: number().nullable(),
@@ -83,7 +83,7 @@ export interface QuestionAttributes {
   statement: string;
   format: number;
   score: string | null;
-  explaination: string;
+  explanation: string;
   options: QuestionOptionAttributes[];
   correct_indexes: number[];
 }
@@ -180,7 +180,7 @@ export const testInit: TestAttributes = {
 
 export const questionInit: QuestionAttributes = {
   id: null,
-  explaination: "",
+  explanation: "",
   format: 0,
   score: "",
   statement: "",

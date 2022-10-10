@@ -18,7 +18,7 @@ class Question extends Model
         'statement',
         'format',
         'score',
-        'explaination'
+        'explanation'
     ];
 
     public const FORMAT = [
