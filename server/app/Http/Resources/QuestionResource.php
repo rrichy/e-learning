@@ -14,7 +14,6 @@ class QuestionResource extends JsonResource
      */
     public function toArray($request)
     {
-        return parent::toArray($request);
         return [
             'test_id' => $this->test_id,
             'item_number' => $this->item_number,

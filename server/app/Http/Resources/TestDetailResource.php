@@ -18,10 +18,8 @@ class TestDetailResource extends JsonResource
         // return parent::toArray($request);
         $test_type = intval(request('test_type')) === Test::CHAPTER ? 'chapterTest' : 'comprehensionTest';
         
-        $chapter_title = $this->item_number . "章 " . ($test_type === 'chapterTest' ? "章末テスト" : "理解度テスト");
-
         return [
-            'chapter_title' => $chapter_title,
+            'chapter_title' => $this->item_number . "章 ",
             'image' => $this->course->image,
             'title' => $this[$test_type]->title,
             'passing_score' => $this[$test_type]->passing_score,
