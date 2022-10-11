@@ -113,7 +113,8 @@ export default function Pages() {
     {
       path: "/course-management",
       element: (
-        <PrivateRoute membershipTypes={[admin, corporate]}>
+        // <PrivateRoute membershipTypes={[admin, corporate]}>
+        <PrivateRoute membershipTypes={[admin]}>
           <Outlet />
         </PrivateRoute>
       ),

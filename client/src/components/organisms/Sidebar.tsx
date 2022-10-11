@@ -260,11 +260,11 @@ const adminSidebarContent: SidebarItemProps[] = [
 ];
 
 const corporateSidebarContent: SidebarItemProps[] = [
-  {
-    icon: <CourseManagementIcon />,
-    label: "コース管理",
-    to: "/course-management",
-  },
+  // {
+  //   icon: <CourseManagementIcon />,
+  //   label: "コース管理",
+  //   to: "/course-management",
+  // },
   {
     icon: <UserIcon />,
     label: "アカウント管理",

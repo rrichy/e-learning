@@ -54,7 +54,7 @@ function QuestionForm({
   const [preview, setPreview] = useState<Partial<QuestionAttributes> | null>(
     null
   );
-  console.log(preview);
+
   return (
     <Dialog
       open={open}

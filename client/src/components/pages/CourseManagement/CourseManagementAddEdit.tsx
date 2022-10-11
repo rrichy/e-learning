@@ -118,6 +118,7 @@ function CourseManagementAddEdit() {
           type: "value",
           message: "Reduce the passing_score or add more questions",
         });
+        errorSnackbar("Reduce the passing_score or add more questions");
       } else {
         if (selectedChapter?.screen && selectedChapter.screen === "chapter") {
           courseContext.setValue(

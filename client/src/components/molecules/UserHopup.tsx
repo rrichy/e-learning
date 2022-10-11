@@ -1,3 +1,4 @@
+import { MembershipType } from "@/enums/membershipTypes";
 import useAlerter from "@/hooks/useAlerter";
 import useAuth from "@/hooks/useAuth";
 import { userInit } from "@/interfaces/AuthAttributes";
@@ -131,13 +132,17 @@ function UserHopup() {
         {/* <MenuItem component={Link} to="/change-plan">
           <ChangePlanIcon />
           受講履歴
-        </MenuItem> */}
-        <Divider />
-        <MenuItem component={Link} to="/contact">
-          <InquiryIcon />
-          お問い合わせ
         </MenuItem>
-        <Divider />
+        <Divider /> */}
+        {user.membership_type_id !== MembershipType.admin && (
+          <>
+            <MenuItem component={Link} to="/contact">
+              <InquiryIcon />
+              お問い合わせ
+            </MenuItem>
+            <Divider />
+          </>
+        )}
         <MenuItem onClick={handleLogout}>
           <LogoutIcon />
           ログアウト

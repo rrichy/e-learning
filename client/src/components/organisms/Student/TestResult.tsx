@@ -15,9 +15,8 @@ import {
 import { useEffect, useState } from "react";
 import Table from "@/components/atoms/Table";
 import { Column } from "material-table";
-import { initPaginatedData, OrderType } from "@/interfaces/CommonInterface";
+import { initPaginatedData } from "@/interfaces/CommonInterface";
 import useAlerter from "@/hooks/useAlerter";
-import { TABLE_ROWS_PER_PAGE } from "@/settings/appconfig";
 import TestExplanation from "./TestExplanation";
 
 function TestResult({ preview }: { preview?: boolean }) {
