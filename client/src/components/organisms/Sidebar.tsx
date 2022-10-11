@@ -306,7 +306,7 @@ const individualSidebarContent: SidebarItemProps[] = [
   {
     icon: <UserIcon />,
     label: "マイページ",
-    to: "/home",
+    to: "/profile",
   },
   {
     icon: <AnnouncementIcon />,
