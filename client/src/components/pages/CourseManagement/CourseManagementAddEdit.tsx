@@ -24,12 +24,16 @@ import {
   videosFieldArraySchema,
 } from "@/validations/CourseFormValidation";
 import { getOptions } from "@/services/CommonService";
-import { OptionAttribute } from "@/interfaces/CommonInterface";
+import {
+  CourseScreenType,
+  OptionAttribute,
+} from "@/interfaces/CommonInterface";
 import CourseManagementForm from "@/components/organisms/CourseManagementFragments/CourseManagementForm";
 import DisabledComponentContextProvider from "@/providers/DisabledComponentContextProvider";
 import TestForm from "@/components/organisms/CourseManagementFragments/TestForm";
 import useConfirm from "@/hooks/useConfirm";
 import ExplainerVideoForm from "@/components/organisms/CourseManagementFragments/ExplainerVideoForm";
+import Preview from "./Preview";
 
 function CourseManagementAddEdit() {
   const mounted = useRef(true);
@@ -44,6 +48,10 @@ function CourseManagementAddEdit() {
   const { isConfirmed } = useConfirm();
   const [selectedChapter, setSelectedChapter] =
     useState<SelectedChapterType>(null);
+  const [displayPreview, setDisplayPreview] =
+    useState<CourseFormAttribute | null>(null);
+  const [screen, setScreen] = useState<CourseScreenType>("course");
+
   const courseContext = useForm<CourseFormAttribute>({
     mode: "onChange",
     defaultValues: courseFormInit,
@@ -106,7 +114,7 @@ function CourseManagementAddEdit() {
 
     if (confirmed) {
       if (
-        raw.passing_score > raw.questions.reduce((acc, b) => acc + (+b.score!), 0)
+        raw.passing_score > raw.questions.reduce((acc, b) => acc + +b.score!, 0)
       ) {
         testContext.setError("passing_score", {
           type: "value",
@@ -202,40 +210,55 @@ function CourseManagementAddEdit() {
   }, [state, courseId, isCreate]);
 
   return (
-    <DisabledComponentContextProvider
-      showLoading
-      value={courseContext.formState.isSubmitting || !initialized}
-    >
-      <FormContainer formContext={courseContext} handleSubmit={handleSubmit}>
-        {!selectedChapter && (
-          <CourseManagementForm
-            categories={categories}
-            control={courseContext.control}
-            setSelection={setSelectedChapter}
-          />
-        )}
-      </FormContainer>
-      {selectedChapter && selectedChapter?.screen !== "explainer" && (
-        <TestForm
-          testContext={testContext}
-          handleTestSubmit={handleTestSubmit}
-          returnFn={() => setSelectedChapter(null)}
-          type={selectedChapter.screen}
-        />
-      )}
-      <FormContainer
-        formContext={videoContext}
-        handleSubmit={handleVideoSubmit}
+    <>
+      <DisabledComponentContextProvider
+        showLoading
+        value={courseContext.formState.isSubmitting || !initialized}
       >
-        {selectedChapter?.screen === "explainer" && (
-          <ExplainerVideoForm
+        <FormContainer formContext={courseContext} handleSubmit={handleSubmit}>
+          {!selectedChapter && (
+            <CourseManagementForm
+              categories={categories}
+              control={courseContext.control}
+              setSelection={setSelectedChapter}
+              simulateFn={() => {
+                setDisplayPreview(courseContext.getValues());
+                setScreen("course");
+              }}
+            />
+          )}
+        </FormContainer>
+        {selectedChapter && selectedChapter?.screen !== "explainer" && (
+          <TestForm
+            testContext={testContext}
+            handleTestSubmit={handleTestSubmit}
             returnFn={() => setSelectedChapter(null)}
-            control={videoContext.control}
-            chapterIndex={selectedChapter.index}
+            type={selectedChapter.screen}
+            simulateFn={() => {
+              setDisplayPreview(courseContext.getValues());
+              setScreen(`chapter/${selectedChapter.index}/chapter-test`);
+            }}
           />
         )}
-      </FormContainer>
-    </DisabledComponentContextProvider>
+        <FormContainer
+          formContext={videoContext}
+          handleSubmit={handleVideoSubmit}
+        >
+          {selectedChapter?.screen === "explainer" && (
+            <ExplainerVideoForm
+              returnFn={() => setSelectedChapter(null)}
+              control={videoContext.control}
+              chapterIndex={selectedChapter.index}
+            />
+          )}
+        </FormContainer>
+      </DisabledComponentContextProvider>
+      <Preview
+        course={displayPreview}
+        onClose={() => setDisplayPreview(null)}
+        toScreen={screen}
+      />
+    </>
   );
 }
 

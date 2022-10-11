@@ -1,7 +1,9 @@
+import { ChapterPreviewContext } from "@/providers/ChapterPreviewProvider";
 import {
   QuestionAttributes as FQuestionAttributes,
   TestAttributes,
 } from "@/validations/CourseFormValidation";
+import { useContext } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { useOutletContext } from "react-router-dom";
 
@@ -47,7 +49,7 @@ export type ChapterContextAttribute = {
 };
 
 function useChapter(preview = false) {
-  // if preview {}
+  if (preview) return useContext(ChapterPreviewContext);
 
   return useOutletContext<ChapterContextAttribute>();
 }

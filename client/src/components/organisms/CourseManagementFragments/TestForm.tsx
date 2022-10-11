@@ -32,8 +32,10 @@ function TestForm({
   type,
   testContext,
   handleTestSubmit,
+  simulateFn,
 }: {
   returnFn: () => void;
+  simulateFn: () => void;
   type: "chapter" | "comprehension";
   testContext: UseFormReturn<TestAttributes, any>;
   handleTestSubmit: (
@@ -212,7 +214,7 @@ function TestForm({
             >
               キャンセル
             </Button>
-            <Button variant="contained" rounded large type="button">
+            <Button variant="contained" rounded large type="button" onClick={simulateFn}>
               プレビュー
             </Button>
             <Button

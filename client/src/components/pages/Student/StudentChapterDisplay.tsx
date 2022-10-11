@@ -20,14 +20,6 @@ import { Outlet, useNavigate, useParams } from "react-router-dom";
 // questions will only be fetched when the subcomponents are loaded.
 interface StudentChapterDisplayProps {}
 
-// type QuestionAttributes = FQuestionAttributes & {
-//   correct_answers_count: number;
-//   id: number;
-//   user_answer: { question_id: number; answer: string | null; order: number }[];
-//   item_number: number;
-//   answered_correctly: boolean;
-// };
-
 function StudentChapterDisplay({}: StudentChapterDisplayProps) {
   const mounted = useRef(true);
   const navigate = useNavigate();
@@ -159,7 +151,7 @@ function StudentChapterDisplay({}: StudentChapterDisplayProps) {
     test.chapter_title +
     (hasSubmitted
       ? "章末テスト結果"
-      : testType === "chapterTest"
+      : testType === "chapter-test"
       ? "章末テスト"
       : "理解度テスト");
 
