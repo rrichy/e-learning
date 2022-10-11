@@ -306,7 +306,7 @@ class CourseService
     private function updateQuestions(Test $test, array $questions)
     {
         $before = now();
-        $questions = [];
+        $question_ids = [];
         foreach ($questions as $question_data) {
             $question = Question::updateOrCreate([
                 'id' => $question_data['id'],
@@ -326,9 +326,9 @@ class CourseService
             );
             $question->options()->where('updated_at', '<', $before)->delete();
 
-            $questions[] = $question->id;
+            $question_ids[] = $question->id;
         }
-        $test->questions()->whereNotIn('id', $questions)->delete();
+        $test->questions()->whereNotIn('id', $question_ids)->delete();
     }
 
     private function updateExplainerVideos(Chapter $chapter, array $videos)
