@@ -47,6 +47,7 @@ import StudentChapterDisplay from "./Student/StudentChapterDisplay";
 import TestDetailsDisplay from "../organisms/Student/TestDetailsDisplay";
 import TestAnswerScreen from "../organisms/Student/TestAnswerScreen";
 import TestResult from "../organisms/Student/TestResult";
+import StudentProfile from "./StudentProfile";
 
 const { trial, individual, corporate, admin, guest } = MembershipType;
 const registered = [trial, individual, corporate, admin];
@@ -321,6 +322,14 @@ export default function Pages() {
           ],
         },
       ],
+    },
+    {
+      path: "/profile",
+      element: (
+        <PrivateRoute membershipTypes={registered}>
+          <StudentProfile />
+        </PrivateRoute>
+      ),
     },
     {
       path: "/*",
