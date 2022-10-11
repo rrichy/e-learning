@@ -9,7 +9,6 @@ import {
   updateCourse,
 } from "@/services/CourseService";
 import {
-  ChapterAttributes,
   CourseFormAttribute,
   CourseFormAttributeWithId,
   courseFormInit,
@@ -19,7 +18,6 @@ import {
   testFormSchema,
   testInit,
   VideoAttributes,
-  videoFormSchema,
   videoInit,
   videosFieldArraySchema,
 } from "@/validations/CourseFormValidation";
@@ -235,7 +233,11 @@ function CourseManagementAddEdit() {
             returnFn={() => setSelectedChapter(null)}
             type={selectedChapter.screen}
             simulateFn={() => {
-              setDisplayPreview(courseContext.getValues());
+              const course = courseContext.getValues();
+              course.chapters[selectedChapter.index].chapter_test =
+                testContext.getValues();
+
+              setDisplayPreview(course);
               setScreen(`chapter/${selectedChapter.index}/chapter-test`);
             }}
           />

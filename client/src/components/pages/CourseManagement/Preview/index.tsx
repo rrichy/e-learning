@@ -1,9 +1,16 @@
 import Button from "@/components/atoms/Button";
 import CommonHeader from "@/components/organisms/Student/CommonHeader";
+import TestAnswerScreen from "@/components/organisms/Student/TestAnswerScreen";
 import TestDetailsDisplay from "@/components/organisms/Student/TestDetailsDisplay";
-import { ChapterContextAttribute } from "@/hooks/pages/Students/useChapter";
+import TestResult from "@/components/organisms/Student/TestResult";
+import {
+  ChapterContextAttribute,
+  QuestionAttributes,
+} from "@/hooks/pages/Students/useChapter";
 import { CourseScreenType } from "@/interfaces/CommonInterface";
 import ChapterPreviewProvider from "@/providers/ChapterPreviewProvider";
+import calculateResult from "@/utils/calculateResult";
+import createMap from "@/utils/createMap";
 import {
   CourseFormAttribute,
   courseFormInit,
@@ -15,13 +22,13 @@ import {
   Container,
   Dialog,
   Grid,
-  Paper,
   Slide,
   Toolbar,
   Typography,
 } from "@mui/material";
 import { TransitionProps } from "@mui/material/transitions";
 import React, { useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form-mui";
 import CourseDetailPreview from "./CourseDetailPreview";
 
 interface PreviewProps {
@@ -53,6 +60,17 @@ function Preview({
     useState<CourseScreenType>(toScreen);
   const [course, setCourse] = useState<CourseFormAttribute>(courseFormInit);
   const [initialized, setInitialized] = useState(false);
+  const [result, setResult] = useState<ChapterContextAttribute["result"]>({
+    passed: true,
+    score: 0,
+    total: 0,
+    questions: [],
+  });
+
+  const form = useForm<{ answers: QuestionAttributes["user_answer"][] }>({
+    mode: "onChange",
+    defaultValues: { answers: [] },
+  });
 
   const screen = useMemo(() => {
     if (templateScreen === "course") return "course";
@@ -73,6 +91,28 @@ function Preview({
     };
   }, [templateScreen]);
 
+  const questions: any[] = useMemo(() => {
+    return (
+      course.chapters[chapterIndex ?? -1]?.chapter_test?.questions.map(
+        (a, index) => ({
+          ...a,
+          item_number: index + 1,
+          correct_answers_count: a.options.filter(
+            (b) => (b.correction_order || 0) > 0
+          ).length,
+          user_answer:
+            a.options
+              .filter((b) => (b.correction_order || 0) > 0)
+              .map((b, index) => ({
+                question_id: index,
+                answer: "",
+                order: index + 1,
+              })) || [],
+        })
+      ) || []
+    );
+  }, [course, chapterIndex]);
+
   const context = useMemo(() => {
     if (chapterIndex === undefined) return null;
 
@@ -83,10 +123,43 @@ function Preview({
           questions_count:
             course.chapters[chapterIndex].chapter_test?.questions.length,
         } ?? testInit,
-      handleNext: () =>
-        setTemplateScreen(`chapter/${chapterIndex}/chapter-test/1`),
+      handleNext: (fetch = false, updateForm = true) => {
+        if (!updateForm) {
+          const question = questions[itemIndex ?? 0];
+          form.setValue(
+            `answers.${itemIndex ?? 0}`,
+            Array(question.correct_answers_count)
+              .fill("")
+              .map((c, index) => ({
+                question_id: index,
+                answer: question.user_answer[index]?.answer || null,
+                order: index + 1,
+              }))
+          );
+        }
+        setTemplateScreen(
+          `chapter/${chapterIndex}/chapter-test/${(itemIndex ?? 0) + 1}`
+        );
+      },
+      handleSubmit: () => {
+        const result = calculateResult(
+          course.chapters[chapterIndex].chapter_test?.passing_score || 0,
+          questions,
+          form.getValues()
+        );
+
+        setResult(result);
+        setTemplateScreen(`chapter/${chapterIndex}/chapter-test/result`);
+      },
+      questions,
+      mappedQuestions: createMap<any, number>(questions, "item_number"),
+      itemNumber: itemIndex ?? 0,
+      form,
+      prefix: `chapter/${chapterIndex}/chapter-test`,
+      result,
+      hasSubmitted: Boolean(result),
     } as Partial<ChapterContextAttribute>;
-  }, [course, chapterIndex]);
+  }, [course, chapterIndex, itemIndex, form, questions, result]);
 
   const handleClose = () => {
     onClose();
@@ -104,7 +177,20 @@ function Preview({
     }
   }, [initialized, coursePreview, toScreen]);
 
-  console.log({ templateScreen, toScreen });
+  useEffect(() => {
+    form.reset({
+      answers: questions.map((q: QuestionAttributes) =>
+        Array(q.correct_answers_count)
+          .fill("")
+          .map((_c, index) => ({
+            question_id: q.id,
+            answer: q.user_answer?.[index]?.answer || null,
+            order: index + 1,
+          }))
+      ),
+    });
+  }, [questions]);
+
   return (
     <Dialog
       fullScreen
@@ -126,6 +212,7 @@ function Preview({
             {screen === "lecture" && "lecture"}
             {screen === "chapter-test" && "章末テストプレービュー"}
             {screen === "answer" && "テストシミュレーター"}
+            {screen === "result" && "章末テスト結果プレービュー"}
           </Typography>
           <Button
             color="inherit"
@@ -151,7 +238,10 @@ function Preview({
               {screen === "chapter-test" && (
                 <TestDetailsDisplay screenFn={setTemplateScreen} />
               )}
-              {screen === "answer" && "テストシミュレーター"}
+              {screen === "answer" && (
+                <TestAnswerScreen screenFn={setTemplateScreen} />
+              )}
+              {screen === "result" && <TestResult preview />}
             </ChapterPreviewProvider>
           )}
         </Grid>

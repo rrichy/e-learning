@@ -5,22 +5,35 @@ import MaterialTable, {
   MaterialTableProps,
   MTableHeader,
 } from "material-table";
-import { DragDropContext, Draggable, Droppable, DropResult } from "react-beautiful-dnd";
+import {
+  DragDropContext,
+  Draggable,
+  Droppable,
+  DropResult,
+} from "react-beautiful-dnd";
 import MTableBody from "./MTableBody";
 import MTableBodyRow from "./MTableBodyRow";
 
 interface TableProps extends Omit<MaterialTableProps<any>, "data"> {
   state: PaginatedData<any>;
-  onDragEnd?: (result: DropResult) => void
-  fetchData: (
+  onDragEnd?: (result: DropResult) => void;
+  fetchData?: (
     page?: number,
     pageSize?: number,
     sort?: any,
-    order?: OrderType,
+    order?: OrderType
   ) => void;
 }
 
-function Table({ state, fetchData, columns, options, components, onDragEnd, ...props }: TableProps) {
+function Table({
+  state,
+  fetchData,
+  columns,
+  options,
+  components,
+  onDragEnd,
+  ...props
+}: TableProps) {
   return (
     <MaterialTable
       columns={columns}
@@ -32,49 +45,56 @@ function Table({ state, fetchData, columns, options, components, onDragEnd, ...p
             orderBy={columns.findIndex((a) => a.field === state.sort)}
             orderDirection={state.order}
             onOrderChange={(sortIndex: any, order: any) => {
-              fetchData(
-                state.page,
-                state.per_page,
-                order ? columns[sortIndex].field : "id",
-                order || "desc"
-              );
+              if (fetchData) {
+                fetchData(
+                  state.page,
+                  state.per_page,
+                  order ? columns[sortIndex].field : "id",
+                  order || "desc"
+                );
+              }
             }}
           />
         ),
         Container: (props) => <Paper {...props} variant="table" />,
-        ...(onDragEnd ? {
-          Body: (props) => (
-            <DragDropContext onDragEnd={onDragEnd}>
-              <Droppable
-                droppableId={"singleColumnDroppableAreaThusStaticInput"}
-              >
-                {(provided) => (
-                  <>
-                    <MTableBody {...props} forwardedRef={provided.innerRef} />
-                    {provided.placeholder}
-                  </>
-                )}
-              </Droppable>
-            </DragDropContext>
-          ),
-          Row: (props) => (
-            <Draggable
-              draggableId={props.data.tableData.id.toString()}
-              index={props.data.tableData.id}
-            >
-              {(provided) => {
-                return (
-                  <MTableBodyRow
-                    {...props}
-                    {...provided.draggableProps}
-                    dragHandleProps={provided.dragHandleProps}
-                    forwardedRef={provided.innerRef}
-                  />
-                );
-              }}
-            </Draggable>
-          )
-        } : {}),
+        ...(onDragEnd
+          ? {
+              Body: (props) => (
+                <DragDropContext onDragEnd={onDragEnd}>
+                  <Droppable
+                    droppableId={"singleColumnDroppableAreaThusStaticInput"}
+                  >
+                    {(provided) => (
+                      <>
+                        <MTableBody
+                          {...props}
+                          forwardedRef={provided.innerRef}
+                        />
+                        {provided.placeholder}
+                      </>
+                    )}
+                  </Droppable>
+                </DragDropContext>
+              ),
+              Row: (props) => (
+                <Draggable
+                  draggableId={props.data.tableData.id.toString()}
+                  index={props.data.tableData.id}
+                >
+                  {(provided) => {
+                    return (
+                      <MTableBodyRow
+                        {...props}
+                        {...provided.draggableProps}
+                        dragHandleProps={provided.dragHandleProps}
+                        forwardedRef={provided.innerRef}
+                      />
+                    );
+                  }}
+                </Draggable>
+              ),
+            }
+          : {}),
         ...components,
       }}
       options={{
@@ -85,9 +105,11 @@ function Table({ state, fetchData, columns, options, components, onDragEnd, ...p
         minBodyHeight: 300,
         ...options,
       }}
-      onChangePage={(page, per_page) =>
-        fetchData(page + 1, per_page, state.sort, state.order)
-      }
+      onChangePage={(page, per_page) => {
+        if (fetchData) {
+          fetchData(page + 1, per_page, state.sort, state.order);
+        }
+      }}
       isLoading={state.loading}
       totalCount={state.total}
       page={state.page - 1}
