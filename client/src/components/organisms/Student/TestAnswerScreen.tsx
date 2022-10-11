@@ -87,6 +87,7 @@ function TestAnswerScreen({
                 <Stack spacing={2}>
                   {currentQuestion?.format === 1 && (
                     <RadioGroup
+                      key={`answers.${currentItem - 1}`}
                       name={`answers.${currentItem - 1}.${0}.answer`}
                       options={currentQuestion?.options}
                       labelKey="description"
