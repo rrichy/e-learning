@@ -14,6 +14,7 @@ import {
   CheckBoxOutlineBlank,
 } from "@mui/icons-material";
 import { ChapterAttributes } from "@/validations/CourseFormValidation";
+import { CourseScreenType } from "@/interfaces/CommonInterface";
 
 interface CourseChapterListProps {
   chapters: (ChapterAttributes & {
@@ -21,9 +22,10 @@ interface CourseChapterListProps {
     has_passed?: boolean;
     latest_score?: number | null;
   })[];
+  screenFn?: (s: CourseScreenType) => void;
 }
 
-function CourseChapterList({ chapters }: CourseChapterListProps) {
+function CourseChapterList({ chapters, screenFn }: CourseChapterListProps) {
   return (
     <Grid item xs={12}>
       <Paper variant="softoutline" sx={{ width: 1, height: 1 }}>
@@ -69,14 +71,15 @@ function CourseChapterList({ chapters }: CourseChapterListProps) {
             }}
           >
             {chapters.map(
-              ({ id, item_number, title, latest_score, has_passed }) => (
+              ({ id, item_number, title, latest_score, has_passed }, index) => (
                 <Chapter
                   key={id}
-                  id={id!}
+                  id={screenFn ? index : id!}
                   chapterNumber={item_number}
                   title={title}
-                  score={latest_score!}
-                  passed={has_passed!}
+                  score={latest_score ?? null}
+                  passed={has_passed ?? false}
+                  screenFn={screenFn}
                 />
               )
             )}
@@ -95,12 +98,14 @@ const Chapter = ({
   title,
   score,
   passed,
+  screenFn,
 }: {
   id: number;
   chapterNumber: number;
   title: string;
   score: number | null;
   passed: boolean;
+  screenFn?: (s: CourseScreenType) => void;
 }) => (
   <Stack
     direction={{ xs: "column", md: "row" }}
@@ -135,7 +140,8 @@ const Chapter = ({
         // startIcon={<CheckBox />}
         startIcon={<CheckBoxOutlineBlank />}
         endIcon={<ArrowForward />}
-        to={`chapter/${id}/lecture`}
+        onClick={screenFn ? () => screenFn(`chapter/${id}/lecture`) : undefined}
+        to={screenFn ? undefined : `chapter/${id}/lecture`}
       >
         解説動画
       </Button>
@@ -145,7 +151,8 @@ const Chapter = ({
         sx={{ width: "fit-content", whiteSpace: "nowrap" }}
         startIcon={passed ? <CheckBox /> : <CheckBoxOutlineBlank />}
         endIcon={<ArrowForward />}
-        to={`chapter/${id}/chapter-test`}
+        onClick={screenFn ? () => screenFn(`chapter/${id}/chapter-test`) : undefined}
+        to={screenFn ? undefined : `chapter/${id}/chapter-test`}
       >
         章末テスト
       </Button>

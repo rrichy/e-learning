@@ -42,3 +42,10 @@ export const initPaginatedData = <T>(): PaginatedData<T> => ({
 export interface InfiniteScrollAttribute<T> extends PaginatedData<T> {
   maxVisited: number;
 }
+
+export type CourseScreenType = 
+  | "course"
+  | `chapter/${number}/chapter-test`
+  | `chapter/${number}/chapter-test/result`
+  | `chapter/${number}/chapter-test/${number}`
+  | `chapter/${number}/lecture`

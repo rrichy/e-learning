@@ -1,5 +1,6 @@
 import Button from "@/components/atoms/Button";
 import useChapter from "@/hooks/pages/Students/useChapter";
+import { CourseScreenType } from "@/interfaces/CommonInterface";
 import { TestAttributes, testInit } from "@/validations/CourseFormValidation";
 import { ArrowForward } from "@mui/icons-material";
 import Close from "@mui/icons-material/Close";
@@ -9,16 +10,18 @@ import { useParams } from "react-router-dom";
 
 // ENSURE NO DATA FETCHING IN THIS COMPONENT
 
-function TestDetailsDisplay({ testState }: { testState?: TestAttributes }) {
+function TestDetailsDisplay({
+  screenFn,
+}: {
+  screenFn?: (s: CourseScreenType) => void;
+}) {
   const [test, setTest] = useState(testInit);
-  const chapter = useChapter();
+  const chapter = useChapter(Boolean(screenFn));
   const { courseId } = useParams();
 
-  const isPreview = Boolean(testState);
-
   useEffect(() => {
-    if (!isPreview && chapter?.test) setTest(chapter.test);
-  }, [isPreview, chapter?.test]);
+    if (chapter?.test) setTest(chapter.test);
+  }, [chapter?.test]);
 
   return (
     <>
@@ -85,7 +88,7 @@ function TestDetailsDisplay({ testState }: { testState?: TestAttributes }) {
             variant="contained"
             color="tertiary"
             endIcon={<ArrowForward />}
-            onClick={() => chapter.handleNext(true)}
+            onClick={() => chapter.handleNext!(true)}
             // disabled={test.is_not_allowed}
           >
             テストを開始する
@@ -98,7 +101,8 @@ function TestDetailsDisplay({ testState }: { testState?: TestAttributes }) {
               mt: 2,
               boxShadow: (t) => `0 3px ${t.palette.primary.main}`,
             }}
-            to={`/course/${courseId}`}
+            onClick={screenFn ? () => screenFn("course") : undefined}
+            to={screenFn ? undefined : `/course/${courseId}`}
           >
             閉じる
           </Button>

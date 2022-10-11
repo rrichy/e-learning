@@ -8,12 +8,10 @@ import { OptionAttribute } from "@/interfaces/CommonInterface";
 import ConditionalDateRange from "@/components/atoms/HookForms/ConditionalDateRange";
 import {
   Delete,
-  DragHandle,
   DragIndicator,
   EventNote,
   VideoLibrary,
 } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
 import { Control, useFieldArray, useFormContext } from "react-hook-form";
 import {
   chapterInit,
@@ -34,10 +32,12 @@ function CourseManagementForm({
   categories,
   control,
   setSelection,
+  simulateFn,
 }: {
   categories: OptionAttribute[];
   control: Control<CourseFormAttribute>;
   setSelection: (d: SelectedChapterType) => void;
+  simulateFn: () => void;
 }) {
   const {
     formState: { isValid, isDirty },
@@ -207,7 +207,13 @@ function CourseManagementForm({
           >
             キャンセル
           </Button>
-          <Button variant="contained" rounded large type="button">
+          <Button
+            variant="contained"
+            rounded
+            large
+            type="button"
+            onClick={simulateFn}
+          >
             プレビュー
           </Button>
           <Button

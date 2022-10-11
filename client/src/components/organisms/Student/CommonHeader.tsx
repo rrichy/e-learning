@@ -3,10 +3,9 @@ import { Avatar, Grid, Paper, Stack, Typography } from "@mui/material";
 interface CommonHeaderProps {
   image: string | null;
   title: string;
-  preview?: boolean;
 }
 
-function CommonHeader({ image, title, preview }: CommonHeaderProps) {
+function CommonHeader({ image, title }: CommonHeaderProps) {
   return (
     <Grid item xs={12}>
       <Paper variant="softoutline" sx={{ width: 1 }}>

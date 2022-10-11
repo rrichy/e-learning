@@ -1,7 +1,7 @@
 import useChapter, {
   QuestionAttributes,
 } from "@/hooks/pages/Students/useChapter";
-import { useCallback, useRef } from "react";
+import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "@/components/atoms/Button";
 import { CircleOutlined, CloseOutlined } from "@mui/icons-material";
@@ -20,10 +20,10 @@ import useAlerter from "@/hooks/useAlerter";
 import { TABLE_ROWS_PER_PAGE } from "@/settings/appconfig";
 import TestExplanation from "./TestExplanation";
 
-function TestResult() {
+function TestResult({ preview }: { preview?: boolean }) {
   const mounted = useRef(true);
   const navigate = useNavigate();
-  const { hasSubmitted, prefix, result } = useChapter();
+  const { hasSubmitted, prefix, result } = useChapter(preview);
   const [initialized, setInitialized] = useState(false);
   const { errorSnackbar } = useAlerter();
   const [state, setState] = useState(initPaginatedData<QuestionAttributes>());
@@ -32,42 +32,6 @@ function TestResult() {
   );
 
   if (!hasSubmitted) navigate(prefix);
-
-  const fetchData = useCallback(
-    async (
-      page: number = 1,
-      pageSize: number = TABLE_ROWS_PER_PAGE[0],
-      sort: keyof QuestionAttributes = "item_number",
-      order: OrderType = "desc"
-    ) => {
-      // setStateSelected([]);
-
-      try {
-        setState((s) => ({
-          ...s,
-          loading: true,
-        }));
-
-        // const res = await indexCourse("both");
-
-        // const { data } = res.data;
-        // const parsed = data.reduce(
-        //   (acc: QuestionAttributes[], b: QuestionAttributes[]) => acc.concat(b),
-        //   []
-        // );
-        // if (mounted.current) {
-        //   setState((s) => ({
-        //     ...s,
-        //     loading: false,
-        //     data: parsed,
-        //   }));
-        // }
-      } catch (e: any) {
-        errorSnackbar(e.message);
-      }
-    },
-    []
-  );
 
   const columns: Column<QuestionAttributes>[] = [
     { field: "item_number", title: "設問番号" },
@@ -148,7 +112,6 @@ function TestResult() {
             <Table
               columns={columns}
               state={state}
-              fetchData={fetchData}
               actions={[
                 (row) => ({
                   icon: "save",
