@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\UpdateSelfRequest;
+use App\Http\Resources\AccountShowResource;
 use App\Models\Category;
 use App\Models\Course;
 use App\Models\MembershipType;
@@ -51,7 +53,7 @@ class AuthenticatedSessionController extends Controller
             case MembershipType::CORPORATE:
                 // Count individuals under the same affiliation as the Corporate (UNFINISHED)
                 return response()->json([
-                    'user' => auth()->user(),
+                    'user' => new AccountShowResource(auth()->user()->load('departments')),
                     'users_count' => [
                         'individual' => User::query()
                             ->where('membership_type_id', MembershipType::INDIVIDUAL)
@@ -62,7 +64,7 @@ class AuthenticatedSessionController extends Controller
                 ]);
             case MembershipType::INDIVIDUAL:
                 return response()->json([
-                    'user' => auth()->user(),
+                    'user' => new AccountShowResource(auth()->user()->load('departments')),
                     'message' => 'Login Successful!',
                     'categories' => Category::query()
                         ->whereHas('courses', fn ($q) => $q->where('status', Course::STATUS['public']))
@@ -78,21 +80,32 @@ class AuthenticatedSessionController extends Controller
         }
     }
 
-    /**
-     * Update the authenticated user
-     * 
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request)
+    public function update(UpdateSelfRequest $request)
     {
-        $valid = $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|string|email|unique:users,email,' . auth()->id(),
-            'image' => 'nullable|string'
-        ]);
+        $valid = $request->validated();
 
-        auth()->user()->update($valid);
+        DB::transaction(function () use ($valid) {
+            $auth = auth()->user();
+            
+            $auth->update($valid);
+
+            $newdepartments = [];
+            if (isset($valid['department_1'])) {
+                $newdepartments[] = $auth->departmentUsers()->updateOrCreate([
+                    'department_id' => $valid['department_1'],
+                    'order' => 1,
+                ])->id;
+
+                if (isset($valid['department_2'])) {
+                    $newdepartments[] = $auth->departmentUsers()->updateOrCreate([
+                        'department_id' => $valid['department_2'],
+                        'order' => 2,
+                    ])->id;
+                }
+            }
+
+            $auth->departmentUsers()->whereNotIn('id', $newdepartments)->delete();
+        });
 
         return response()->json([
             'message' => 'Update successful!',

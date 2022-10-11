@@ -29,7 +29,7 @@ import { MembershipType } from "@/enums/membershipTypes";
 import useAuth from "@/hooks/useAuth";
 import Button from "@/components/atoms/Button";
 
-const { trial, individual, corporate, admin } = MembershipType;
+const { admin } = MembershipType;
 
 function AccountManagementAddEdit() {
   const mounted = useRef(true);
@@ -37,19 +37,7 @@ function AccountManagementAddEdit() {
   const { state, pathname } = useLocation();
   const { accountId } = useParams();
   const [initialized, setInitialized] = useState(false);
-  const [options, setOptions] = useState<OptionsAttribute>({
-    membership_type_id: [
-      { id: trial, name: "トライアル" },
-      { id: individual, name: "個人" },
-      { id: corporate, name: "法人" },
-      { id: admin, name: "管理者" },
-    ],
-    sex: [
-      { id: 0, name: "未選択", selectionType: "disabled" },
-      { id: 1, name: "男性" },
-      { id: 2, name: "女性" },
-    ],
-  });
+  const [options, setOptions] = useState<OptionsAttribute>({});
   const { isConfirmed } = useConfirm();
   const { successSnackbar, errorSnackbar, handleError } = useAlerter();
   const { membershipTypeId } = useAuth();

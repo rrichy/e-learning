@@ -1,3 +1,4 @@
+import { UserAttributes } from "@/interfaces/AuthAttributes";
 import { RegistrationFormAttribute } from "@/validations/RegistrationFormValidation";
 import { get, post, BEARER_TOKEN, put } from "./ApiService";
 
@@ -23,7 +24,7 @@ export const getAuthData = () => {
   return get("/api/me");
 };
 
-export const updateAuthData = (payload: Partial<RegistrationFormAttribute>) => {
+export const updateAuthData = (payload: Partial<UserAttributes>) => {
   return put("/api/me", payload);
 };
 
