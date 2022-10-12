@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class AccountService
 {
@@ -49,6 +50,15 @@ class AccountService
         $valid = $request->validated();
         
         DB::transaction(function () use ($valid, $user) {
+            $s3_image_url = auth()->user()->temporaryUrls()->where('directory', 'profiles/')->first();
+    
+            if ($s3_image_url) {
+                $s3_image_url->delete();
+                abort_if($s3_image_url->url !== $valid['image'], 403, 'Image url mismatch!');
+            }
+
+            $old_image = $user->image;
+
             $user->update($valid);
 
             $newdepartments = [];
@@ -60,6 +70,10 @@ class AccountService
                 }
             }
             $user->departments()->sync($newdepartments);
+
+            if ($s3_image_url) {
+                Storage::delete(str_replace(config('constants.prefixes.s3'), '', $old_image));
+            }
         });
     }
 
@@ -67,6 +81,13 @@ class AccountService
     public function store(AccountStoreUpdateRequest $request)
     {
         $valid = $request->validated();
+
+        $s3_image_url = auth()->user()->temporaryUrls()->where('directory', 'profiles/')->first();
+
+        if ($s3_image_url) {
+            $s3_image_url->delete();
+            abort_if($s3_image_url->url !== $valid['image'], 403, 'Image url mismatch!');
+        }
 
         $parsed = array_merge($valid, [
             'password' => Hash::make($request->password),
@@ -83,7 +104,7 @@ class AccountService
             }
         }
         $user->departments()->attach($newdepartments);
-
+        
         // ignore but do not comment out
         event(new Registered($user));
     }

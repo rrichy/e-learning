@@ -57,7 +57,7 @@ class UpdateSelfRequest extends FormRequest
     public function rules()
     {
         $auth = auth()->user();
-        $prefix = 'https://'.config('filesystems.disks.s3.bucket').'.s3.'.config('filesystems.disks.s3.region').'.amazonaws.com/';
+        $prefix = config('constants.prefixes.s3');
 
         if ($auth->isAdmin()) {
             return [

@@ -51,7 +51,7 @@ class AccountStoreUpdateRequest extends FormRequest
     {
         $rules = [
             'name' => ['required', 'string', 'max:255'],
-            'image' => ['nullable', 'string', 'max:255'],
+            'image' => ['nullable', 'string', 'max:255', 'starts_with:' . config('constants.prefixes.s3')],
             'sex' => ['required', 'integer', 'in:1,2'],
             'birthday' => ['required', 'date_format:Y-m-d', 'before:today'],
             'membership_type_id' => ['required', 'integer', Rule::in(MembershipType::TYPES)],

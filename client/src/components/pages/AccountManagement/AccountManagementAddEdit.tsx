@@ -21,13 +21,12 @@ import {
   storeAccount,
   updateAccount,
 } from "@/services/AccountService";
-import {
-  OptionsAttribute,
-} from "@/interfaces/CommonInterface";
+import { OptionsAttribute } from "@/interfaces/CommonInterface";
 import OptionsContextProvider from "@/providers/OptionsContextProvider";
 import { MembershipType } from "@/enums/membershipTypes";
 import useAuth from "@/hooks/useAuth";
 import Button from "@/components/atoms/Button";
+import { uploadImage } from "@/services/AuthService";
 
 const { admin } = MembershipType;
 
@@ -69,9 +68,11 @@ function AccountManagementAddEdit() {
 
       if (confirmed) {
         try {
+          const image = await uploadImage(raw.image);
+
           const res = await (isCreate
-            ? storeAccount(raw)
-            : updateAccount(+accountId!, raw));
+            ? storeAccount({ ...raw, image })
+            : updateAccount(+accountId!, { ...raw, image }));
           successSnackbar(res.data.message);
           navigate("/account-management");
         } catch (e: any) {
@@ -250,7 +251,9 @@ function AccountManagementAddEdit() {
   return (
     <Paper variant="outlined">
       <Stack spacing={3}>
-        <Typography variant="sectiontitle2">アカウントを{isCreate ? "登録" : "編集"}</Typography>
+        <Typography variant="sectiontitle2">
+          アカウントを{isCreate ? "登録" : "編集"}
+        </Typography>
         <OptionsContextProvider options={options}>
           <DisabledComponentContextProvider
             showLoading

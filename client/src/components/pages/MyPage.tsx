@@ -5,7 +5,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { adminRegistrationFormSchema } from "@/validations/RegistrationFormValidation";
 import useConfirm from "@/hooks/useConfirm";
 import useAlerter from "@/hooks/useAlerter";
-import { updateAuthData, upload } from "@/services/AuthService";
+import { updateAuthData, uploadImage } from "@/services/AuthService";
 import { useCallback, useEffect, useRef, useState } from "react";
 import useAuth from "@/hooks/useAuth";
 import { UserAttributes, userInit } from "@/interfaces/AuthAttributes";
@@ -19,7 +19,6 @@ import {
   getOptions,
   getOptionsWithBelongsToId,
 } from "@/services/CommonService";
-import { put } from "@/services/ApiService";
 
 const { trial, individual, corporate, admin } = MembershipType;
 
@@ -91,19 +90,7 @@ function MyPage() {
 
     if (confirmed) {
       try {
-        let image: string | null = "";
-
-        if (!raw.image) image = null;
-        else if (typeof raw.image === "string") image = raw.image;
-        else {
-          const url = await upload("profile_image");
-          await put(url.data, raw.image[0] as File, {
-            headers: {
-              "Content-Type": (raw.image[0] as File).type,
-            },
-          }, true);
-          image = url.data.split("?")[0];
-        }
+        const image = await uploadImage(raw.image);
         const res = await updateAuthData({...raw, image });
 
         successSnackbar(res.data.message);

@@ -31,24 +31,24 @@ class AuthenticatedService
 
             $s3_image_url = $auth->temporaryUrls()->where('directory', 'profiles/')->first();
 
-            abort_if($s3_image_url && $s3_image_url->url !== $valid['image'], 403, 'Image url mismatch!');
-            
+            if ($s3_image_url) {
+                $s3_image_url->delete();
+                abort_if($s3_image_url->url !== $valid['image'], 403, 'Image url mismatch!');
+            }
+
             $old_image = $auth->image;
-            
+
             $auth->update($valid);
 
             $newdepartments = [];
             if (isset($valid['department_1'])) {
-                $newdepartments[$valid['department_1']] = [ 'order' => 1 ];
-                if (isset($valid['department_2'])) $newdepartments[$valid['department_2']] = [ 'order' => 2 ];
+                $newdepartments[$valid['department_1']] = ['order' => 1];
+                if (isset($valid['department_2'])) $newdepartments[$valid['department_2']] = ['order' => 2];
             }
             $auth->departments()->sync($newdepartments);
 
             if ($s3_image_url) {
-                $s3_image_url->delete();
-                $prefix = 'https://'.config('filesystems.disks.s3.bucket').'.s3.'.config('filesystems.disks.s3.region').'.amazonaws.com/';
-
-                Storage::delete(str_replace($prefix, '', $old_image));
+                Storage::delete(str_replace(config('constants.prefixes.s3'), '', $old_image));
             }
         });
 
@@ -100,12 +100,12 @@ class AuthenticatedService
         if ($directory === 'profiles/') {
             $client = Storage::getClient();
             $expiry = "+3 minutes";
-    
+
             $command = $client->getCommand('PutObject', [
                 'Bucket' => config('filesystems.disks.s3.bucket'),
                 'Key'    => $directory . now()->valueOf()
             ]);
-    
+
             $url = $client->createPresignedRequest($command, $expiry)->getUri();
 
             // $url = Storage::temporaryUrl($directory . now()->valueOf(), now()->addMinutes(3));
