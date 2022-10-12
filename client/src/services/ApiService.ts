@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { Axios, AxiosRequestConfig } from "axios";
 import { getBearerToken } from "./AuthService";
 
 export const BEARER_TOKEN = "bearer_token";
@@ -87,11 +87,11 @@ export const patch = async (url: string, data: any = {}) => {
   }
 };
 
-export const put = async (url: string, data: any) => {
+export const put = async (url: string, data: any, config: AxiosRequestConfig = {}, detachAuth = false) => {
   try {
     let access_token = localStorage.getItem(BEARER_TOKEN);
-    let headers: any = {};
-    if (access_token) {
+    let headers: AxiosRequestConfig["headers"] = config.headers ?? {};
+    if (access_token && !detachAuth) {
       headers["Authorization"] = `Bearer ${access_token}`;
     }
 

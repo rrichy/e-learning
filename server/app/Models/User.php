@@ -127,4 +127,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(TestResult::class);
     }
+
+    public function temporaryUrls(): HasMany
+    {
+        return $this->hasMany(TemporaryUrl::class);
+    }
 }

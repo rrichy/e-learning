@@ -29,4 +29,9 @@ class AuthenticatedSessionController extends Controller
     {
         return $service->logout();
     }
+
+    public function upload(Request $request, AuthenticatedService $service)
+    {
+        return $service->upload($request);
+    }
 }

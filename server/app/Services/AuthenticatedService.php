@@ -8,8 +8,11 @@ use App\Http\Resources\AccountShowResource;
 use App\Models\Category;
 use App\Models\Course;
 use App\Models\MembershipType;
+use App\Models\TemporaryUrl;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class AuthenticatedService
 {
@@ -26,6 +29,12 @@ class AuthenticatedService
         DB::transaction(function () use ($valid) {
             $auth = auth()->user();
 
+            $s3_image_url = $auth->temporaryUrls()->where('directory', 'profiles/')->first();
+
+            abort_if($s3_image_url && $s3_image_url->url !== $valid['image'], 403, 'Image url mismatch!');
+            
+            $old_image = $auth->image;
+            
             $auth->update($valid);
 
             $newdepartments = [];
@@ -34,6 +43,13 @@ class AuthenticatedService
                 if (isset($valid['department_2'])) $newdepartments[$valid['department_2']] = [ 'order' => 2 ];
             }
             $auth->departments()->sync($newdepartments);
+
+            if ($s3_image_url) {
+                $s3_image_url->delete();
+                $prefix = 'https://'.config('filesystems.disks.s3.bucket').'.s3.'.config('filesystems.disks.s3.region').'.amazonaws.com/';
+
+                Storage::delete(str_replace($prefix, '', $old_image));
+            }
         });
 
         return response()->json([
@@ -56,6 +72,52 @@ class AuthenticatedService
             'access_token' => $token,
             'message' => 'Login Successful!',
         ]);
+    }
+
+    /**
+     * Types of upload
+     * - user edits own profile
+     * - admin/corporate edits other user's profile
+     * - admin/corporate uploads course
+     * - admin/corporate uploads video
+     */
+    public function upload(Request $request)
+    {
+        $auth = auth()->user();
+        $type = $request->input('type');
+        $user_id = $request->input('user_id');
+
+        abort_if(is_null($type) || !in_array($type, ['profile_image', 'course_image', 'chapter_video']), 403, 'No upload type in the request!');
+        abort_if(in_array($type, ['course_image', 'chapter_video']) && !($auth->isAdmin() || $auth->isCorporate()), 403, 'You are not authorized to upload with this type!');
+        abort_if($type === 'profile_image' && $auth->isIndividual() && $user_id, 403, 'You cannot modify someone else\'s image');
+
+        $directory = [
+            'profile_image' => 'profiles/',
+            'course_image' => 'courses/',
+            'chapter_video' => 'chapters/'
+        ][$type];
+
+        if ($directory === 'profiles/') {
+            $client = Storage::getClient();
+            $expiry = "+3 minutes";
+    
+            $command = $client->getCommand('PutObject', [
+                'Bucket' => config('filesystems.disks.s3.bucket'),
+                'Key'    => $directory . now()->valueOf()
+            ]);
+    
+            $url = $client->createPresignedRequest($command, $expiry)->getUri();
+
+            // $url = Storage::temporaryUrl($directory . now()->valueOf(), now()->addMinutes(3));
+
+            TemporaryUrl::create([
+                'directory' => $directory,
+                'url' => explode('?', $url)[0],
+                'user_id' => auth()->id(),
+            ]);
+
+            return response()->json($url);
+        }
     }
 
 

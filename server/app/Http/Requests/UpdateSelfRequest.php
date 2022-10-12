@@ -57,18 +57,19 @@ class UpdateSelfRequest extends FormRequest
     public function rules()
     {
         $auth = auth()->user();
+        $prefix = 'https://'.config('filesystems.disks.s3.bucket').'.s3.'.config('filesystems.disks.s3.region').'.amazonaws.com/';
 
         if ($auth->isAdmin()) {
             return [
                 'name' => 'required|string',
                 'email' => 'required|string|email|unique:users,email,' . auth()->id(),
-                'image' => 'nullable|string',
+                'image' => 'nullable|string|starts_with:' . $prefix,
             ];
         } else if ($auth->isCorporate() || $auth->isIndividual()) {
             return [
                 'name' => 'required|string',
                 'email' => 'required|string|email|unique:users,email,' . auth()->id(),
-                'image' => 'nullable|string',
+                'image' => 'nullable|string|starts_with:' . $prefix,
                 'sex' => 'required|integer|in:1,2',
                 'birthday' => ['required', 'date_format:Y-m-d'],
                 'department_1' => [
@@ -88,7 +89,7 @@ class UpdateSelfRequest extends FormRequest
             return [
                 'name' => 'required|string',
                 'email' => 'required|string|email|unique:users,email,' . auth()->id(),
-                'image' => 'nullable|string',
+                'image' => 'nullable|string|starts_with:' . $prefix,
                 'sex' => 'required|integer|in:1,2',
                 'birthday' => ['required', 'date_format:Y-m-d'],
             ];

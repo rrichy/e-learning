@@ -35,3 +35,11 @@ export const register = (payload: RegistrationFormAttribute) => {
 export const logout = () => {
   return post("/api/logout");
 };
+
+export const upload = (type: 'profile_image' | 'course_image' | 'chapter_video', id?: number) => {
+  let url = `/api/upload?type=${type}`;
+
+  if(id) url += `&user_id=${id}`;
+
+  return get(url);
+}
