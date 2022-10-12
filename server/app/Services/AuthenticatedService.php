@@ -30,20 +30,10 @@ class AuthenticatedService
 
             $newdepartments = [];
             if (isset($valid['department_1'])) {
-                $newdepartments[] = $auth->departmentUsers()->updateOrCreate([
-                    'department_id' => $valid['department_1'],
-                    'order' => 1,
-                ])->id;
-
-                if (isset($valid['department_2'])) {
-                    $newdepartments[] = $auth->departmentUsers()->updateOrCreate([
-                        'department_id' => $valid['department_2'],
-                        'order' => 2,
-                    ])->id;
-                }
+                $newdepartments[$valid['department_1']] = [ 'order' => 1 ];
+                if (isset($valid['department_2'])) $newdepartments[$valid['department_2']] = [ 'order' => 2 ];
             }
-
-            $auth->departmentUsers()->whereNotIn('id', $newdepartments)->delete();
+            $auth->departments()->sync($newdepartments);
         });
 
         return response()->json([

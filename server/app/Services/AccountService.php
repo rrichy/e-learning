@@ -21,7 +21,6 @@ class AccountService
 
         return AccountIndexResource::collection(
             User::whereNot('id', auth()->id())
-                ->with(['parentDepartment', 'childDepartment'])
                 ->when(
                     auth()->user()->isCorporate(),
                     fn ($q) => $q->where('affiliation_id', auth()->user()->affiliation_id)
@@ -54,20 +53,13 @@ class AccountService
 
             $newdepartments = [];
             if (isset($valid['department_1'])) {
-                $newdepartments[] = $user->departmentUsers()->updateOrCreate([
-                    'department_id' => $valid['department_1'],
-                    'order' => 1,
-                ])->id;
+                $newdepartments[$valid['department_1']] = [ 'order' => 1 ];
 
                 if (isset($valid['department_2'])) {
-                    $newdepartments[] = $user->departmentUsers()->updateOrCreate([
-                        'department_id' => $valid['department_2'],
-                        'order' => 2,
-                    ])->id;
+                    $newdepartments[$valid['department_2']] = [ 'order' => 2 ];
                 }
             }
-
-            $user->departmentUsers()->whereNotIn('id', $newdepartments)->delete();
+            $user->departments()->sync($newdepartments);
         });
     }
 
@@ -82,19 +74,15 @@ class AccountService
 
         $user = User::create($parsed);
 
+        $newdepartments = [];
         if (isset($valid['department_1'])) {
-            $newdepartments[] = $user->departmentUsers()->updateOrCreate([
-                'department_id' => $valid['department_1'],
-                'order' => 1,
-            ])->id;
+            $newdepartments[$valid['department_1']] = [ 'order' => 1 ];
 
             if (isset($valid['department_2'])) {
-                $newdepartments[] = $user->departmentUsers()->updateOrCreate([
-                    'department_id' => $valid['department_2'],
-                    'order' => 2,
-                ])->id;
+                $newdepartments[$valid['department_2']] = [ 'order' => 2 ];
             }
         }
+        $user->departments()->attach($newdepartments);
 
         // ignore but do not comment out
         event(new Registered($user));
