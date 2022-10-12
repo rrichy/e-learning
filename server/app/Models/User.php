@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -17,6 +18,7 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
+    protected $appends = ['parentDepartment', 'childDepartment'];
     /**
      * The attributes that are mass assignable.
      *
@@ -63,42 +65,24 @@ class User extends Authenticatable
         return $this->hasMany(DepartmentUser::class);
     }
 
-    public function departments(): HasManyThrough
+    public function departments(): BelongsToMany
     {
-        return $this->hasManyThrough(
-            Department::class, 
-            DepartmentUser::class,
-            'user_id',
-            'id',
-            'id',
-            'department_id',
-        );
+        return $this->belongsToMany(Department::class, 'department_users')
+            ->using(DepartmentUser::class)
+            ->withPivot('order')
+            ->as('departments');
     }
 
-    public function parentDepartment(): HasOneThrough
+    public function getParentDepartmentAttribute()
     {
-        return $this->hasOneThrough(
-            Department::class, 
-            DepartmentUser::class,
-            'user_id',
-            'id',
-            'id',
-            'department_id',
-        )->where('order', 1);
+        return $this->departments()->where('order', 1)->first();
     }
 
-    public function childDepartment(): HasOneThrough
+    public function getChildDepartmentAttribute()
     {
-        return $this->hasOneThrough(
-            Department::class, 
-            DepartmentUser::class,
-            'user_id',
-            'id',
-            'id',
-            'department_id',
-        )->where('order', 2);
+        return $this->departments()->where('order', 2)->first();
     }
-    
+
     public function affiliation(): BelongsTo
     {
         return $this->belongsTo(Affiliation::class);
@@ -118,12 +102,12 @@ class User extends Authenticatable
     {
         return $this->membership_type_id === MembershipType::CORPORATE;
     }
-    
+
     public function isIndividual(): bool
     {
         return $this->membership_type_id === MembershipType::INDIVIDUAL;
     }
-    
+
     public function attendingCourses(): HasMany
     {
         return $this->hasMany(AttendingCourse::class);
@@ -142,5 +126,10 @@ class User extends Authenticatable
     public function testResults(): HasMany
     {
         return $this->hasMany(TestResult::class);
+    }
+
+    public function temporaryUrls(): HasMany
+    {
+        return $this->hasMany(TemporaryUrl::class);
     }
 }

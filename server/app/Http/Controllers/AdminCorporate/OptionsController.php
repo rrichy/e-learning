@@ -36,7 +36,7 @@ class OptionsController extends Controller
                         }
                     case 'departments': {
                             $value = Department::query()
-                                ->when(!auth()->user()->isAdmin(), fn ($q) => $q->where('affiliation_id', auth()->user()->affiliation_id))
+                                ->when(!auth()->user()->isAdmin(), fn ($q) => $q->where('affiliation_id', auth()->user()->affiliation_id)->whereNull('parent_id'))
                                 ->get(['id', 'name']);
 
                             break;
@@ -61,7 +61,7 @@ class OptionsController extends Controller
 
             // get departments of a given affiliation_id
             $affiliation_id = request()->input('affiliation_id');
-            if ($affiliation_id) $options['departments'] = Department::where('affiliation_id', $affiliation_id)->get(['id', 'name']);
+            if ($affiliation_id) $options['departments'] = Department::where('affiliation_id', $affiliation_id)->whereNull('parent_id')->get(['id', 'name']);
 
             // get child_departments of a given department_id
             $department_id = request()->input('department_id');
