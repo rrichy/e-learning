@@ -57,19 +57,19 @@ class UpdateSelfRequest extends FormRequest
     public function rules()
     {
         $auth = auth()->user();
-        $prefix = config('constants.prefixes.s3');
+        $image_prefix = config('constants.prefixes.s3') . ',' . config('constants.prefixes.picsum');
 
         if ($auth->isAdmin()) {
             return [
                 'name' => 'required|string',
                 'email' => 'required|string|email|unique:users,email,' . auth()->id(),
-                'image' => 'nullable|string|starts_with:' . $prefix,
+                'image' => 'nullable|string|starts_with:' . $image_prefix,
             ];
         } else if ($auth->isCorporate() || $auth->isIndividual()) {
             return [
                 'name' => 'required|string',
                 'email' => 'required|string|email|unique:users,email,' . auth()->id(),
-                'image' => 'nullable|string|starts_with:' . $prefix,
+                'image' => 'nullable|string|starts_with:' . $image_prefix,
                 'sex' => 'required|integer|in:1,2',
                 'birthday' => ['required', 'date_format:Y-m-d'],
                 'department_1' => [
@@ -89,7 +89,7 @@ class UpdateSelfRequest extends FormRequest
             return [
                 'name' => 'required|string',
                 'email' => 'required|string|email|unique:users,email,' . auth()->id(),
-                'image' => 'nullable|string|starts_with:' . $prefix,
+                'image' => 'nullable|string|starts_with:' . $image_prefix,
                 'sex' => 'required|integer|in:1,2',
                 'birthday' => ['required', 'date_format:Y-m-d'],
             ];

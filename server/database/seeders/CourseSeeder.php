@@ -22,7 +22,7 @@ class CourseSeeder extends Seeder
         $courses = [];
 
         $categories->each(function ($category) use (&$courses, $signatures) {
-            foreach (Course::factory(rand(0, 3))->make(['category_id' => $category->id])->toArray() as $index => $course) {
+            foreach (Course::factory(rand(0, 8))->make(['category_id' => $category->id])->toArray() as $index => $course) {
                 if ($course['is_whole_period'] === 0) {
                     $course['start_period'] = now()->addDays(rand(15, 90));
                     $course['end_period'] = now()->addDays(rand(120, 270));

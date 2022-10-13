@@ -22,7 +22,7 @@ class CategorySeeder extends Seeder
             'サーバー'
         ];
 
-        $child_categories = [];
+        // $child_categories = [];
         foreach ($category_names as $index => $category_name) {
             // a category has an 80% chance of having an affiliation_id
             $affiliation_id = fake()->boolean(80) ? $affiliations->random()->id : null;
@@ -35,20 +35,20 @@ class CategorySeeder extends Seeder
                 'affiliation_id' => $affiliation_id,
             ]);
 
-            $child_data = Category::factory(rand(0, 2))->make([
-                'parent_id' => $category->id,
-                'affiliation_id' => $affiliation_id,
-            ]);
+            // $child_data = Category::factory(rand(0, 2))->make([
+            //     'parent_id' => $category->id,
+            //     'affiliation_id' => $affiliation_id,
+            // ]);
             
-            foreach($child_data->toArray() as $index => $child_category) {
-                $child_category['priority'] = $index + 1;
-                $child_category['created_at'] = now();
-                $child_category['updated_at'] = now();
+            // foreach($child_data->toArray() as $index => $child_category) {
+            //     $child_category['priority'] = $index + 1;
+            //     $child_category['created_at'] = now();
+            //     $child_category['updated_at'] = now();
 
-                array_push($child_categories, $child_category);
-            }
+            //     array_push($child_categories, $child_category);
+            // }
         }
         
-        Category::insert($child_categories);
+        // Category::insert($child_categories);
     }
 }
