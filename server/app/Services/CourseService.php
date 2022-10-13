@@ -16,6 +16,7 @@ use App\Models\QuestionOption;
 use App\Models\Test;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class CourseService
@@ -30,21 +31,23 @@ class CourseService
         if ($auth->isIndividual()) {
             return CourseListResource::collection(
                 Category::whereHas('courses', fn ($q) => $q->where('status', Course::STATUS['public']))
-                ->with(
-                    ['courses' => fn ($q) => $q->where('status', Course::STATUS['public'])]
-                )->get()
+                    ->with(
+                        ['courses' => fn ($q) => $q->where('status', Course::STATUS['public'])]
+                    )->get()
             );
         }
-        
+
         if ($status === "both") {
             return CourseIndexResource::collection(
                 Category::with(['courses' => function ($q) {
                     $q->orderBy('priority', 'asc');
                 }])->when(
-                    $auth->isCorporate(), 
-                    function ($q) use ($auth) { $q->where('affiliation_id', $auth->affiliation_id); }
+                    $auth->isCorporate(),
+                    function ($q) use ($auth) {
+                        $q->where('affiliation_id', $auth->affiliation_id);
+                    }
                 )->orderBy('priority', 'asc')
-                ->get()
+                    ->get()
             );
         }
 
@@ -52,8 +55,10 @@ class CourseService
             Category::with(['courses' => function ($q) use ($status) {
                 $q->where('status', Course::STATUS[$status] ?? Course::STATUS['public']);
             }])->when(
-                $auth->isCorporate(), 
-                function ($q) use ($auth) { $q->where('affiliation_id', $auth->affiliation_id); }
+                $auth->isCorporate(),
+                function ($q) use ($auth) {
+                    $q->where('affiliation_id', $auth->affiliation_id);
+                }
             )->get()
         );
     }
@@ -68,13 +73,13 @@ class CourseService
                 ])
             );
         }
-        
+
         abort_if(
             auth()->user()->isCorporate() && auth()->user()->affiliation_id !== $course->category->affiliation_id,
             403,
             'You have no authority of viewing this course!'
         );
-        
+
         return new CourseShowResource(
             $course->load([
                 'chapters' => fn ($chapter) => $chapter->with([
@@ -101,9 +106,22 @@ class CourseService
         $valid = $request->validated();
 
         DB::transaction(function () use ($course, $valid) {
+            $s3_image_url = auth()->user()->temporaryUrls()->where('directory', 'courses/')->first();
+
+            if ($s3_image_url) {
+                $s3_image_url->delete();
+                abort_if($s3_image_url->url !== $valid['image'], 403, 'Image url mismatch!');
+            }
+
+            $old_image = $course->image;
+
             $course->update($valid);
 
             $this->updateChapters($course, $valid['chapters']);
+
+            if ($s3_image_url) {
+                Storage::delete(str_replace(config('constants.prefixes.s3'), '', $old_image));
+            }
         });
     }
 
@@ -143,14 +161,14 @@ class CourseService
     {
         $auth = auth()->user();
         $course_ids = array_map(fn ($q) => $q['id'], $request->payload);
-        
+
         $rules = [
             'payload' => 'array',
             'payload.*.category_id' => 'required|integer',
             'payload.*.changes' => 'array',
             'payload.*.changes.*.id' => 'required|integer|distinct|exists:courses,id',
         ];
-        
+
         foreach ($request->payload as $index => $category) {
             $course_ids = array_map(fn ($q) => $q['id'], $category['changes']);
             $rules['payload.' . $index . '.changes.*.priority'] = [
@@ -171,9 +189,11 @@ class CourseService
         if ($auth->isCorporate()) {
             $ids = array_map(fn ($item) => $item['id'], $valid['payload']);
             $validIdCount = Course::whereHas(
-                    'category',
-                    function ($q) use ($auth) { $q->where('affiliation_id', $auth->affiliation_id); }
-                )->whereIn('id', $ids)
+                'category',
+                function ($q) use ($auth) {
+                    $q->where('affiliation_id', $auth->affiliation_id);
+                }
+            )->whereIn('id', $ids)
                 ->count();
 
             abort_if(
@@ -204,9 +224,9 @@ class CourseService
         if (auth()->user()->isCorporate()) {
             $ids = array_map(fn ($item) => $item['id'], $valid['ids']);
             $validIdCount = Course::whereHas(
-                    'category',
-                    fn ($q) =>  $q->where('affiliation_id', auth()->user()->affiliation_id)
-                )->whereIn('id', $ids)
+                'category',
+                fn ($q) =>  $q->where('affiliation_id', auth()->user()->affiliation_id)
+            )->whereIn('id', $ids)
                 ->count();
 
             abort_if(

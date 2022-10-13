@@ -44,11 +44,11 @@ export const upload = (type: 'profile_image' | 'course_image' | 'chapter_video',
   return get(url);
 }
 
-export const uploadImage = async (imageField: any) => {
+export const uploadImage = async (imageField: any, type: "profile_image" | "course_image" = "profile_image") => {
   if (!imageField) return null;
   if (typeof imageField === "string") return imageField;
 
-  const url = await upload("profile_image");
+  const url = await upload(type);
   await put(url.data, imageField[0], {
     headers: {
       "Content-Type": imageField[0].type,

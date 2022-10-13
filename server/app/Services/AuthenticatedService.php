@@ -97,7 +97,7 @@ class AuthenticatedService
             'chapter_video' => 'chapters/'
         ][$type];
 
-        if ($directory === 'profiles/') {
+        if ($directory === 'profiles/' || $directory === 'courses/') {
             $client = Storage::getClient();
             $expiry = "+3 minutes";
 
@@ -107,8 +107,6 @@ class AuthenticatedService
             ]);
 
             $url = $client->createPresignedRequest($command, $expiry)->getUri();
-
-            // $url = Storage::temporaryUrl($directory . now()->valueOf(), now()->addMinutes(3));
 
             TemporaryUrl::create([
                 'directory' => $directory,

@@ -32,6 +32,7 @@ import TestForm from "@/components/organisms/CourseManagementFragments/TestForm"
 import useConfirm from "@/hooks/useConfirm";
 import ExplainerVideoForm from "@/components/organisms/CourseManagementFragments/ExplainerVideoForm";
 import Preview from "./Preview";
+import { uploadImage } from "@/services/AuthService";
 
 function CourseManagementAddEdit() {
   const mounted = useRef(true);
@@ -81,9 +82,11 @@ function CourseManagementAddEdit() {
 
       if (confirmed) {
         try {
+          const image = await uploadImage(raw.image, "course_image");
+
           const res = await (isCreate
-            ? storeCourse(raw)
-            : updateCourse(+courseId!, raw));
+            ? storeCourse({ ...raw, image })
+            : updateCourse(+courseId!, { ...raw, image }));
 
           successSnackbar(res.data.message);
           navigate("/course-management");

@@ -105,10 +105,12 @@ class CourseRequest extends FormRequest
      */
     public function rules()
     {
+        $image_prefix = config('constants.prefixes.s3') . ',' . config('constants.prefixes.picsum');
+
         $rules = [
             'status' => 'required|integer|in:' . join(',', Course::STATUS),
             'category_id' => 'required|integer|exists:categories,id',
-            'image' => 'nullable|string',
+            'image' => 'nullable|string|starts_with:' . $image_prefix,
             'title' => 'required|string',
             'content' => 'required|string',
             'study_time' => 'required|integer',
