@@ -105,8 +105,8 @@ export default function Pages() {
     {
       path: "/inquiries",
       element: (
-        <PrivateRoute membershipTypes={registered}>
-          <Contact />
+        <PrivateRoute membershipTypes={[admin, corporate]}>
+          <Inquiries />
         </PrivateRoute>
       ),
     },
@@ -256,7 +256,7 @@ export default function Pages() {
     {
       path: "/contact",
       element: (
-        <PrivateRoute membershipTypes={registered}>
+        <PrivateRoute membershipTypes={[corporate, individual, trial]}>
           <Contact />
         </PrivateRoute>
       ),
