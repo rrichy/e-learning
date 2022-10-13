@@ -33,7 +33,7 @@ export const videoFormSchema = object({
   id: number().nullable(),
   title: string().label("解説動画タイトル").required(),
   content: string().label("解説動画内容").required(),
-  video_file_path: string().label("動画ファイル").nullable(),
+  video_file_path: mixed().label("動画ファイル").nullable(),
   // video_file_path: string().label("動画ファイル").required(),
 });
 
@@ -102,7 +102,7 @@ export interface TestAttributes {
 export interface VideoAttributes {
   title: string;
   content: string;
-  video_file_path: string | File | null;
+  video_file_path: any;
 }
 
 export interface ChapterAttributes {

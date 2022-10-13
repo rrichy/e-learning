@@ -19,7 +19,7 @@ class ExplainerVideoSeeder extends Seeder
 
         $xvideos = [];
         $chapters->each(function ($chapter, $index) use (&$xvideos) {
-            $xvideos_count = rand(1, 5);
+            $xvideos_count = rand(1, 2);
             $content = '{"blocks":[{"key":"c9cr2","text":"Some random text with styles","type":"unstyled","depth":0,"inlineStyleRanges":[{"offset":0,"length":5,"style":"UNDERLINE"},{"offset":5,"length":7,"style":"STRIKETHROUGH"},{"offset":12,"length":5,"style":"HIGHLIGHT"},{"offset":17,"length":5,"style":"ITALIC"},{"offset":22,"length":6,"style":"BOLD"}],"entityRanges":[],"data":{}}],"entityMap":{}}';
             for ($item_number = 1; $item_number <= $xvideos_count; $item_number++) {
                 $xvideos[] = [
@@ -27,7 +27,7 @@ class ExplainerVideoSeeder extends Seeder
                     'item_number' => $item_number,
                     'title' => fake()->text(5),
                     'content' => $content,
-                    'video_file_path' => 'https://www.dailymotion.com/video/x83gqeu',
+                    'video_file_path' => 'https://techhub-v2-bucket.s3.ap-northeast-1.amazonaws.com/sample-video.mp4',
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];

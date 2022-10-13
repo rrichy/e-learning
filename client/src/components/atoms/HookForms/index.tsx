@@ -8,6 +8,7 @@ export { default as RadioGroup } from "./RadioGroup";
 export { default as Selection } from "./Selection";
 export { default as Slider } from "./Slider";
 export { default as TextField } from "./TextField";
+export { default as VideoDropzone } from "./VideoDropzone";
 
 export type { CheckboxGroupProps } from "./CheckboxGroup";
 export type { ConditionalDateRangeProps } from "./ConditionalDateRange";
@@ -17,3 +18,4 @@ export type { RadioGroupProps } from "./RadioGroup";
 export type { TextFieldProps } from "./TextField";
 export type { MultiSelectionProps } from "./MultiSelection";
 export type { SliderProps } from "./Slider";
+export type { VideoDropzoneProps } from "./VideoDropzone";
