@@ -108,6 +108,11 @@ class User extends Authenticatable
         return $this->membership_type_id === MembershipType::INDIVIDUAL;
     }
 
+    public function isTrial(): bool
+    {
+        return $this->membership_type_id === MembershipType::TRIAL;
+    }
+
     public function attendingCourses(): HasMany
     {
         return $this->hasMany(AttendingCourse::class);

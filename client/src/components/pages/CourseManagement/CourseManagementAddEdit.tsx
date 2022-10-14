@@ -9,6 +9,7 @@ import {
   updateCourse,
 } from "@/services/CourseService";
 import {
+  ChapterAttributes,
   CourseFormAttribute,
   CourseFormAttributeWithId,
   courseFormInit,
@@ -32,7 +33,8 @@ import TestForm from "@/components/organisms/CourseManagementFragments/TestForm"
 import useConfirm from "@/hooks/useConfirm";
 import ExplainerVideoForm from "@/components/organisms/CourseManagementFragments/ExplainerVideoForm";
 import Preview from "./Preview";
-import { uploadImage } from "@/services/AuthService";
+import { uploadImage, uploadVideo } from "@/services/AuthService";
+import UploadStatus from "./UploadStatus";
 
 function CourseManagementAddEdit() {
   const mounted = useRef(true);
@@ -45,6 +47,11 @@ function CourseManagementAddEdit() {
   ]);
   const { successSnackbar, errorSnackbar, handleError } = useAlerter();
   const { isConfirmed } = useConfirm();
+  const [videoUploadState, setVideoUploadState] = useState<{
+    progress: number[][];
+    status: "uploading" | "complete";
+    chapters: ChapterAttributes[];
+  } | null>(null);
   const [selectedChapter, setSelectedChapter] =
     useState<SelectedChapterType>(null);
   const [displayPreview, setDisplayPreview] =
@@ -73,6 +80,10 @@ function CourseManagementAddEdit() {
       .filter((a) => a)
       .pop() === "create";
 
+  const handleCloseUploadDialog = () => {
+    setVideoUploadState(null);
+  };
+
   const handleSubmit = courseContext.handleSubmit(
     async (raw: CourseFormAttribute) => {
       const confirmed = await isConfirmed({
@@ -83,6 +94,61 @@ function CourseManagementAddEdit() {
       if (confirmed) {
         try {
           const image = await uploadImage(raw.image, "course_image");
+          const chapters = await new Promise((resolve, reject) => {
+            const parsedChapters: ChapterAttributes[] = [];
+            const raw_chapters = raw.chapters;
+            setVideoUploadState({
+              progress: raw_chapters.map(
+                ({ explainer_videos }) =>
+                  explainer_videos?.map(({ video_file_path }) => 0) ?? []
+              ),
+              status: "uploading",
+              chapters: raw_chapters,
+            });
+
+            raw_chapters.forEach(
+              async ({ explainer_videos, ...chapter }, chapterIndex) => {
+                const parsedVideos: VideoAttributes[] = [];
+                explainer_videos?.forEach(
+                  async ({ video_file_path, ...video }, index) => {
+                    const uploaded_video = await uploadVideo(
+                      video_file_path,
+                      (percent) => {
+                        setVideoUploadState((s) => {
+                          const temp = [...s!.progress];
+                          let status: "uploading" | "complete" = "uploading";
+                          temp[chapterIndex][index] = percent;
+
+                          if (
+                            chapterIndex === raw_chapters.length - 1 &&
+                            index === explainer_videos.length - 1 &&
+                            percent === 100
+                          )
+                            status = "complete";
+
+                          return {
+                            chapters: s!.chapters,
+                            progress: temp,
+                            status,
+                          };
+                        });
+                      }
+                    );
+
+                    parsedVideos.push({
+                      ...video,
+                      video_file_path: uploaded_video,
+                    });
+                  }
+                );
+                parsedChapters.push({
+                  ...chapter,
+                  explainer_videos: parsedVideos,
+                });
+              }
+            );
+          });
+          // const chapters = await uploadChapterData(raw.chapters);
 
           const res = await (isCreate
             ? storeCourse({ ...raw, image })
@@ -263,6 +329,10 @@ function CourseManagementAddEdit() {
         course={displayPreview}
         onClose={() => setDisplayPreview(null)}
         toScreen={screen}
+      />
+      <UploadStatus
+        state={videoUploadState}
+        onClose={handleCloseUploadDialog}
       />
     </>
   );

@@ -12,11 +12,11 @@ const axiosInstance = axios.create({
   withCredentials: true,
 });
 
-export const post = async (url: string, data: any = {}) => {
+export const post = async (url: string, data: any = {}, config: AxiosRequestConfig = {}, detachAuth = false) => {
   try {
     let access_token = localStorage.getItem(BEARER_TOKEN);
-    let headers: any = {};
-    if (access_token) {
+    let headers: AxiosRequestConfig["headers"] = config.headers ?? {};
+    if (access_token && !detachAuth) {
       headers["Authorization"] = `Bearer ${access_token}`;
     }
 

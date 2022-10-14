@@ -30,6 +30,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/me', [AuthenticatedSessionController::class, 'show']);
     Route::put('/me', [AuthenticatedSessionController::class, 'update']);
     Route::get('/upload', [AuthenticatedSessionController::class, 'upload']);
+    Route::post('/upload', [AuthenticatedSessionController::class, 'upload']);
     Route::get('/options', [OptionsController::class, 'index']);
 
     Route::group(['middleware' => ['membership:admin,corporate,individual']], function () {
