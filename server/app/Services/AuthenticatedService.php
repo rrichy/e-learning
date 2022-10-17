@@ -149,7 +149,7 @@ class AuthenticatedService
 
                 $url = $client->createPresignedRequest($command, "+60 minutes")->getUri();
 
-                TemporaryUrl::create([
+                TemporaryUrl::updateOrCreate([
                     'directory' => $directory,
                     'url' => explode('?', $url)[0],
                     'user_id' => auth()->id(),
@@ -175,7 +175,7 @@ class AuthenticatedService
 
                 $url = $client->createPresignedRequest($command, "+30 minutes")->getUri();
 
-                TemporaryUrl::create([
+                TemporaryUrl::updateOrCreate([
                     'directory' => $directory,
                     'url' => explode('?', $url)[0],
                     'user_id' => auth()->id(),

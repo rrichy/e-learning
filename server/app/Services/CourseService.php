@@ -112,6 +112,10 @@ class CourseService
                 $s3_image_url->delete();
                 abort_if($s3_image_url->url !== $valid['image'], 403, 'Image url mismatch!');
             }
+            
+            $s3_video_urls = auth()->user()->temporaryUrls()->where('directory', 'chapters/')->delete();
+            // abort if some $valid['chapters.*.video_file_path'] mismatch
+            // abort_if($s3_video_urls->url !== $valid['image'], 403, 'Image url mismatch!');
 
             $old_image = $course->image;
 
@@ -122,6 +126,10 @@ class CourseService
             if ($s3_image_url) {
                 Storage::delete(str_replace(config('constants.prefixes.s3'), '', $old_image));
             }
+            // delete old videos
+            // if ($s3_video_urls) {
+            //     Storage::delete(str_replace(config('constants.prefixes.s3'), '', $old_image));
+            // }
         });
     }
 
@@ -133,6 +141,17 @@ class CourseService
 
         DB::transaction(function () use ($valid, &$message) {
             $course = Course::create($valid);
+
+            $s3_image_url = auth()->user()->temporaryUrls()->where('directory', 'courses/')->first();
+
+            if ($s3_image_url) {
+                $s3_image_url->delete();
+                abort_if($s3_image_url->url !== $valid['image'], 403, 'Image url mismatch!');
+            }
+
+            $s3_video_urls = auth()->user()->temporaryUrls()->where('directory', 'chapters/')->delete();
+            // abort if some $valid['chapters.*.video_file_path'] mismatch
+            // abort_if($s3_video_urls->url !== $valid['image'], 403, 'Image url mismatch!');
 
             $this->createChapters($course, $valid['chapters']);
 
