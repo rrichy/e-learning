@@ -35,6 +35,7 @@ import ExplainerVideoForm from "@/components/organisms/CourseManagementFragments
 import Preview from "./Preview";
 import { uploadImage, uploadVideo } from "@/services/AuthService";
 import UploadStatus from "./UploadStatus";
+import parseChapters from "@/utils/parseChapters";
 
 function CourseManagementAddEdit() {
   const mounted = useRef(true);
@@ -94,68 +95,20 @@ function CourseManagementAddEdit() {
       if (confirmed) {
         try {
           const image = await uploadImage(raw.image, "course_image");
-          const chapters = await new Promise((resolve, reject) => {
-            const parsedChapters: ChapterAttributes[] = [];
-            const raw_chapters = raw.chapters;
-            setVideoUploadState({
-              progress: raw_chapters.map(
-                ({ explainer_videos }) =>
-                  explainer_videos?.map(({ video_file_path }) => 0) ?? []
-              ),
-              status: "uploading",
-              chapters: raw_chapters,
-            });
+          const chapters = await parseChapters(
+            raw.chapters,
+            setVideoUploadState
+          );
 
-            raw_chapters.forEach(
-              async ({ explainer_videos, ...chapter }, chapterIndex) => {
-                const parsedVideos: VideoAttributes[] = [];
-                explainer_videos?.forEach(
-                  async ({ video_file_path, ...video }, index) => {
-                    const uploaded_video = await uploadVideo(
-                      video_file_path,
-                      (percent) => {
-                        setVideoUploadState((s) => {
-                          const temp = [...s!.progress];
-                          let status: "uploading" | "complete" = "uploading";
-                          temp[chapterIndex][index] = percent;
+          console.log(chapters);
+          if (chapters) {
+            const res = await (isCreate
+              ? storeCourse({ ...raw, image, chapters })
+              : updateCourse(+courseId!, { ...raw, image, chapters }));
 
-                          if (
-                            chapterIndex === raw_chapters.length - 1 &&
-                            index === explainer_videos.length - 1 &&
-                            percent === 100
-                          )
-                            status = "complete";
-
-                          return {
-                            chapters: s!.chapters,
-                            progress: temp,
-                            status,
-                          };
-                        });
-                      }
-                    );
-
-                    parsedVideos.push({
-                      ...video,
-                      video_file_path: uploaded_video,
-                    });
-                  }
-                );
-                parsedChapters.push({
-                  ...chapter,
-                  explainer_videos: parsedVideos,
-                });
-              }
-            );
-          });
-          // const chapters = await uploadChapterData(raw.chapters);
-
-          const res = await (isCreate
-            ? storeCourse({ ...raw, image })
-            : updateCourse(+courseId!, { ...raw, image }));
-
-          successSnackbar(res.data.message);
-          navigate("/course-management");
+            successSnackbar(res.data.message);
+            navigate("/course-management");
+          }
         } catch (e: any) {
           const errors = handleError(e);
           type Key = keyof CourseFormAttribute;

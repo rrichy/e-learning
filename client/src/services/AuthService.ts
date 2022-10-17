@@ -82,6 +82,10 @@ export const uploadImage = async (
   return url.data.split("?")[0] as string;
 };
 
+export const getTemporaryVideoUrl = (url: string) => {
+  return get("/api/video?url=" + encodeURIComponent(url));
+}
+
 export const uploadVideo = async (
   videoField: any,
   callback?: (percent: number) => void
@@ -92,63 +96,69 @@ export const uploadVideo = async (
     return videoField;
   }
 
-  // initiating a multipartupload
-  const multipartUrl = await upload("chapter_video");
-  const multipartRes = await axios.post(multipartUrl.data.url);
-  const filename = multipartUrl.data.generated_key;
+  return new Promise(async (resolve: (v: string) => void, reject) => {
+    // initiating a multipartupload
+    const multipartUrl = await upload("chapter_video");
+    const multipartRes = await axios.post(multipartUrl.data.url);
+    const filename = multipartUrl.data.generated_key;
 
-  const parser = new DOMParser();
-  const xmlDoc = parser.parseFromString(multipartRes.data, "text/xml");
-  const uploadId = xmlDoc.getElementsByTagName("UploadId")[0].childNodes[0]
-    .nodeValue as string;
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(multipartRes.data, "text/xml");
+    const uploadId = xmlDoc.getElementsByTagName("UploadId")[0].childNodes[0]
+      .nodeValue as string;
 
-  const file = videoField[0] as File;
-  const chunkSize = 10 * 1024 * 1024;
-  const total = file.size;
-  const reader = new FileReader();
-  let loaded = 0;
-  let partNumber = 0;
-  let slice = file.slice(0, chunkSize);
+    const file = videoField[0] as File;
+    const chunkSize = 10 * 1024 * 1024;
+    const total = file.size;
+    const reader = new FileReader();
+    let loaded = 0;
+    let partNumber = 0;
+    let slice = file.slice(0, chunkSize);
 
-  const collection: { PartNumber: number; ETag: string }[] = [];
+    const collection: { PartNumber: number; ETag: string }[] = [];
 
-  reader.readAsBinaryString(slice);
+    reader.readAsBinaryString(slice);
 
-  reader.onload = async function (e) {
-    // upload part
-    const partUrl = await upload("chapter_video", {
-      uploadId,
-      partNumber: ++partNumber,
-      filename,
-    });
-    const partRes = await axios.put(partUrl.data, slice);
-    collection.push({ PartNumber: partNumber, ETag: partRes.headers.etag });
+    reader.onload = async function (e) {
+      console.log("uploaddddingg");
 
-    loaded += chunkSize;
-    if (callback) {
-      const percentLoaded = Math.min((loaded / total) * 100, 100);
-      callback(percentLoaded);
-    }
-
-    if (loaded <= total) {
-      slice = file.slice(loaded, loaded + chunkSize);
-      reader.readAsBinaryString(slice);
-    } else {
-      loaded = total;
-      const parts = toXml(collection);
-
-      // completemultipartupload
-      const completeUrl = await upload("chapter_video", {
+      // upload part
+      const partUrl = await upload("chapter_video", {
         uploadId,
+        partNumber: ++partNumber,
         filename,
-        parts: collection,
-        contentType: file.type,
       });
-      const completeRes = await axios.post(completeUrl.data, parts, {
-        headers: { "Content-Type": file.type },
-      });
-    }
-  };
+      const partRes = await axios.put(partUrl.data, slice);
+      collection.push({ PartNumber: partNumber, ETag: partRes.headers.etag });
+
+      loaded += chunkSize;
+      if (callback) {
+        const percentLoaded = Math.min((loaded / total) * 100, 100);
+        callback(percentLoaded);
+      }
+
+      if (loaded <= total) {
+        slice = file.slice(loaded, loaded + chunkSize);
+        reader.readAsBinaryString(slice);
+      } else {
+        loaded = total;
+        const parts = toXml(collection);
+
+        // completemultipartupload
+        const completeUrl = await upload("chapter_video", {
+          uploadId,
+          filename,
+          parts: collection,
+          contentType: file.type,
+        });
+        const completeRes = await axios.post(completeUrl.data, parts, {
+          headers: { "Content-Type": file.type },
+        });
+        console.log("upload complete");
+        resolve(multipartUrl.data.url.split("?")[0] as string);
+      }
+    };
+  }).then((v: string) => v, () => false);
 };
 
 const toXml = (data: { PartNumber: number; ETag: string }[]) => {

@@ -31,6 +31,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/me', [AuthenticatedSessionController::class, 'update']);
     Route::get('/upload', [AuthenticatedSessionController::class, 'upload']);
     Route::post('/upload', [AuthenticatedSessionController::class, 'upload']);
+    Route::get('/video', [AuthenticatedSessionController::class, 'video']);
     Route::get('/options', [OptionsController::class, 'index']);
 
     Route::group(['middleware' => ['membership:admin,corporate,individual']], function () {

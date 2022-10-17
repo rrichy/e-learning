@@ -120,15 +120,15 @@ class AuthenticatedService
             $part_number = $request->input('part_number');
             $filename = $request->input('filename');
 
-            if(is_null($upload_id)) {
+            if (is_null($upload_id)) {
                 $generated_key = now()->valueOf();
                 $command = $client->getCommand('CreateMultipartUpload', [
                     'Bucket' => config('filesystems.disks.s3.bucket'),
                     'Key'    => $directory . $generated_key,
                 ]);
-    
+
                 $url = $client->createPresignedRequest($command, $expiry)->getUri();
-    
+
                 TemporaryUrl::create([
                     'directory' => $directory,
                     'url' => explode('?', $url)[0],
@@ -148,13 +148,13 @@ class AuthenticatedService
                 ]);
 
                 $url = $client->createPresignedRequest($command, "+60 minutes")->getUri();
-    
+
                 TemporaryUrl::create([
                     'directory' => $directory,
                     'url' => explode('?', $url)[0],
                     'user_id' => auth()->id(),
                 ]);
-                
+
                 return response()->json($url);
             } else {
                 $valid = $request->validate([
@@ -174,17 +174,35 @@ class AuthenticatedService
                 ]);
 
                 $url = $client->createPresignedRequest($command, "+30 minutes")->getUri();
-    
+
                 TemporaryUrl::create([
                     'directory' => $directory,
                     'url' => explode('?', $url)[0],
                     'user_id' => auth()->id(),
                 ]);
-                
+
                 return response()->json($url);
             }
-
         }
+    }
+
+
+    public function viewVideo(Request $request)
+    {
+        $url = $request->input('url');
+
+        abort_if(is_null($url) || !str_contains($url, config('constants.prefixes.s3')), 403, 'Not a valid url');
+
+        // check if authorized
+        // here
+
+
+        return response()->json([
+            'url' => Storage::temporaryUrl(
+                str_replace(config('constants.prefixes.s3'), '', $url),
+                '+10 minutes'
+            )
+        ]);
     }
 
 
