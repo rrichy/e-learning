@@ -62,6 +62,11 @@ class ChapterController extends Controller
         return $service->submitTest($request, $chapter);
     }
 
+    public function listVideos(Chapter $chapter, ChapterService $service)
+    {
+        return $service->listVideos($chapter);
+    }
+
     /**
      * Show the form for editing the specified resource.
      *

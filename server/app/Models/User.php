@@ -137,4 +137,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(TemporaryUrl::class);
     }
+
+    public function viewingInformations(): HasMany
+    {
+        return $this->hasMany(ViewingInformation::class);
+    }
 }

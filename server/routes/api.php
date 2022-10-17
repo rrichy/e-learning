@@ -71,6 +71,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/chapter/{chapter}/test', [ChapterController::class, 'showTest']);
         Route::get('/chapter/{chapter}/proceed-test', [ChapterController::class, 'proceedTest']);
         Route::post('/chapter/{chapter}/submit-test', [ChapterController::class, 'submitTest']);
+        Route::get('/chapter/{chapter}/lecture', [ChapterController::class, 'listVideos']);
         // Route::resource('/chapter', ChapterController::class);
     });
     

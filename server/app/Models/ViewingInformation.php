@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class ExplainerVideo extends Model
+class ViewingInformation extends Model
 {
     use HasFactory;
 
@@ -27,5 +27,10 @@ class ExplainerVideo extends Model
     public function viewingInformations(): HasMany
     {
         return $this->hasMany(ViewingInformation::class);
+    }
+
+    public function scopeWhoseUserIdIs($query, $id)
+    {
+        return $this->where('user_id', $id);
     }
 }

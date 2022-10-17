@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Http\Requests\NoticeStoreUpdateRequest;
 use App\Http\Requests\SubmitTestRequest;
+use App\Http\Resources\ListVideoResource;
 use App\Http\Resources\NoticeHomepageResource;
 use App\Http\Resources\NoticeIndexResource;
 use App\Http\Resources\NoticeShowResource;
@@ -21,31 +22,14 @@ use Illuminate\Support\Facades\DB;
 
 class ChapterService
 {
-    // public function list()
-    // {
-    //     $order = request()->input('order', 'asc');
-    //     $per_page = request()->input('per_page', '10');
-    //     $sort = request()->input('sort', 'id');
-
-    //     if (auth()->user()->isIndividual()) {
-    //         return NoticeHomepageResource::collection(
-    //             Notice::with('user')
-    //                 ->where(fn ($q) => $q->where('affiliation_id', auth()->user()->affiliation_id)->orWhereNull('affiliation_id'))
-    //                 ->where('shown_in_bulletin', true)
-    //                 ->orderBy($sort, $order)
-    //                 ->paginate($per_page)
-    //         );
-    //     }
-
-    //     return NoticeIndexResource::collection(
-    //         Notice::with('user')
-    //             ->when(
-    //                 auth()->user()->isCorporate(), 
-    //                 fn ($q) => $q->where('affiliation_id', auth()->user()->affiliation_id)
-    //             )->orderBy($sort, $order)
-    //             ->paginate($per_page)
-    //     )->additional(['message' => 'Notices successfully fetched!']);
-    // }
+    public function listVideos(Chapter $chapter)
+    {
+        return ListVideoResource::collection(
+            $chapter->explainerVideos()
+                ->with(['viewingInformations' => fn ($q) => $q->whoseUserIdIs(auth()->id())])
+                ->get()
+        );
+    }
 
 
     public function testDetails(Chapter $chapter)
