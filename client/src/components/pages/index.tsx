@@ -87,14 +87,6 @@ export default function Pages() {
       ),
     },
     {
-      path: "/change-plan",
-      element: (
-        <PrivateRoute membershipTypes={registered}>
-          <ChangePlan />
-        </PrivateRoute>
-      ),
-    },
-    {
       path: "/change-password",
       element: (
         <PrivateRoute membershipTypes={registered}>
@@ -327,10 +319,20 @@ export default function Pages() {
     {
       path: "/profile",
       element: (
-        <PrivateRoute membershipTypes={registered}>
-          <StudentProfile />
+        <PrivateRoute membershipTypes={[individual, trial]}>
+          <Outlet />
         </PrivateRoute>
       ),
+      children: [
+        {
+          index: true,
+          element: <StudentProfile />,
+        },
+        {
+          path: "plan",
+          element: <ChangePlan />,
+        },
+      ],
     },
     {
       path: "/*",

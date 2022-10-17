@@ -1,10 +1,12 @@
-import { Avatar, Box, Grid, Paper, Stack, Typography } from "@mui/material";
+import { Grid, Paper, Stack, Typography } from "@mui/material";
 import { useState } from "react";
-import Button from "../atoms/Button";
 import Labeler from "../molecules/Labeler";
 import MaterialTable from "material-table";
+import CommonProfile from "../organisms/Student/CommonProfile";
+import useAuth from "@/hooks/useAuth";
 
 function StudentProfile() {
+  const { authData } = useAuth();
   const [data, setData] = useState([
     {
       name: "CCNAコース【前編】",
@@ -31,46 +33,12 @@ function StudentProfile() {
   
   return (
     <Grid container spacing={3}>
-      <Grid item xs={12} md={3}>
-        <Paper variant="softoutline" sx={{ p: 5 }}>
-          <Stack spacing={1} pb={2}>
-            <Avatar
-              src="https://picsum.photos/id/639/200/300"
-              alt="sample photo"
-              sx={{ m: "auto", height: 125, width: 125 }}
-            />
-            <Typography variant="h6" align="center" fontWeight={700}>山田 一郎</Typography> 
-            <Typography align="center">2021/04/01に登録</Typography> 
-          </Stack>
-          <Box p={3} sx={{ background: "#e5f7f6" }}>
-            <Typography variant="subtitle2" align="center">現在のご利用プラン</Typography> 
-            <Typography variant="h6" align="center" fontWeight={700} color="#00c2b2">1ヶ月プラン</Typography> 
-          </Box>
-          <Stack spacing={2} pt={3}>
-            <Button
-              variant="contained"
-              type="button"
-              rounded
-            >
-              アカウント編集
-            </Button>
-            <Button
-              variant="contained"
-              type="button"
-              rounded
-            >
-              プラン変更
-            </Button>
-            <Button
-              variant="contained"
-              type="button"
-              rounded
-            >
-              オプション申込み
-            </Button>
-          </Stack>
-        </Paper>
-      </Grid>
+      <CommonProfile 
+        name={authData?.name}
+        image={authData?.image}
+        plan={authData?.created_at}
+        registered_date={authData?.created_at}
+      />
       <Grid item xs={12} md={9}>
         <Stack spacing={3}>
           <Paper variant="softoutline" sx={{ p: 7 }}>
