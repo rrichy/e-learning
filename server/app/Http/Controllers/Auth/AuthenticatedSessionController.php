@@ -34,4 +34,9 @@ class AuthenticatedSessionController extends Controller
     {
         return $service->upload($request);
     }
+
+    public function video(Request $request, AuthenticatedService $service)
+    {
+        return $service->viewVideo($request);
+    }
 }

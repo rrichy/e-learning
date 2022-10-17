@@ -85,11 +85,12 @@ class AuthenticatedService
     {
         $auth = auth()->user();
         $type = $request->input('type');
-        $user_id = $request->input('user_id');
+        // $user_id = $request->input('user_id');
 
         abort_if(is_null($type) || !in_array($type, ['profile_image', 'course_image', 'chapter_video']), 403, 'No upload type in the request!');
-        abort_if(in_array($type, ['course_image', 'chapter_video']) && !($auth->isAdmin() || $auth->isCorporate()), 403, 'You are not authorized to upload with this type!');
-        abort_if($type === 'profile_image' && $auth->isIndividual() && $user_id, 403, 'You cannot modify someone else\'s image');
+        abort_if(($auth->isIndividual() || $auth->isTrial()) && $type !== 'profile_image', 403, 'You are not authorized to upload with this type!');
+        // abort_if(in_array($type, ['course_image', 'chapter_video']) && !($auth->isAdmin() || $auth->isCorporate()), 403, 'You are not authorized to upload with this type!');
+        // abort_if($type === 'profile_image' && $auth->isIndividual() && $user_id, 403, 'You cannot modify someone else\'s image');
 
         $directory = [
             'profile_image' => 'profiles/',
@@ -97,10 +98,9 @@ class AuthenticatedService
             'chapter_video' => 'chapters/'
         ][$type];
 
+        $client = Storage::getClient();
+        $expiry = "+3 minutes";
         if ($directory === 'profiles/' || $directory === 'courses/') {
-            $client = Storage::getClient();
-            $expiry = "+3 minutes";
-
             $command = $client->getCommand('PutObject', [
                 'Bucket' => config('filesystems.disks.s3.bucket'),
                 'Key'    => $directory . now()->valueOf()
@@ -115,7 +115,94 @@ class AuthenticatedService
             ]);
 
             return response()->json($url);
+        } else {
+            $upload_id = $request->input('upload_id');
+            $part_number = $request->input('part_number');
+            $filename = $request->input('filename');
+
+            if (is_null($upload_id)) {
+                $generated_key = now()->valueOf();
+                $command = $client->getCommand('CreateMultipartUpload', [
+                    'Bucket' => config('filesystems.disks.s3.bucket'),
+                    'Key'    => $directory . $generated_key,
+                ]);
+
+                $url = $client->createPresignedRequest($command, $expiry)->getUri();
+
+                TemporaryUrl::create([
+                    'directory' => $directory,
+                    'url' => explode('?', $url)[0],
+                    'user_id' => auth()->id(),
+                ]);
+
+                return response()->json([
+                    'url' => $url,
+                    'generated_key' => $generated_key,
+                ]);
+            } else if (!is_null($part_number) && !is_null($filename)) {
+                $command = $client->getCommand('UploadPart', [
+                    'Bucket' => config('filesystems.disks.s3.bucket'),
+                    'Key'    => $directory . $filename,
+                    'UploadId' => $upload_id,
+                    'PartNumber' => $part_number,
+                ]);
+
+                $url = $client->createPresignedRequest($command, "+60 minutes")->getUri();
+
+                TemporaryUrl::create([
+                    'directory' => $directory,
+                    'url' => explode('?', $url)[0],
+                    'user_id' => auth()->id(),
+                ]);
+
+                return response()->json($url);
+            } else {
+                $valid = $request->validate([
+                    'parts' => 'array',
+                    'parts.*.ETag' => 'required|string',
+                    'parts.*.PartNumber' => 'required|numeric',
+                    'contentType' => 'required|string',
+                ]);
+
+                $command = $client->getCommand('CompleteMultipartUpload', [
+                    'Bucket' => config('filesystems.disks.s3.bucket'),
+                    'Key'    => $directory . $filename,
+                    'UploadId' => $upload_id,
+                    'MultipartUpload' => [
+                        'Parts' => $valid['parts'],
+                    ],
+                ]);
+
+                $url = $client->createPresignedRequest($command, "+30 minutes")->getUri();
+
+                TemporaryUrl::create([
+                    'directory' => $directory,
+                    'url' => explode('?', $url)[0],
+                    'user_id' => auth()->id(),
+                ]);
+
+                return response()->json($url);
+            }
         }
+    }
+
+
+    public function viewVideo(Request $request)
+    {
+        $url = $request->input('url');
+
+        abort_if(is_null($url) || !str_contains($url, config('constants.prefixes.s3')), 403, 'Not a valid url');
+
+        // check if authorized
+        // here
+
+
+        return response()->json([
+            'url' => Storage::temporaryUrl(
+                str_replace(config('constants.prefixes.s3'), '', $url),
+                '+10 minutes'
+            )
+        ]);
     }
 
 

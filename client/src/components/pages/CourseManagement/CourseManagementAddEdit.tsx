@@ -9,6 +9,7 @@ import {
   updateCourse,
 } from "@/services/CourseService";
 import {
+  ChapterAttributes,
   CourseFormAttribute,
   CourseFormAttributeWithId,
   courseFormInit,
@@ -32,7 +33,9 @@ import TestForm from "@/components/organisms/CourseManagementFragments/TestForm"
 import useConfirm from "@/hooks/useConfirm";
 import ExplainerVideoForm from "@/components/organisms/CourseManagementFragments/ExplainerVideoForm";
 import Preview from "./Preview";
-import { uploadImage } from "@/services/AuthService";
+import { uploadImage, uploadVideo } from "@/services/AuthService";
+import UploadStatus from "./UploadStatus";
+import parseChapters from "@/utils/parseChapters";
 
 function CourseManagementAddEdit() {
   const mounted = useRef(true);
@@ -45,6 +48,11 @@ function CourseManagementAddEdit() {
   ]);
   const { successSnackbar, errorSnackbar, handleError } = useAlerter();
   const { isConfirmed } = useConfirm();
+  const [videoUploadState, setVideoUploadState] = useState<{
+    progress: number[][];
+    status: "uploading" | "complete";
+    chapters: ChapterAttributes[];
+  } | null>(null);
   const [selectedChapter, setSelectedChapter] =
     useState<SelectedChapterType>(null);
   const [displayPreview, setDisplayPreview] =
@@ -73,6 +81,10 @@ function CourseManagementAddEdit() {
       .filter((a) => a)
       .pop() === "create";
 
+  const handleCloseUploadDialog = () => {
+    setVideoUploadState(null);
+  };
+
   const handleSubmit = courseContext.handleSubmit(
     async (raw: CourseFormAttribute) => {
       const confirmed = await isConfirmed({
@@ -83,13 +95,20 @@ function CourseManagementAddEdit() {
       if (confirmed) {
         try {
           const image = await uploadImage(raw.image, "course_image");
+          const chapters = await parseChapters(
+            raw.chapters,
+            setVideoUploadState
+          );
 
-          const res = await (isCreate
-            ? storeCourse({ ...raw, image })
-            : updateCourse(+courseId!, { ...raw, image }));
+          console.log(chapters);
+          if (chapters) {
+            const res = await (isCreate
+              ? storeCourse({ ...raw, image, chapters })
+              : updateCourse(+courseId!, { ...raw, image, chapters }));
 
-          successSnackbar(res.data.message);
-          navigate("/course-management");
+            successSnackbar(res.data.message);
+            navigate("/course-management");
+          }
         } catch (e: any) {
           const errors = handleError(e);
           type Key = keyof CourseFormAttribute;
@@ -263,6 +282,10 @@ function CourseManagementAddEdit() {
         course={displayPreview}
         onClose={() => setDisplayPreview(null)}
         toScreen={screen}
+      />
+      <UploadStatus
+        state={videoUploadState}
+        onClose={handleCloseUploadDialog}
       />
     </>
   );

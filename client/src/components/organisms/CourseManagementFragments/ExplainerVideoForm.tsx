@@ -22,6 +22,7 @@ import { Close, Delete, Save } from "@mui/icons-material";
 import { convertToRaw } from "draft-js";
 import { VideoDropzone } from "@/components/atoms/HookForms";
 import ReactPlayer from "react-player";
+import { getTemporaryVideoUrl } from "@/services/AuthService";
 
 function ExplainerVideoForm({
   returnFn,
@@ -211,11 +212,12 @@ function PreviewVideoSection({
   data,
 }: {
   onClose: () => void;
-  data: { header: string; video: VideoAttributes } | null;
+  data: { header: string; video: Partial<VideoAttributes> } | null;
 }) {
+  const [url, setUrl] = useState("");
   const [state, setState] = useState<{
     header: string;
-    video: VideoAttributes;
+    video: Partial<VideoAttributes>;
   } | null>(null);
 
   const handleClose = () => {
@@ -228,14 +230,20 @@ function PreviewVideoSection({
   useEffect(() => {
     if (data) {
       setState(data);
+      if (data.video.video_file_path) {
+        if (typeof data.video.video_file_path === "string") {
+          (async () => {
+            try {
+              const res = await getTemporaryVideoUrl(
+                data.video.video_file_path
+              );
+              setUrl(res.data.url);
+            } catch (e: any) {}
+          })();
+        } else setUrl(data.video.video_file_path[1]);
+      }
     }
   }, [data]);
-
-  const url = state?.video?.video_file_path
-    ? typeof state?.video?.video_file_path === "string"
-      ? state?.video?.video_file_path
-      : state?.video?.video_file_path[1]
-    : undefined;
 
   return (
     <Dialog
