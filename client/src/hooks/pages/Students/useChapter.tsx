@@ -47,6 +47,7 @@ export type ChapterContextAttribute = {
     questions: QuestionAttributes[];
   };
   itemNumber: number;
+  chapterId: number;
 };
 
 function useChapter(preview = false): ChapterContextAttribute | Partial<ChapterContextAttribute> {

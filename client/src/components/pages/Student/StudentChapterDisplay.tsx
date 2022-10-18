@@ -171,6 +171,7 @@ function StudentChapterDisplay({}: StudentChapterDisplayProps) {
           hasSubmitted,
           result,
           itemNumber: itemNumber ? Number(itemNumber) : -1,
+          chapterId,
         }}
       />
     </Grid>

@@ -71,7 +71,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/chapter/{chapter}/test', [ChapterController::class, 'showTest']);
         Route::get('/chapter/{chapter}/proceed-test', [ChapterController::class, 'proceedTest']);
         Route::post('/chapter/{chapter}/submit-test', [ChapterController::class, 'submitTest']);
-        // Route::resource('/chapter', ChapterController::class);
+        Route::get('/chapter/{chapter}/lecture', [ChapterController::class, 'listVideos']);
+        Route::put('/video/{video}/update', [AuthenticatedSessionController::class, 'updatePlayback']);
+    // Route::resource('/chapter', ChapterController::class);
     });
     
     Route::group(['middleware' => ['membership:admin']], function () {

@@ -30,9 +30,9 @@ class CourseService
 
         if ($auth->isIndividual()) {
             return CourseListResource::collection(
-                Category::whereHas('courses', fn ($q) => $q->where('status', Course::STATUS['public']))
+                Category::whereHas('courses', fn ($q) => $q->isPublic())
                     ->with(
-                        ['courses' => fn ($q) => $q->where('status', Course::STATUS['public'])]
+                        ['courses' => fn ($q) => $q->isPublic()]
                     )->get()
             );
         }

@@ -42,7 +42,7 @@ class Course extends Model
         'group' => 2,
         'individual' => 3,
     ];
-    
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
@@ -87,4 +87,10 @@ class Course extends Model
     // {
     //     return $this->hasOne(Notice::class);
     // }
+
+    // Scopes
+    public function scopeIsPublic($query)
+    {
+        $query->where('status', self::PUBLIC);
+    }
 }

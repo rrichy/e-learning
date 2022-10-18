@@ -103,6 +103,9 @@ export interface VideoAttributes {
   title: string;
   content: string;
   video_file_path: any;
+  id?: number;
+  is_complete?: boolean | null;
+  playback_position?: number | null;
 }
 
 export interface ChapterAttributes {

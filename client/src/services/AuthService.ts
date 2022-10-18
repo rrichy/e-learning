@@ -84,7 +84,7 @@ export const uploadImage = async (
 
 export const getTemporaryVideoUrl = (url: string) => {
   return get("/api/video?url=" + encodeURIComponent(url));
-}
+};
 
 export const uploadVideo = async (
   videoField: any,
@@ -158,7 +158,10 @@ export const uploadVideo = async (
         resolve(multipartUrl.data.url.split("?")[0] as string);
       }
     };
-  }).then((v: string) => v, () => false);
+  }).then(
+    (v: string) => v,
+    () => false
+  );
 };
 
 const toXml = (data: { PartNumber: number; ETag: string }[]) => {
