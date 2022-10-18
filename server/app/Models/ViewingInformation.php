@@ -12,13 +12,17 @@ class ViewingInformation extends Model
     use HasFactory;
 
     protected $fillable = [
-        'chapter_id',
-        'item_number',
-        'title',
-        'content',
-        'video_file_path',
+        'user_id',
+        'explainer_video_id',
+        'is_complete',
+        'playback_position',
     ];
 
+    protected $casts = [
+        'is_complete' => 'boolean',
+        'playback_position' => 'float'
+    ];
+    
     public function chapter(): BelongsTo
     {
         return $this->belongsTo(Chapter::class);
@@ -31,6 +35,6 @@ class ViewingInformation extends Model
 
     public function scopeWhoseUserIdIs($query, $id)
     {
-        return $this->where('user_id', $id);
+        return $this->where('user_id', $id)->first();
     }
 }

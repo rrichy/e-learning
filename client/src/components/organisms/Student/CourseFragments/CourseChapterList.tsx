@@ -20,6 +20,7 @@ interface CourseChapterListProps {
   chapters: (ChapterAttributes & {
     item_number: number;
     has_passed?: boolean;
+    completed_lecture?: boolean;
     latest_score?: number | null;
   })[];
   screenFn?: (s: CourseScreenType) => void;
@@ -71,7 +72,7 @@ function CourseChapterList({ chapters, screenFn }: CourseChapterListProps) {
             }}
           >
             {chapters.map(
-              ({ id, item_number, title, latest_score, has_passed }, index) => (
+              ({ id, item_number, title, latest_score, has_passed, completed_lecture }, index) => (
                 <Chapter
                   key={id}
                   id={screenFn ? index : id!}
@@ -80,6 +81,7 @@ function CourseChapterList({ chapters, screenFn }: CourseChapterListProps) {
                   score={latest_score ?? null}
                   passed={has_passed ?? false}
                   screenFn={screenFn}
+                  completed={completed_lecture ?? false}
                 />
               )
             )}
@@ -97,6 +99,7 @@ const Chapter = ({
   chapterNumber,
   title,
   score,
+  completed,
   passed,
   screenFn,
 }: {
@@ -104,6 +107,7 @@ const Chapter = ({
   chapterNumber: number;
   title: string;
   score: number | null;
+  completed: boolean;
   passed: boolean;
   screenFn?: (s: CourseScreenType) => void;
 }) => (
@@ -138,7 +142,7 @@ const Chapter = ({
         variant="contained"
         sx={{ width: "fit-content", whiteSpace: "nowrap" }}
         // startIcon={<CheckBox />}
-        startIcon={<CheckBoxOutlineBlank />}
+        startIcon={completed ? <CheckBox /> : <CheckBoxOutlineBlank />}
         endIcon={<ArrowForward />}
         onClick={screenFn ? () => screenFn(`chapter/${id}/lecture`) : undefined}
         to={screenFn ? undefined : `chapter/${id}/lecture`}
@@ -151,7 +155,9 @@ const Chapter = ({
         sx={{ width: "fit-content", whiteSpace: "nowrap" }}
         startIcon={passed ? <CheckBox /> : <CheckBoxOutlineBlank />}
         endIcon={<ArrowForward />}
-        onClick={screenFn ? () => screenFn(`chapter/${id}/chapter-test`) : undefined}
+        onClick={
+          screenFn ? () => screenFn(`chapter/${id}/chapter-test`) : undefined
+        }
         to={screenFn ? undefined : `chapter/${id}/chapter-test`}
       >
         章末テスト

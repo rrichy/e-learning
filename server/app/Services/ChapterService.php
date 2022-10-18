@@ -27,8 +27,9 @@ class ChapterService
         return ListVideoResource::collection(
             $chapter->explainerVideos()
                 ->with(['viewingInformations' => fn ($q) => $q->whoseUserIdIs(auth()->id())])
+                ->orderBy('item_number', 'asc')
                 ->get()
-        );
+        )->additional([ 'chapterNumber' => $chapter->item_number ]);
     }
 
 

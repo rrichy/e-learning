@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\ExplainerVideo;
+use App\Models\ViewingInformation;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class ChapterResource extends JsonResource
@@ -29,9 +30,13 @@ class ChapterResource extends JsonResource
             $results = $this->chapterTest->testResults()
                 ->where('user_id', auth()->id())
                 ->latest()->get();
+
+            $video_ids = $this->explainerVideos->modelKeys();
+            $complete_count = ViewingInformation::where([['user_id', auth()->id()], ['is_complete', 1]])->whereIn('explainer_video_id', $video_ids)->count();
             
             $structure['latest_score'] = $results[0]->score ?? null;
             $structure['has_passed'] = $results->contains('passed', 1);
+            $structure['completed_lecture'] = count($video_ids) === $complete_count;
         }
 
         return $structure;

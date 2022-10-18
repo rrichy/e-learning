@@ -16,6 +16,7 @@ declare module "@mui/material/Typography" {
     sectiontitle1: true;
     sectiontitle2: true;
     sectiontitle3: true;
+    sectiontitle4: true;
   }
 }
 
@@ -262,6 +263,18 @@ const theme = createTheme({
             fontSize: 20,
             fontWeight: "bold",
             padding: "16px 10px 12px 12px",
+            display: "block",
+          },
+        },
+        {
+          props: { variant: "sectiontitle4" },
+          style: {
+            backgroundColor: "#323232",
+            color: "#ffffff",
+            fontSize: 20,
+            fontWeight: "bold",
+            padding: "16px 10px 12px 12px",
+            // borderLeft: "5px solid #00b4aa",
             display: "block",
           },
         },

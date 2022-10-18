@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\UpdateSelfRequest;
+use App\Models\ExplainerVideo;
 use App\Services\AuthenticatedService;
 use Illuminate\Http\Request;
 
@@ -38,5 +39,10 @@ class AuthenticatedSessionController extends Controller
     public function video(Request $request, AuthenticatedService $service)
     {
         return $service->viewVideo($request);
+    }
+
+    public function updatePlayback(Request $request, ExplainerVideo $video, AuthenticatedService $service)
+    {
+        return $service->updatePlayback($request, $video);
     }
 }

@@ -7,9 +7,11 @@ use App\Http\Requests\UpdateSelfRequest;
 use App\Http\Resources\AccountShowResource;
 use App\Models\Category;
 use App\Models\Course;
+use App\Models\ExplainerVideo;
 use App\Models\MembershipType;
 use App\Models\TemporaryUrl;
 use App\Models\User;
+use App\Models\ViewingInformation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -202,6 +204,27 @@ class AuthenticatedService
                 str_replace(config('constants.prefixes.s3'), '', $url),
                 '+10 minutes'
             )
+        ]);
+    }
+
+
+    public function updatePlayback(Request $request, ExplainerVideo $video)
+    {
+        $valid = $request->validate([
+            'playback_position' => 'required|numeric',
+            'is_complete' => 'boolean'
+        ]);
+
+        // check if authorized
+        // here
+
+        ViewingInformation::updateOrCreate([
+            'user_id' => auth()->id(),
+            'explainer_video_id' => $video->id,
+        ], $valid);
+
+        return response()->json([
+            'message' => 'Updated playback position!'
         ]);
     }
 

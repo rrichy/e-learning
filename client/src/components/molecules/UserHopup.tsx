@@ -135,14 +135,12 @@ function UserHopup() {
         </MenuItem>
         <Divider /> */}
         {user.membership_type_id !== MembershipType.admin && (
-          <>
-            <MenuItem component={Link} to="/contact">
-              <InquiryIcon />
-              お問い合わせ
-            </MenuItem>
-            <Divider />
-          </>
+          <MenuItem component={Link} to="/contact">
+            <InquiryIcon />
+            お問い合わせ
+          </MenuItem>
         )}
+        {user.membership_type_id !== MembershipType.admin && <Divider />}
         <MenuItem onClick={handleLogout}>
           <LogoutIcon />
           ログアウト
