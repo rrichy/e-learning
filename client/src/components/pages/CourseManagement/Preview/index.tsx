@@ -30,6 +30,7 @@ import { TransitionProps } from "@mui/material/transitions";
 import React, { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form-mui";
 import CourseDetailPreview from "./CourseDetailPreview";
+import LecturePreview from "./LecturePreview";
 
 interface PreviewProps {
   onClose: () => void;
@@ -191,6 +192,9 @@ function Preview({
     });
   }, [questions]);
 
+  
+  const headerTitle = `${chapterIndex! + 1}章 ${screen === "lecture" ? "理解度テスト" : screen === "chapter-test" ? "章末テスト" : "章末テスト結果"}`;
+
   return (
     <Dialog
       fullScreen
@@ -209,7 +213,7 @@ function Preview({
             fontWeight="bold"
           >
             {screen === "course" && "コースプレービュー"}
-            {screen === "lecture" && "lecture"}
+            {screen === "lecture" && "解説動画プレービュー"}
             {screen === "chapter-test" && "章末テストプレービュー"}
             {screen === "answer" && "テストシミュレーター"}
             {screen === "result" && "章末テスト結果プレービュー"}
@@ -233,7 +237,7 @@ function Preview({
             <ChapterPreviewProvider context={context}>
               <CommonHeader
                 image={course.image || null}
-                title={chapterIndex! + 1 + "章 章末テスト" || ""}
+                title={headerTitle}
               />
               {screen === "chapter-test" && (
                 <TestDetailsDisplay screenFn={setTemplateScreen} />
@@ -242,6 +246,14 @@ function Preview({
                 <TestAnswerScreen screenFn={setTemplateScreen} />
               )}
               {screen === "result" && <TestResult preview />}
+              {screen === "lecture" && (
+                <LecturePreview
+                  chapterNumber={(chapterIndex || 0) + 1}
+                  lectures={
+                    course.chapters[chapterIndex || 0].explainer_videos ?? []
+                  }
+                />
+              )}
             </ChapterPreviewProvider>
           )}
         </Grid>
