@@ -17,6 +17,7 @@ import {
   initPaginationFilter,
   initReactQueryPagination,
   OrderType,
+  PaginationFilterInterface,
   ReactQueryPaginationInterface,
 } from "@/interfaces/CommonInterface";
 import LibraryBooksOutlinedIcon from "@mui/icons-material/LibraryBooksOutlined";
@@ -27,6 +28,8 @@ import { breakpoint_values } from "@/providers/ThemeProvider";
 import IconButton from "@/components/atoms/IconButton";
 import Table from "@/components/atoms/Table";
 import { TABLE_ROWS_PER_PAGE } from "@/settings/appconfig";
+import CourseAttendeeSearch from "@/components/organisms/CourseManagementFragments/CourseAttendeeSearch";
+import { CourseAttendeeSearchAttributes } from "@/interfaces/SearchFormAttributes";
 
 interface Attendee {
   name: string;
@@ -40,13 +43,11 @@ interface Attendee {
 
 const init = initReactQueryPagination<Attendee>();
 
-function CourseDetail() {
-  const { courseId } = useParams();
-  const [filters, setFilters] = useState(initPaginationFilter);
-  const { isFetching: courseIsFetching, data: courseDetails } = useQuery(
+const courseResult = (courseId: number) =>
+  useQuery(
     ["course-detail", courseId],
     async () => {
-      const res = await showCourse(+courseId!, true);
+      const res = await showCourse(courseId, true);
       return res.data.data as CourseFormAttributeWithId;
     },
     {
@@ -55,10 +56,15 @@ function CourseDetail() {
       enabled: !!courseId,
     }
   );
-  const { data, isFetching } = useQuery(
+
+const tableResult = (
+  courseId: number,
+  filters: PaginationFilterInterface & { [k: string]: any }
+) =>
+  useQuery(
     ["attendees", courseId, filters],
     async () => {
-      const res = await showAttendees(+courseId!, filters);
+      const res = await showAttendees(courseId, filters);
       return res.data as ReactQueryPaginationInterface<Attendee>;
     },
     {
@@ -69,13 +75,22 @@ function CourseDetail() {
     }
   );
 
+function CourseDetail() {
+  const { courseId } = useParams();
+  const [filters, setFilters] = useState<
+    PaginationFilterInterface & { [k: string]: any }
+  >(initPaginationFilter);
+  const { isFetching: courseIsFetching, data: courseDetails } = courseResult(
+    +courseId!
+  );
+  const { data, isFetching } = tableResult(+courseId!, filters);
+
   const updateFilter = (
     page: number = 1,
     pageSize: number = TABLE_ROWS_PER_PAGE[0],
     sort: "id",
     order: OrderType = "desc"
   ) => {
-    console.log({ page, pageSize, sort, order });
     setFilters({
       ...filters,
       current_page: page,
@@ -83,6 +98,18 @@ function CourseDetail() {
       sort,
       order,
     });
+  };
+
+  const handleSearch = (raw: CourseAttendeeSearchAttributes) => {
+    const temp = { ...filters };
+
+    for (let [key, value] of Object.entries(raw)) {
+      if (key === "never_logged_in") {
+        if (value !== -1) temp[key] = 1;
+      } else if (value) temp[key] = value;
+    }
+
+    setFilters(temp);
   };
 
   const columns: Column<Attendee>[] = [
@@ -216,11 +243,9 @@ function CourseDetail() {
         </Grid>
       )}
 
-      {/* <Grid item xs={12}>
-        <FormContainer>
-          <AccountManagementSearch categories={categories} />
-        </FormContainer>
-      </Grid> */}
+      <Grid item xs={12}>
+        <CourseAttendeeSearch onSubmit={handleSearch} />
+      </Grid>
 
       <Grid item xs={12}>
         <Table

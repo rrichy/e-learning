@@ -18,7 +18,7 @@ export const showCourse = (id: number, tabulated = false) => {
 
 export const showAttendees = (
   id: number,
-  filters: PaginationFilterInterface
+  filters: PaginationFilterInterface & { [k: string]: any }
 ) => {
   const params = Object.entries(filters)
     .reduce(
