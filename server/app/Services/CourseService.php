@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Http\Requests\CourseRequest;
+use App\Http\Resources\AttendeeResource;
 use App\Http\Resources\CourseIndexResource;
 use App\Http\Resources\CourseListResource;
 use App\Http\Resources\CourseShowResource;
@@ -112,7 +113,7 @@ class CourseService
                 $s3_image_url->delete();
                 abort_if($s3_image_url->url !== $valid['image'], 403, 'Image url mismatch!');
             }
-            
+
             $s3_video_urls = auth()->user()->temporaryUrls()->where('directory', 'chapters/')->delete();
             // abort if some $valid['chapters.*.video_file_path'] mismatch
             // abort_if($s3_video_urls->url !== $valid['image'], 403, 'Image url mismatch!');
@@ -257,6 +258,27 @@ class CourseService
 
         Course::whereIn('id', $valid['ids'])->update(['status' => Course::STATUS[$valid['status']]]);
     }
+
+
+    public function listAttendees(Course $course)
+    {
+        $auth = auth()->user();
+        abort_if($auth->isCorporate() && $auth->affiliation_id !== $course->category->affiliation_id, 403, 'You do not own this course!');
+        
+        $order = request()->input('order', 'asc');
+        $per_page = request()->input('per_page', '10');
+        $sort = request()->input('sort', 'id');
+
+        return AttendeeResource::collection(
+            $course->attendingCourses()
+                ->with([
+                    'user' => fn ($query) => $query->select('id', 'name', 'email')
+                ])
+                ->orderBy($sort, $order)
+                ->paginate($per_page)
+        )->additional(['meta' => compact('order', 'sort')]);
+    }
+    
 
     private function appendAttribute(array $arr, string $att, mixed $val)
     {

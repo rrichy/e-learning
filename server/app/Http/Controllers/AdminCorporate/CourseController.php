@@ -67,4 +67,9 @@ class CourseController extends Controller
             'message' => 'Successfully updated the courses!',
         ]);
     }
+
+    public function attendees(Course $course, CourseService $service)
+    {
+        return $service->listAttendees($course);
+    }
 }

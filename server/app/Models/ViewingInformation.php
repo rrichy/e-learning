@@ -35,6 +35,6 @@ class ViewingInformation extends Model
 
     public function scopeWhoseUserIdIs($query, $id)
     {
-        return $this->where('user_id', $id)->first();
+        return $query->where('user_id', $id)->first();
     }
 }

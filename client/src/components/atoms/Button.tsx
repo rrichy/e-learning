@@ -12,9 +12,10 @@ export type ButtonProps = MuiButtonProps & {
   large?: boolean;
   rounded?: boolean;
   fit?: boolean;
+  fitY?: boolean;
 };
 
-function Button({ loading, large, rounded, fit, sx, ...props }: ButtonProps) {
+function Button({ loading, large, rounded, fit, fitY, sx, ...props }: ButtonProps) {
   if (loading) {
     const { children, disabled, ...rest } = props;
     return (
@@ -30,6 +31,7 @@ function Button({ loading, large, rounded, fit, sx, ...props }: ButtonProps) {
               }
             : {}),
           ...(fit ? { maxWidth: "fit-content" } : {}),
+          ...(fitY ? { maxHeight: "fit-content" } : {}),
           ...sx,
         }}
         {...rest}
@@ -48,6 +50,7 @@ function Button({ loading, large, rounded, fit, sx, ...props }: ButtonProps) {
           ? { height: { xs: 40, sm: 60 }, maxWidth: fit ? "fit-content" : 280 }
           : {}),
         ...(fit ? { maxWidth: "fit-content" } : {}),
+        ...(fitY ? { maxHeight: "fit-content" } : {}),
         ...sx,
       }}
       {...{ component: props.to ? RouterLink : null, ...props }}

@@ -7,7 +7,7 @@ export interface OptionsAttribute {
 export interface OptionAttribute {
   id: number | string;
   name: string;
-  selectionType?: "disabled" | "category"
+  selectionType?: "disabled" | "category";
 }
 
 export interface NativeObjectInterface<T = any> {
@@ -43,9 +43,45 @@ export interface InfiniteScrollAttribute<T> extends PaginatedData<T> {
   maxVisited: number;
 }
 
-export type CourseScreenType = 
+export type CourseScreenType =
   | "course"
   | `chapter/${number}/chapter-test`
   | `chapter/${number}/chapter-test/result`
   | `chapter/${number}/chapter-test/${number}`
-  | `chapter/${number}/lecture`
+  | `chapter/${number}/lecture`;
+
+export interface PaginationFilterInterface {
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total: number;
+  order?: OrderType;
+  sort?: string;
+}
+
+export const initPaginationFilter: PaginationFilterInterface = {
+  current_page: 1,
+  last_page: 1,
+  per_page: TABLE_ROWS_PER_PAGE[0],
+  total: 0,
+  order: "desc",
+  sort: "id",
+};
+
+export interface ReactQueryPaginationInterface<T> {
+  data: T[];
+  meta: PaginationFilterInterface;
+  message?: string;
+}
+
+export const initReactQueryPagination = <
+  T = any
+>(): ReactQueryPaginationInterface<T> => ({
+  data: [],
+  meta: {
+    current_page: 1,
+    last_page: 1,
+    per_page: 10,
+    total: 0,
+  },
+});

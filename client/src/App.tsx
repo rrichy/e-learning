@@ -8,6 +8,10 @@ import ThemeProvider from "@/providers/ThemeProvider";
 import AuthContextProvider from "./providers/AuthContextProvider";
 import { SnackbarProvider } from "notistack";
 import ConfirmContextProvider from "./providers/ConfirmContextProvider";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+
+const queryClient = new QueryClient();
 
 function App() {
   return (
@@ -20,11 +24,14 @@ function App() {
         >
           <CssBaseline />
           <LocalizationProvider adapterLocale={ja} dateAdapter={AdapterDateFns}>
-            <AuthContextProvider>
-              <ConfirmContextProvider>
-                <Pages />
-              </ConfirmContextProvider>
-            </AuthContextProvider>
+            <QueryClientProvider client={queryClient}>
+              <ReactQueryDevtools initialIsOpen={false} />
+              <AuthContextProvider>
+                <ConfirmContextProvider>
+                  <Pages />
+                </ConfirmContextProvider>
+              </AuthContextProvider>
+            </QueryClientProvider>
           </LocalizationProvider>
         </SnackbarProvider>
       </ThemeProvider>

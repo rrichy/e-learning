@@ -33,4 +33,9 @@ class AttendingCourse extends Model
     {
         return $this->belongsTo(Course::class);
     }
+
+    public function scopeIsActive($query)
+    {
+        return $query->where('status', 1);
+    }
 }

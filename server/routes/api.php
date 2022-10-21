@@ -37,9 +37,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::group(['middleware' => ['membership:admin,corporate,individual']], function () {
         Route::get('/notice', [NoticeController::class, 'index']);
         Route::get('/notice/{notice}', [NoticeController::class, 'show']);
-
-        Route::get('/course', [CourseController::class, 'index']);
-        Route::get('/course/{course}', [CourseController::class, 'show']);
         
         Route::group(['middleware' => ['membership:admin,corporate']], function () {
             Route::get('/affiliation', [AffiliationController::class, 'index']);
@@ -60,11 +57,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::put('/course/mass', [CourseController::class, 'massUpdate']);
             Route::put('/course/toggle', [CourseController::class, 'toggleStatus']);
             Route::delete('/course/{ids}', [CourseController::class, 'massDelete']);
+            Route::get('/course/{course}/attendees', [CourseController::class, 'attendees']);
             Route::resource('/course', CourseController::class)->only(['store', 'update']);
     
             Route::delete('/notice/{ids}', [NoticeController::class, 'massDelete']);
             Route::resource('/notice', NoticeController::class)->only(['store', 'update']);
         });
+
+        Route::get('/course', [CourseController::class, 'index']);
+        Route::get('/course/{course}', [CourseController::class, 'show']);
     });
 
     Route::group(['middleware' => ['membership:individual']], function () {
