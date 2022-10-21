@@ -15,8 +15,8 @@ class AttendeeResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'name'=> $this->user->name,
-            'email'=> $this->user->email,
+            'name'=> $this->name,
+            'email'=> $this->email,
             'start_date'=> $this->start_date,
             'progress_rate'=> $this->progress_rate,
             'highest_score'=> $this->highest_score,

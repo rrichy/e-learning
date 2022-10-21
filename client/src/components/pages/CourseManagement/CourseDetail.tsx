@@ -1,61 +1,28 @@
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
   Box,
-  Container,
-  Dialog,
-  DialogTitle,
   Grid,
   Link,
-  Paper,
   Skeleton,
   Typography,
   useMediaQuery,
 } from "@mui/material";
 import { Stack } from "@mui/system";
-import { useEffect, useRef, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
-import { yupResolver } from "@hookform/resolvers/yup";
-import MaterialTable, { Column } from "material-table";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { useState } from "react";
+import { useParams } from "react-router-dom";
+import { Column } from "material-table";
 import Button from "@/components/atoms/Button";
-import AccountManagementSearch from "@/components/organisms/AccountManagementFragments/AccountManagementSearchAccordion";
-import { FormContainer, useForm } from "react-hook-form-mui";
-import {
-  DatePicker,
-  RadioGroup,
-  Selection,
-  TextField,
-} from "../../molecules/LabeledHookForms";
-import {
-  showAttendees,
-  showCourse,
-  storeCourse,
-  updateCourse,
-} from "@/services/CourseService";
-import { getOptions } from "@/services/CommonService";
-import {
-  CourseFormAttribute,
-  CourseFormAttributeWithId,
-  courseFormInit,
-  courseFormSchema,
-} from "@/validations/CourseFormValidation";
-import Labeler from "@/components/molecules/Labeler";
-// import { RadioGroup } from "@/components/atoms/HookForms";
-import CloseIcon from "@mui/icons-material/Close";
+import { showAttendees, showCourse } from "@/services/CourseService";
+import { CourseFormAttributeWithId } from "@/validations/CourseFormValidation";
 import {
   initPaginationFilter,
   initReactQueryPagination,
-  OptionAttribute,
   OrderType,
   ReactQueryPaginationInterface,
 } from "@/interfaces/CommonInterface";
 import LibraryBooksOutlinedIcon from "@mui/icons-material/LibraryBooksOutlined";
 import MailOutlinedIcon from "@mui/icons-material/MailOutlined";
-import useAlerter from "@/hooks/useAlerter";
 import { jpDate } from "@/mixins/jpFormatter";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { breakpoint_values } from "@/providers/ThemeProvider";
 import IconButton from "@/components/atoms/IconButton";
 import Table from "@/components/atoms/Table";
@@ -74,8 +41,6 @@ interface Attendee {
 const init = initReactQueryPagination<Attendee>();
 
 function CourseDetail() {
-  const mounted = useRef(true);
-  const queryClient = useQueryClient();
   const { courseId } = useParams();
   const [filters, setFilters] = useState(initPaginationFilter);
   const { isFetching: courseIsFetching, data: courseDetails } = useQuery(
@@ -91,25 +56,18 @@ function CourseDetail() {
     }
   );
   const { data, isFetching } = useQuery(
-    ["attendees", courseId, filters.current_page],
+    ["attendees", courseId, filters],
     async () => {
       const res = await showAttendees(+courseId!, filters);
       return res.data as ReactQueryPaginationInterface<Attendee>;
     },
     {
-      staleTime: 3_000,
+      staleTime: 5_000,
       keepPreviousData: true,
       refetchOnWindowFocus: false,
       enabled: !!courseId,
-      // initialData: initReactQueryPagination<Attendee>(),
     }
   );
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [courseStatusOpen, setCourseStatusOpen] = useState(false);
-  // const [courseDetail, setCourseDetail] = useState<CourseFormAttribute>();
-  // const { state, pathname } = useLocation();
-  // const mounted = useRef(true);
-  const { errorSnackbar } = useAlerter();
 
   const updateFilter = (
     page: number = 1,
@@ -117,6 +75,7 @@ function CourseDetail() {
     sort: "id",
     order: OrderType = "desc"
   ) => {
+    console.log({ page, pageSize, sort, order });
     setFilters({
       ...filters,
       current_page: page,
@@ -125,24 +84,6 @@ function CourseDetail() {
       order,
     });
   };
-
-  const handleSearchOpen = () => {
-    setSearchOpen(true);
-  };
-  const handleSearchClose = () => {
-    setSearchOpen(false);
-  };
-
-  const handleCourseStatusOpen = () => {
-    setCourseStatusOpen(true);
-  };
-  const handleCourseStatusClose = () => {
-    setCourseStatusOpen(false);
-  };
-
-  const [categories, setCategories] = useState<OptionAttribute[]>([
-    { id: 0, name: "未選択", selectionType: "disabled" },
-  ]);
 
   const columns: Column<Attendee>[] = [
     { field: "name", title: "氏名" },
@@ -280,7 +221,7 @@ function CourseDetail() {
           <AccountManagementSearch categories={categories} />
         </FormContainer>
       </Grid> */}
-      
+
       <Grid item xs={12}>
         <Table
           columns={columns}
