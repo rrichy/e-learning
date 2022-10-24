@@ -148,6 +148,14 @@ export type CourseFormAttributeWithId = CourseFormAttribute & {
     has_passed?: boolean;
     latest_score?: number | null;
   })[];
+  attendees_information?: {
+    category_start_period: string;
+    category_end_period: string;
+    status_parsed: string;
+    target_parsed: string;
+    attendees: number;
+    current_attendees: number;
+  }
 };
 
 export type CourseListAttribute = {

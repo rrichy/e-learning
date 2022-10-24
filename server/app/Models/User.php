@@ -142,4 +142,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(ViewingInformation::class);
     }
+
+    // Scopes
+    public function scopeWhoAreIndividual($query)
+    {
+        return $query->where('membership_type_id', MembershipType::INDIVIDUAL);
+    }
 }

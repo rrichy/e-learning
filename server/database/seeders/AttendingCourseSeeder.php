@@ -18,8 +18,8 @@ class AttendingCourseSeeder extends Seeder
      */
     public function run()
     {
-        $students = User::where('membership_type_id', MembershipType::INDIVIDUAL)->get();
-        $public_courses = Course::where('status', Course::PUBLIC)->get();
+        $students = User::whoAreIndividual()->get();
+        $public_courses = Course::isPublic()->get();
         $course_count = $public_courses->count();
 
         $attending_courses = [];

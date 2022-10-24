@@ -1,167 +1,174 @@
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Container,
-  Dialog,
-  DialogTitle,
+  Box,
   Grid,
-  IconButton,
-  Paper,
+  Link,
+  Skeleton,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
 import { Stack } from "@mui/system";
-import { useEffect, useRef, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
-import { yupResolver } from "@hookform/resolvers/yup";
-import MaterialTable from "material-table";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { useState } from "react";
+import { useParams } from "react-router-dom";
+import { Column } from "material-table";
 import Button from "@/components/atoms/Button";
-import AccountManagementSearch from "@/components/organisms/AccountManagementFragments/AccountManagementSearchAccordion";
-import { FormContainer, useForm } from "react-hook-form-mui";
+import { showAttendees, showCourse } from "@/services/CourseService";
+import { CourseFormAttributeWithId } from "@/validations/CourseFormValidation";
 import {
-  DatePicker,
-  RadioGroup,
-  Selection,
-  TextField,
-} from "../../molecules/LabeledHookForms";
-import {
-  showCourse,
-  storeCourse,
-  updateCourse,
-} from "@/services/CourseService";
-import { getOptions } from "@/services/CommonService";
-import {
-  CourseFormAttribute,
-  CourseFormAttributeWithId,
-  courseFormInit,
-  courseFormSchema,
-} from "@/validations/CourseFormValidation";
-import Labeler from "@/components/molecules/Labeler";
-// import { RadioGroup } from "@/components/atoms/HookForms";
-import CloseIcon from '@mui/icons-material/Close';
-import { OptionAttribute } from "@/interfaces/CommonInterface";
-import LibraryBooksOutlinedIcon from '@mui/icons-material/LibraryBooksOutlined';
-import MailOutlinedIcon from '@mui/icons-material/MailOutlined';
-import Link from "@/components/atoms/Link";
-import useAlerter from "@/hooks/useAlerter";
+  initPaginationFilter,
+  initReactQueryPagination,
+  OrderType,
+  PaginationFilterInterface,
+  ReactQueryPaginationInterface,
+} from "@/interfaces/CommonInterface";
+import LibraryBooksOutlinedIcon from "@mui/icons-material/LibraryBooksOutlined";
+import MailOutlinedIcon from "@mui/icons-material/MailOutlined";
 import { jpDate } from "@/mixins/jpFormatter";
+import { useQuery } from "@tanstack/react-query";
+import { breakpoint_values } from "@/providers/ThemeProvider";
+import IconButton from "@/components/atoms/IconButton";
+import Table from "@/components/atoms/Table";
+import { TABLE_ROWS_PER_PAGE } from "@/settings/appconfig";
+import CourseAttendeeSearch from "@/components/organisms/CourseManagementFragments/CourseAttendeeSearch";
+import { CourseAttendeeSearchAttributes } from "@/validations/SearchFormValidation";
+
+interface Attendee {
+  name: string;
+  email: string;
+  start_date: string;
+  progress_rate: number;
+  highest_score: number | null;
+  latest_score: number | null;
+  completion_date: string | null;
+}
+
+const init = initReactQueryPagination<Attendee>();
+
+const courseResult = (courseId: number) =>
+  useQuery(
+    ["course-detail", courseId],
+    async () => {
+      const res = await showCourse(courseId, true);
+      return res.data.data as CourseFormAttributeWithId;
+    },
+    {
+      staleTime: 3_000,
+      refetchOnWindowFocus: false,
+      enabled: !!courseId,
+    }
+  );
+
+const tableResult = (
+  courseId: number,
+  filters: PaginationFilterInterface & { [k: string]: any }
+) =>
+  useQuery(
+    ["attendees", courseId, filters],
+    async () => {
+      const res = await showAttendees(courseId, filters);
+      return res.data as ReactQueryPaginationInterface<Attendee>;
+    },
+    {
+      staleTime: 5_000,
+      keepPreviousData: true,
+      refetchOnWindowFocus: false,
+      enabled: !!courseId,
+    }
+  );
 
 function CourseDetail() {
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [courseStatusOpen, setCourseStatusOpen] = useState(false);
-  const [courseDetail, setCourseDetail] = useState<CourseFormAttribute>();
   const { courseId } = useParams();
-  const { state, pathname } = useLocation();
-  const mounted = useRef(true);
-  const { errorSnackbar } = useAlerter();
-  const [initialized, setInitialized] = useState(false);
-  const courseContext = useForm<CourseFormAttribute>({
-    mode: "onChange",
-    defaultValues: courseFormInit,
-    resolver: yupResolver(courseFormSchema),
+  const [pagination, setPagination] = useState(initPaginationFilter);
+  const [filters, setFilters] = useState<{ [k: string]: any }>({});
+  const { isFetching: courseIsFetching, data: courseDetails } = courseResult(
+    +courseId!
+  );
+  const { data, isFetching } = tableResult(+courseId!, {
+    ...pagination,
+    ...filters,
   });
 
-  const isCreate =
-    pathname
-      .split("/")
-      .filter((a) => a)
-      .pop() === "create";
-
-  const handleSearchOpen = () => {
-    setSearchOpen(true);
-  };
-  const handleSearchClose = () => {
-    setSearchOpen(false);
-  };
-
-  const handleCourseStatusOpen = () => {
-    setCourseStatusOpen(true);
-  };
-  const handleCourseStatusClose = () => {
-    setCourseStatusOpen(false);
+  const updateFilter = (
+    page: number = 1,
+    pageSize: number = TABLE_ROWS_PER_PAGE[0],
+    sort: "id",
+    order: OrderType = "desc"
+  ) => {
+    setPagination({
+      ...pagination,
+      current_page: page,
+      per_page: pageSize,
+      sort,
+      order,
+    });
   };
 
-  const [categories, setCategories] = useState<OptionAttribute[]>([
-    { id: 0, name: "未選択", selectionType: "disabled" },
-  ]);
+  const handleSearch = (raw: CourseAttendeeSearchAttributes) => {
+    const temp: { [k: string]: any } = {};
 
-  const [data, setData] = useState([
-    { 
-      name: "Trevion Shields", 
-      email: "trevionshields@gmail.com", 
-      start_date: "2022-09-20",
-      progress_rate: 20,
-      score: 8,
-      lecture_day: "2022-09-18"
+    for (let [key, value] of Object.entries(raw)) {
+      if (key === "never_logged_in") {
+        if (value === 1) temp[key] = 1;
+      } else if (value) temp[key] = value;
+    }
+
+    setFilters(temp);
+  };
+
+  const columns: Column<Attendee>[] = [
+    { field: "name", title: "氏名" },
+    { field: "email", title: "メールアドレス" },
+    {
+      field: "start_date",
+      title: "受講開始日",
+      render: (row) => jpDate(row.start_date),
     },
-  ]);
+    { field: "progress_rate", title: "進捗率" },
+    { field: "highest_score", title: "最高点" },
+    { field: "latest_score", title: "最新点" },
+    {
+      field: "completion_date",
+      title: "受講完了日",
+      render: (row) =>
+        row.completion_date ? jpDate(row.completion_date) : "-",
+    },
+  ];
 
-  // useEffect(() => {
-  //   (async () => {
-  //     try {
-  //       let shouldFetch = false;
-  //       let course: CourseFormAttribute | CourseFormAttributeWithId =
-  //         courseFormInit;
-  //       const promise = [getOptions(["categories"])];
-
-  //       if (!isCreate) {
-  //         if (!state) {
-  //           shouldFetch = true;
-  //           promise.push(showCourse(+courseId!));
-  //         } else course = state as CourseFormAttributeWithId;
-  //       }
-  //       const res = await Promise.all(promise);
-
-  //       setCategories([
-  //         { id: 0, name: "未選択", selectionType: "disabled" },
-  //         ...res[0].data.categories,
-  //       ]);
-  //       if (!isCreate)
-  //         courseContext.reset(!shouldFetch ? course : res[1].data.data);
-  //     } catch (e: any) {
-  //       errorSnackbar(e.message);
-  //     } finally {
-  //       setInitialized(true);
-  //     }
-  //   })();
-  // }, [state, pathname, courseId, isCreate]);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await showCourse(+courseId!);
-        const data = res.data.data;
-        setCourseDetail(data);
-        console.log(data);
-      } catch (e: any) {
-        errorSnackbar(e.message);
-      }
-    })();
-  }, [data]);
+  const isMd = useMediaQuery(`(min-width:${breakpoint_values.md}px)`);
 
   return (
-    <Stack justifyContent="center">
-      <Container>
-        <Stack spacing={3} sx={{ p: 3 }}>
-          <Stack direction="row" justifyContent="space-between">
-            <Stack>
-              <Typography
-                fontWeight="bold"
-                variant="h5"
-              >
-                {courseDetail?.title} 
-                {/* Course Title */}
+    <Grid container spacing={2}>
+      <Grid item xs={12}>
+        <Stack direction="row" alignItems="center">
+          {courseIsFetching ? (
+            <Box flex={1}>
+              <Skeleton variant="text" height={32} />
+              <Skeleton variant="text" height={16} />
+            </Box>
+          ) : (
+            <Box flex={1}>
+              <Typography fontWeight="bold" variant="h5">
+                {courseDetails?.title}
               </Typography>
-              <Link to="#">127.0.0.1/course/screen/{courseId} (Course Preview)</Link>
-            </Stack>
-            <Stack direction="row" spacing={1}>
+              <Link
+                component="button"
+                onClick={() => console.log("open preview")}
+              >
+                {`${import.meta.env.VITE_HOST}:${
+                  import.meta.env.VITE_PORT
+                }/course/screen/${courseId} (Course Preview)`}
+              </Link>
+            </Box>
+          )}
+          {isMd ? (
+            <>
               <Button
                 to={`/course-management/details/${courseId}/conditional-mail`}
                 variant="outlined"
                 color="inherit"
-                sx={{ width: "fit-content" }}
+                fitY
+                fit
                 startIcon={<MailOutlinedIcon />}
+                sx={{ whiteSpace: "nowrap", mr: 1 }}
               >
                 条件付きメール
               </Button>
@@ -169,177 +176,108 @@ function CourseDetail() {
                 to={`/course-management/${courseId}/edit`}
                 variant="outlined"
                 color="inherit"
-                sx={{ width: "fit-content" }}
+                fitY
+                fit
                 startIcon={<LibraryBooksOutlinedIcon />}
               >
                 コースの更新
               </Button>
-            </Stack>
-          </Stack>
-          <Grid container>
-            <Grid xs={12} sm={6}>
-              <Labeler label="開講日: ">
-                <Typography>{courseDetail?.start_period ? jpDate(courseDetail?.start_period) : "" }</Typography>
-              </Labeler>
-              <Labeler label="閉講日: ">
-                <Typography>{courseDetail?.end_period ? jpDate(courseDetail?.end_period) : "" }</Typography>
-              </Labeler>
-              <Labeler label="ステータス: ">
-                <Typography>{courseDetail?.status}</Typography>
-              </Labeler>
-              <Labeler label="対象者: ">
-                <Typography>{courseDetail?.target}</Typography>
-              </Labeler>
-            </Grid>
-            <Grid xs={12} sm={6}>
-              <Labeler label="受講者数: ">
-                <Typography>{courseDetail?.study_time}</Typography>
-              </Labeler>
-              <Labeler label="受講中: ">
-                <Typography>{courseDetail?.is_whole_period}</Typography>
-              </Labeler>
-              <Labeler label="受講完了: ">
-                <Typography>{courseDetail?.priority}</Typography>
-              </Labeler>
-            </Grid>
-          </Grid>
-          <FormContainer>
-            <AccountManagementSearch categories={categories} />
-          </FormContainer>
-          <Paper variant="outlined" sx={{ p: 6 }}>
-            <MaterialTable 
-              columns={[
-                { 
-                  field: "name", 
-                  title: "氏名",
-                  render: (row) => (
-                    <Link to={`/course-management/details/detail-correction`}>
-                      {row.name}
-                    </Link>
-                  ) 
-                },
-                { field: "email", title: "メールアドレス" },
-                { field: "start_date", title: "受講開始日" },
-                { field: "progress_rate", title: "進捗率" },
-                { field: "score", title: "点数" },
-                { field: "lecture_day", title: "受講完了日" },
-              ]}
-              options={{
-                toolbar: false,
-                draggable: false,
-                paging: false,
-                maxBodyHeight: 600,
-              }}
-              components={{
-                Container: (props) => <Paper {...props} variant="table" />,
-              }}
-              data={data}
-            />
-          </Paper>
+            </>
+          ) : (
+            <>
+              <IconButton
+                to={`/course-management/details/${courseId}/conditional-mail`}
+              >
+                <MailOutlinedIcon sx={{ color: "common.black" }} />
+              </IconButton>
+              <IconButton to={`/course-management/${courseId}/edit`}>
+                <LibraryBooksOutlinedIcon sx={{ color: "common.black" }} />
+              </IconButton>
+            </>
+          )}
         </Stack>
-        <FormContainer>
-          <Dialog open={searchOpen} maxWidth="lg">
-            <DialogTitle 
-              align="center" 
-              fontWeight={700} 
-              sx={{ 
-                background: "#00c2b2", 
-                color: "#ffffff" 
-              }}
-            >
-              コースを検索
-              <IconButton
-                onClick={handleSearchClose}
-                sx={{
-                  position: "absolute",
-                  right: 8,
-                  top: 12,
-                  color: "#ffffff",
-                }}
-              >
-                <CloseIcon />
-              </IconButton>
-            </DialogTitle>
-            <Stack spacing={1} pt={3} pl={3} pr={3}>
-              <Selection
-                name="sex"
-                label="コース情報"
-              />
-              <TextField
-                name="name"
-                placeholder="コース名"
-              />
-              <RadioGroup
-                name="gender"
-                label="終了日"
-                row={false}
-                options={[
-                  { id: 1, name: "全期間" },
-                  { id: 2, name: "Date 1 and Date 2" },
-                ]}
-              />
-              <RadioGroup
-                name="gender"
-                label="絞り込み"
-                row={false}
-                options={[
-                  { id: 1, name: "今後開催予定のコース" },
-                  { id: 2, name: "現在受講可能なコース" },
-                  { id: 3, name: "すべて" },
-                ]}
-              />
-              <Selection
-                name="sex"
-                label="表示件数"
-              />
-              <Selection
-                name="sex"
-                label="件"
-              />
-            </Stack>
-            <Stack direction="row" spacing={2} p={3} justifyContent="center">
-              <Button large color="inherit" variant="outlined" sx={{ borderRadius: 7 }}>コース名</Button>
-              <Button large color="warning" variant="contained" sx={{ borderRadius: 7 }}>検索</Button>
-            </Stack>
-          </Dialog>
+      </Grid>
 
-          <Dialog open={courseStatusOpen} maxWidth="lg">
-            <DialogTitle>
-              <Typography
-                fontWeight="bold"
-                variant="h6"
-                pl={1}
-                sx={{ borderLeft: "5px solid #00c2b2" }}
-              >
-                公開中のコース状況
-              </Typography>
-              <IconButton
-                onClick={handleCourseStatusClose}
-                sx={{
-                  position: 'absolute',
-                  right: 8,
-                  top: 8,
-                  color: (theme) => theme.palette.grey[500],
-                }}
-              >
-                <CloseIcon />
-              </IconButton>
-            </DialogTitle>
-            <Typography
-              fontWeight="bold"
-              pl={1}
-              align="center"
-            >
-              Table Here
-            </Typography>
-            <Stack direction="row" spacing={2} p={3} justifyContent="flex-end">
-              <Button color="warning" variant="contained" sx={{ borderRadius: 7, width: 100 }}>削除</Button>
-            </Stack>
-          </Dialog>
-        </FormContainer>
-      </Container>
-    </Stack>
+      {courseIsFetching ? (
+        <Grid item xs={12} container spacing={2}>
+          <Detailer label="開講日 ~ 閉講日" value={<Skeleton />} />
+          <Detailer label="ステータス" value={<Skeleton />} />
+          <Detailer label="対象者" value={<Skeleton />} />
+          <Detailer label="受講者数" value={<Skeleton />} />
+          <Detailer label="受講中" value={<Skeleton />} />
+          <Detailer label="受講完了" value={<Skeleton />} />
+        </Grid>
+      ) : (
+        <Grid item xs={12} container spacing={2}>
+          <Detailer
+            label="開講日 ~ 閉講日"
+            value={`${jpDate(
+              courseDetails?.start_period ??
+                courseDetails?.attendees_information?.category_start_period
+            )} ~ ${jpDate(
+              courseDetails?.end_period ??
+                courseDetails?.attendees_information?.category_end_period
+            )}`}
+          />
+          <Detailer
+            label="ステータス"
+            value={courseDetails?.attendees_information?.status_parsed}
+          />
+          <Detailer
+            label="対象者"
+            value={courseDetails?.attendees_information?.target_parsed}
+          />
+          <Detailer
+            label="受講者数"
+            value={courseDetails?.attendees_information?.attendees}
+          />
+          <Detailer
+            label="受講中"
+            value={courseDetails?.attendees_information?.current_attendees}
+          />
+          <Detailer
+            label="受講完了"
+            value={
+              (courseDetails?.attendees_information?.attendees || 0) -
+              (courseDetails?.attendees_information?.current_attendees || 0)
+            }
+          />
+        </Grid>
+      )}
+
+      <Grid item xs={12}>
+        <CourseAttendeeSearch onSubmit={handleSearch} />
+      </Grid>
+
+      <Grid item xs={12}>
+        <Table
+          columns={columns}
+          state={data || init}
+          fetchData={updateFilter}
+          isLoading={isFetching}
+        />
+      </Grid>
+    </Grid>
   );
 }
 
 export default CourseDetail;
+
+const Detailer = ({
+  label,
+  value,
+}: {
+  label: string;
+  value: React.ReactNode;
+}) => (
+  <>
+    <Grid item xs={6} md={2}>
+      <Typography variant="body2" fontWeight="bold" textAlign="right">
+        {label}:
+      </Typography>
+    </Grid>
+    <Grid item xs={6} md={4} textAlign="center">
+      {value}
+    </Grid>
+  </>
+);

@@ -50,7 +50,7 @@ declare module "@mui/material/Button" {
   }
 }
 
-const breakpoint_values = {
+export const breakpoint_values = {
   xs: 0,
   sm: 600,
   md: 900,

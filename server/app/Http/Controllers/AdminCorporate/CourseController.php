@@ -4,8 +4,10 @@ namespace App\Http\Controllers\AdminCorporate;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CourseRequest;
+use App\Http\Resources\AttendeeResource;
 use App\Models\Course;
 use App\Services\CourseService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
@@ -24,7 +26,7 @@ class CourseController extends Controller
             'message' => $message,
         ]);
     }
-    
+
     public function show(Course $course, CourseService $service)
     {
         return $service->details($course);
@@ -66,5 +68,16 @@ class CourseController extends Controller
         return response()->json([
             'message' => 'Successfully updated the courses!',
         ]);
+    }
+
+    public function attendees(Request $request, Course $course, CourseService $service)
+    {
+        try {
+            $attendees = $service->listAttendees($request, $course, auth()->user());
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
+
+        return $attendees;
     }
 }

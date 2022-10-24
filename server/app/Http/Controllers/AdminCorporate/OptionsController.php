@@ -42,7 +42,9 @@ class OptionsController extends Controller
                             break;
                         }
                     case 'categories': {
-                            $value = Category::get(['id', 'name']);
+                            $value = Category::query()
+                                ->when(!auth()->user()->isAdmin(), fn ($q) => $q->where('affiliation_id', auth()->user()->affiliation_id)->whereNull('parent_id'))
+                                ->get(['id', 'name']);
                             break;
                         }
                     case 'signatures': {
