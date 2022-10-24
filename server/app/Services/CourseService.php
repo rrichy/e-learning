@@ -8,6 +8,7 @@ use App\Http\Resources\CourseIndexResource;
 use App\Http\Resources\CourseListResource;
 use App\Http\Resources\CourseShowResource;
 use App\Http\Resources\Student\StudentCourseShowResource;
+use App\Models\AttendingCourse;
 use App\Models\Category;
 use App\Models\Chapter;
 use App\Models\Course;
@@ -15,6 +16,9 @@ use App\Models\ExplainerVideo;
 use App\Models\Question;
 use App\Models\QuestionOption;
 use App\Models\Test;
+use App\Models\User;
+use Exception;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -260,14 +264,26 @@ class CourseService
     }
 
 
-    public function listAttendees(Course $course)
+    public function listAttendees(Request $request, Course $course, $auth)
     {
-        $auth = auth()->user();
-        abort_if($auth->isCorporate() && $auth->affiliation_id !== $course->category->affiliation_id, 403, 'You do not own this course!');
+        if ($auth->isCorporate() && $auth->affiliation_id !== $course->category->affiliation_id) {
+            throw new Exception('You do not own this course!');
+        }
 
-        $order = request()->input('order', 'asc');
-        $per_page = request()->input('per_page', '10');
-        $sort = request()->input('sort', 'id');
+        $order = $request->input('order', 'asc');
+        $per_page = $request->input('per_page', '10');
+        $sort = $request->input('sort', 'id');
+
+        $filters = $request->validate([
+            'affiliation_id' => 'numeric',
+            'name' => 'string',
+            'email' => 'string',
+            'remarks' => 'string',
+            'never_logged_in' => 'boolean',
+            'logged_in_min_date' => 'required_with:logged_in_max_date',
+            'logged_in_max_date' => 'required_with:logged_in_min_date',
+            'narrowed_by' => 'numeric|in:1,2,3',
+        ]);
 
         return AttendeeResource::collection(
             $course->attendingCourses()
@@ -282,11 +298,30 @@ class CourseService
                     'attending_courses.completion_date'
                 ])
                 ->join('users', 'users.id', '=', 'attending_courses.user_id')
+                ->when(!empty($filters), fn ($query) => $this->filterAttendees($query, $filters))
                 ->orderBy($sort, $order)
                 ->paginate($per_page)
-        )->additional(['meta' => compact('order', 'sort')]);
+        )->additional(['meta' => compact('sort', 'order')]);
     }
 
+
+    // Helper functions
+    private function filterAttendees($query, $filters)
+    {
+        $query->when(isset($filters['affiliation_id']), fn ($q) => $q->where('users.affiliation_id', $filters['affiliation_id']))
+            ->when(isset($filters['name']), fn ($q) => $q->where('users.name', 'like', '%' . $filters['name'] . '%'))
+            ->when(isset($filters['email']), fn ($q) => $q->where('users.email', 'like', '%' . $filters['email'] . '%'))
+            ->when(isset($filters['remarks']), fn ($q) => $q->where('users.remarks', 'like', '%' . $filters['remarks'] . '%'))
+            ->when(isset($filters['never_logged_in']), fn ($q) => $q->whereNull('users.last_login_date'))
+            ->when(
+                isset($filters['logged_in_min_date']) && isset($filters['logged_in_max_date']),
+                fn ($q) => $q->whereDate('users.last_login_date', '>=', $filters['logged_in_min_date'])
+                    ->whereDate('users.last_login_date', '<=', $filters['logged_in_max_date'])
+            )->when(isset($filters['narrowed_by']) && $filters['narrowed_by'] != 3, function ($q) use ($filters) {
+                if ($filters['narrowed_by'] == 1) $q->where('attending_courses.status', AttendingCourse::ATTENDING);
+                if ($filters['narrowed_by'] == 2) $q->where('attending_courses.status', AttendingCourse::COMPLETE);
+            });
+    }
 
     private function appendAttribute(array $arr, string $att, mixed $val)
     {

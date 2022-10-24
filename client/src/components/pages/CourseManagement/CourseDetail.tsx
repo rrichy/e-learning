@@ -29,7 +29,7 @@ import IconButton from "@/components/atoms/IconButton";
 import Table from "@/components/atoms/Table";
 import { TABLE_ROWS_PER_PAGE } from "@/settings/appconfig";
 import CourseAttendeeSearch from "@/components/organisms/CourseManagementFragments/CourseAttendeeSearch";
-import { CourseAttendeeSearchAttributes } from "@/interfaces/SearchFormAttributes";
+import { CourseAttendeeSearchAttributes } from "@/validations/SearchFormValidation";
 
 interface Attendee {
   name: string;
@@ -77,13 +77,15 @@ const tableResult = (
 
 function CourseDetail() {
   const { courseId } = useParams();
-  const [filters, setFilters] = useState<
-    PaginationFilterInterface & { [k: string]: any }
-  >(initPaginationFilter);
+  const [pagination, setPagination] = useState(initPaginationFilter);
+  const [filters, setFilters] = useState<{ [k: string]: any }>({});
   const { isFetching: courseIsFetching, data: courseDetails } = courseResult(
     +courseId!
   );
-  const { data, isFetching } = tableResult(+courseId!, filters);
+  const { data, isFetching } = tableResult(+courseId!, {
+    ...pagination,
+    ...filters,
+  });
 
   const updateFilter = (
     page: number = 1,
@@ -91,8 +93,8 @@ function CourseDetail() {
     sort: "id",
     order: OrderType = "desc"
   ) => {
-    setFilters({
-      ...filters,
+    setPagination({
+      ...pagination,
       current_page: page,
       per_page: pageSize,
       sort,
@@ -101,11 +103,11 @@ function CourseDetail() {
   };
 
   const handleSearch = (raw: CourseAttendeeSearchAttributes) => {
-    const temp = { ...filters };
+    const temp: { [k: string]: any } = {};
 
     for (let [key, value] of Object.entries(raw)) {
       if (key === "never_logged_in") {
-        if (value !== -1) temp[key] = 1;
+        if (value === 1) temp[key] = 1;
       } else if (value) temp[key] = value;
     }
 

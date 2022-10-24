@@ -8,20 +8,16 @@ import {
   Selection,
   TextField,
 } from "@/components/molecules/LabeledHookForms";
-import DateRange from "@/components/atoms/HookForms/DateRange";
-import { Selection as ASelection } from "@/components/atoms/HookForms";
-import Labeler from "@/components/molecules/Labeler";
-import {
-  OptionAttribute,
-  OptionsAttribute,
-} from "@/interfaces/CommonInterface";
+import { OptionAttribute } from "@/interfaces/CommonInterface";
 import { FormContainer, useForm } from "react-hook-form-mui";
 import { useQuery } from "@tanstack/react-query";
 import { getOptions } from "@/services/CommonService";
+import { yupResolver } from "@hookform/resolvers/yup";
 import {
   CourseAttendeeSearchAttributes,
+  courseAttendeeSearchSchema,
   initCourseAttendeeDefault,
-} from "@/interfaces/SearchFormAttributes";
+} from "@/validations/SearchFormValidation";
 
 function CourseAttendeeSearch({
   onSubmit,
@@ -44,7 +40,9 @@ function CourseAttendeeSearch({
     }
   );
   const form = useForm({
+    mode: "onChange",
     defaultValues: initCourseAttendeeDefault,
+    resolver: yupResolver(courseAttendeeSearchSchema),
   });
   const [open, setOpen] = useState(false);
 
@@ -90,7 +88,7 @@ function CourseAttendeeSearch({
                 radioName="never_logged_in"
                 radioLabel="未ログイン"
                 radioValue={1}
-                dateRangeValue={0}
+                dateRangeValue={2}
                 DateRangeProps={{
                   minDateProps: { name: "logged_in_min_date" },
                   maxDateProps: { name: "logged_in_max_date" },
@@ -126,7 +124,7 @@ function CourseAttendeeSearch({
                 rounded
                 color="secondary"
                 variant="contained"
-                disabled={!form.formState.isDirty}
+                disabled={!form.formState.isDirty || !form.formState.isValid}
               >
                 検索
               </Button>
