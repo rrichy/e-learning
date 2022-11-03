@@ -1,8 +1,9 @@
 import useAlerter from "@/hooks/useAlerter";
 import { AuthAttributes } from "@/interfaces/AuthAttributes";
 import React, { createContext, useEffect, useState } from "react";
-import { get } from "@/services/ApiService";
+import { post } from "@/services/ApiService";
 import { getAuthData, getBearerToken } from "@/services/AuthService";
+import Button from "@/components/atoms/Button";
 
 export const AuthContext = createContext<
   | [
@@ -12,7 +13,7 @@ export const AuthContext = createContext<
 >([null, null]);
 
 function AuthContextProvider({ children }: { children: React.ReactNode }) {
-  const { errorSnackbar } = useAlerter();
+  const { errorSnackbar, warningSnackbar, closeSnackbar } = useAlerter();
   const [auth, setAuth] = useState<AuthAttributes>({
     isLoggedIn: Boolean(getBearerToken()),
     data: null,
@@ -32,6 +33,20 @@ function AuthContextProvider({ children }: { children: React.ReactNode }) {
             count: res.data.users_count,
             categories: res.data.categories ?? [],
           });
+          if (!res.data.user.email_verified_at) {
+            warningSnackbar("Verify your email", {
+              action: (snackbarId) => (
+                <Button
+                  onClick={() => {
+                    post("/api/email/verification-notification");
+                    closeSnackbar(snackbarId);
+                  }}
+                >
+                  resend verification
+                </Button>
+              ),
+            });
+          }
         } catch (e: any) {
           errorSnackbar(e.message);
           setAuth({
@@ -51,7 +66,7 @@ function AuthContextProvider({ children }: { children: React.ReactNode }) {
         categories: [],
       });
     }
-  }, [auth.isLoggedIn, errorSnackbar]);
+  }, [auth.isLoggedIn, errorSnackbar, closeSnackbar]);
 
   return (
     <AuthContext.Provider value={[auth, setAuth]}>

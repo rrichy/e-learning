@@ -29,6 +29,6 @@ Route::get('/verify-email/{id}/{hash}', [VerifyEmailController::class, '__invoke
                 ->name('verification.verify');
 
 Route::post('/email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
-                ->middleware(['auth', 'throttle:6,1'])
+                ->middleware(['auth:sanctum', 'throttle:6,1'])
                 ->name('verification.send');
 
