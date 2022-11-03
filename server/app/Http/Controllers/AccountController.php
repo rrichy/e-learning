@@ -5,20 +5,21 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AccountStoreUpdateRequest;
 use App\Models\User;
 use App\Services\AccountService;
+use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class AccountController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index(AccountService $service)
+    public function index(Request $request, AccountService $service)
     {
-        Gate::authorize('viewAny-account');
-
-        return $service->list();
+        try {
+            $list = $service->list($request, auth()->user());
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
+        
+        return $list;
     }
 
     /**

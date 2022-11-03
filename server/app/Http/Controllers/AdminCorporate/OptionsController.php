@@ -31,13 +31,23 @@ class OptionsController extends Controller
                             $value = Affiliation::query()
                                 ->when(!auth()->user()->isAdmin(), fn ($q) => $q->where('id', auth()->user()->affiliation_id))
                                 ->get(['id', 'name']);
-                                
+
                             break;
                         }
+                        // parent_departments
                     case 'departments': {
                             $value = Department::query()
-                                ->when(!auth()->user()->isAdmin(), fn ($q) => $q->where('affiliation_id', auth()->user()->affiliation_id)->whereNull('parent_id'))
-                                ->get(['id', 'name']);
+                                ->when(!auth()->user()->isAdmin(), fn ($q) => $q->where('affiliation_id', auth()->user()->affiliation_id))
+                                ->whereNull('parent_id')
+                                ->get(['id', 'name', 'affiliation_id']);
+
+                            break;
+                        }
+                    case 'child_departments': {
+                            $value = Department::query()
+                                ->when(!auth()->user()->isAdmin(), fn ($q) => $q->where('affiliation_id', auth()->user()->affiliation_id))
+                                ->whereNotNull('parent_id')
+                                ->get(['id', 'name', 'affiliation_id', 'parent_id']);
 
                             break;
                         }

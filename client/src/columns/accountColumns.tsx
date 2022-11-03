@@ -6,9 +6,11 @@ import { Column } from "material-table";
 export default function generate({
   affiliation_lookup,
   department_lookup,
+  child_department_lookup,
 }: {
   affiliation_lookup: { [k: number]: string };
   department_lookup: { [k: number]: string };
+  child_department_lookup: { [k: number]: string };
 }) {
   const columns: Column<UserAttributes>[] = [
     {
@@ -27,12 +29,14 @@ export default function generate({
     {
       field: "department_1",
       title: "部署１",
+      sorting: false,
       render: (row) => department_lookup[row.department_1 ?? 0] ?? "-",
     },
     {
       field: "department_2",
       title: "部署２",
-      render: (row) => department_lookup[row.department_2 ?? 0] ?? "-",
+      sorting: false,
+      render: (row) => child_department_lookup[row.department_2 ?? 0] ?? "-",
     },
     {
       field: "created_at",

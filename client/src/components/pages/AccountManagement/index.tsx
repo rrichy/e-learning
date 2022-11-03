@@ -1,91 +1,109 @@
-import {
-  Box,
-  Card,
-  CardContent,
-  CardHeader,
-  Checkbox,
-  Dialog,
-  DialogTitle,
-  Divider,
-  FormControlLabel,
-  IconButton,
-  Paper,
-  Typography,
-} from "@mui/material";
+import { Box, Paper, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Button from "@/components/atoms/Button";
-import { FormContainer } from "react-hook-form-mui";
-import { Selection, TextField } from "../../molecules/LabeledHookForms";
-import CloseIcon from "@mui/icons-material/Close";
 import {
-  initPaginatedData,
+  initPaginationFilter,
+  initReactQueryPagination,
   OptionAttribute,
-  OptionsAttribute,
   OrderType,
-  PageDialogProps,
+  PaginationFilterInterface,
+  ReactQueryPaginationInterface,
 } from "@/interfaces/CommonInterface";
-import AccountManagementSearch from "@/components/organisms/AccountManagementFragments/AccountManagementSearchAccordion";
+import AccountManagementSearch, {
+  useOptions,
+} from "@/components/organisms/AccountManagementFragments/AccountManagementSearchAccordion";
 import Table from "@/components/atoms/Table";
 import useAlerter from "@/hooks/useAlerter";
 import useConfirm from "@/hooks/useConfirm";
 import { TABLE_ROWS_PER_PAGE } from "@/settings/appconfig";
-import { getOptions } from "@/services/CommonService";
-import { destroyAccount, indexAccount } from "@/services/AccountService";
+import { destroyAccount } from "@/services/AccountService";
 import { UserAttributes } from "@/interfaces/AuthAttributes";
 import accountColumns from "@/columns/accountColumns";
+import { AccountManagementSearchAttributes } from "@/validations/SearchFormValidation";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { get } from "@/services/ApiService";
+
+const init = initReactQueryPagination<UserAttributes>();
+
+const tableResult = (
+  filters: PaginationFilterInterface & { [k: string]: any }
+) =>
+  useQuery(
+    ["accounts", filters],
+    async () => {
+      const params = Object.entries(filters)
+        .reduce(
+          (acc: string[], [key, value]) =>
+            !value || ["last_page", "total"].includes(key)
+              ? acc
+              : [...acc, `${key === "current_page" ? "page" : key}=${value}`],
+          []
+        )
+        .join("&");
+
+      const res = await get("/api/account?" + params);
+      return res.data as ReactQueryPaginationInterface<UserAttributes>;
+    },
+    {
+      staleTime: 5_000,
+      keepPreviousData: true,
+      refetchOnWindowFocus: false,
+    }
+  );
 
 function AccountManagement() {
-  const mounted = useRef(true);
+  const queryClient = useQueryClient();
   const { successSnackbar, errorSnackbar } = useAlerter();
   const { isConfirmed } = useConfirm();
   const [lookups, setLookups] = useState({
     affiliation_lookup: {} as { [k: number]: string },
     department_lookup: {} as { [k: number]: string },
+    child_department_lookup: {} as { [k: number]: string },
   });
-  const [state, setState] = useState(initPaginatedData<UserAttributes>());
+  const { data: resOptions, isLoading: resIsLoading } = useOptions();
+  const [pagination, setPagination] = useState(initPaginationFilter);
+  const [filters, setFilters] = useState<{ [k: string]: any }>({});
+  const { data, isFetching } = tableResult({
+    ...pagination,
+    ...filters,
+  });
   const [stateSelected, setStateSelected] = useState<UserAttributes[]>([]);
-
-  const fetchData = useCallback(
-    async (
-      page: number = 1,
-      pageSize: number = TABLE_ROWS_PER_PAGE[0],
-      sort: keyof UserAttributes = "id",
-      order: OrderType = "asc"
-    ) => {
-      try {
-        setState((s) => ({
-          ...s,
-          page,
-          order,
-          sort,
-          per_page: pageSize,
-          loading: true,
-        }));
-
-        const res = await indexAccount(page, pageSize, sort, order);
-        const { data, meta } = res.data;
-        if (mounted.current) {
-          setState((s) => ({
-            ...s,
-            loading: false,
-            data,
-            page: meta.current_page,
-            total: meta.total,
-            order,
-            sort,
-            per_page: meta.per_page,
-            last_page: meta.last_page,
-          }));
-        }
-      } catch (e: any) {
-        errorSnackbar(e.message);
-      } finally {
-        setState((s) => ({ ...s, loading: false }));
-      }
+  const deleteMutation = useMutation((ids: number[]) => destroyAccount(ids), {
+    onSuccess: (res: any) => {
+      successSnackbar(res.data.message);
+      queryClient.invalidateQueries(["accounts", filters]);
     },
-    []
-  );
+    onError: (e: any) => errorSnackbar(e.message),
+  });
+
+  const updateFilter = (
+    page: number = 1,
+    pageSize: number = TABLE_ROWS_PER_PAGE[0],
+    sort: keyof UserAttributes = "id",
+    order: OrderType = "desc"
+  ) => {
+    setPagination({
+      ...pagination,
+      current_page: page,
+      per_page: pageSize,
+      sort,
+      order,
+    });
+  };
+
+  const handleSearch = async (raw: AccountManagementSearchAttributes) => {
+    const temp: { [k: string]: any } = {};
+
+    for (let [key, value] of Object.entries(raw)) {
+      if (key === "never_logged_in") {
+        if (value === 1) temp[key] = 1;
+      } else if (value) temp[key] = value;
+    }
+
+    setFilters(temp);
+    updateFilter();
+  };
 
   const handleDelete = async () => {
     const confirmed = await isConfirmed({
@@ -94,51 +112,37 @@ function AccountManagement() {
     });
 
     if (confirmed) {
-      try {
-        setState((s) => ({ ...s, loading: true }));
-        const res = await destroyAccount(stateSelected.map((a) => a.id!));
-        successSnackbar(res.data.message);
-        fetchData();
-      } catch (e: any) {
-        errorSnackbar(e.message);
-      } finally {
-        setState((s) => ({ ...s, loading: false }));
-      }
+      deleteMutation.mutate(stateSelected.map((a) => a.id!));
     }
   };
 
   useEffect(() => {
-    mounted.current = true;
-    fetchData();
-
-    (async () => {
-      try {
-        const res = await getOptions(["affiliations", "departments"]);
-        setLookups({
-          affiliation_lookup: res.data.affiliations.reduce(
-            (acc: { [k: number]: string }, b: OptionAttribute) => ({
-              ...acc,
-              [b.id]: b.name,
-            }),
-            {}
-          ),
-          department_lookup: res.data.departments.reduce(
-            (acc: { [k: number]: string }, b: OptionAttribute) => ({
-              ...acc,
-              [b.id]: b.name,
-            }),
-            {}
-          ),
-        });
-      } catch (e: any) {
-        errorSnackbar(e.message);
-      }
-    })();
-
-    return () => {
-      mounted.current = false;
-    };
-  }, [errorSnackbar]);
+    if (!resIsLoading && resOptions) {
+      setLookups({
+        affiliation_lookup: resOptions.affiliations.reduce(
+          (acc: { [k: number]: string }, b: OptionAttribute) => ({
+            ...acc,
+            [b.id]: b.name,
+          }),
+          {}
+        ),
+        department_lookup: resOptions.departments.reduce(
+          (acc: { [k: number]: string }, b: OptionAttribute) => ({
+            ...acc,
+            [b.id]: b.name,
+          }),
+          {}
+        ),
+        child_department_lookup: resOptions.child_departments.reduce(
+          (acc: { [k: number]: string }, b: OptionAttribute) => ({
+            ...acc,
+            [b.id]: b.name,
+          }),
+          {}
+        ),
+      });
+    }
+  }, [resOptions, resIsLoading]);
 
   return (
     <>
@@ -151,9 +155,7 @@ function AccountManagement() {
           },
         }}
       >
-        {/* <FormContainer>
-          <AccountManagementSearch categories={categories} />
-        </FormContainer> */}
+        <AccountManagementSearch onSubmit={handleSearch} />
         <Stack
           spacing={2}
           justifyContent="center"
@@ -187,12 +189,13 @@ function AccountManagement() {
             </Button>
             <Box>
               <Typography fontStyle="italic">
-                検索結果: {state.total}人
+                検索結果: {data?.meta.total ?? 0}人
               </Typography>
               <Table
                 columns={accountColumns(lookups)}
-                state={state}
-                fetchData={fetchData}
+                state={data || init}
+                fetchData={updateFilter}
+                isLoading={isFetching || deleteMutation.isLoading}
                 onSelectionChange={(rows) => setStateSelected(rows)}
                 options={{
                   selection: true,

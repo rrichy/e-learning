@@ -46,6 +46,8 @@ function CourseAttendeeSearch({
   });
   const [open, setOpen] = useState(false);
 
+  const { isDirty, isValid } = form.formState;
+
   return (
     <Box>
       <Button
@@ -124,7 +126,7 @@ function CourseAttendeeSearch({
                 rounded
                 color="secondary"
                 variant="contained"
-                disabled={!form.formState.isDirty || !form.formState.isValid}
+                disabled={!isDirty || !isValid}
               >
                 検索
               </Button>
