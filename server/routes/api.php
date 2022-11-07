@@ -10,6 +10,7 @@ use App\Http\Controllers\AdminCorporate\NoticeController;
 use App\Http\Controllers\AdminCorporate\OptionsController;
 use App\Http\Controllers\AdminCorporate\SignatureController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\InquiryController;
 use App\Http\Controllers\Student\ChapterController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -62,6 +63,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     
             Route::delete('/notice/{ids}', [NoticeController::class, 'massDelete']);
             Route::resource('/notice', NoticeController::class)->only(['store', 'update']);
+        
+            Route::apiResource('inquiries', InquiryController::class);
         });
 
         Route::get('/course', [CourseController::class, 'index']);

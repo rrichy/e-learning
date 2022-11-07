@@ -145,6 +145,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(ViewingInformation::class);
     }
 
+    public function inquiries(): HasMany
+    {
+        return $this->hasMany(Inquiry::class);
+    }
+
     // Scopes
     public function scopeWhoAreIndividual($query)
     {

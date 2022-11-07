@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             QuestionOptionSeeder::class,
             NoticeSeeder::class,
             AttendingCourseSeeder::class,
+            InquirySeeder::class,
             // UserAnswerSeeder::class,
         ]);
     }

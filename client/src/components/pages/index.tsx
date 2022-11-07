@@ -16,7 +16,6 @@ import Register from "./Register";
 import MyPage from "./MyPage";
 import ChangePlan from "./ChangePlan";
 import ChangePassword from "./ChangePassword";
-import Inquiries from "./Inquiries";
 import Header from "../organisms/Header";
 import CourseManagement from "./CourseManagement";
 import CourseManagementAddEdit from "./CourseManagement/CourseManagementAddEdit";
@@ -49,6 +48,7 @@ import TestAnswerScreen from "../organisms/Student/TestAnswerScreen";
 import TestResult from "../organisms/Student/TestResult";
 import StudentProfile from "./StudentProfile";
 import StudentLecture from "./Student/StudentLecture";
+import Inquiries from "./Inquiries";
 
 const { trial, individual, corporate, admin, guest } = MembershipType;
 const registered = [trial, individual, corporate, admin];
