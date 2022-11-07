@@ -16,7 +16,7 @@ import {
 import { getOptions } from "@/services/CommonService";
 import arrayMoveTo from "@/utils/arrayMoveTo";
 import useConfirm from "@/hooks/useConfirm";
-import { DropResult } from "react-beautiful-dnd";
+import { DropResult } from "@hello-pangea/dnd";
 import organizeMailColumns from "@/columns/organizeMailColumns";
 
 function useOrganizeMail() {

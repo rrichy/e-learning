@@ -14,7 +14,7 @@ import {
   Draggable,
   Droppable,
   DropResult,
-} from "react-beautiful-dnd";
+} from "@hello-pangea/dnd";
 import emptyTable from "@/assets/empty_table.svg";
 import MTableBody from "./MTableBody";
 import MTableBodyRow from "./MTableBodyRow";

@@ -25,7 +25,7 @@ import {
   Draggable,
   DraggableProvidedDragHandleProps,
   Droppable,
-} from "react-beautiful-dnd";
+} from "@hello-pangea/dnd";
 import { useMemo } from "react";
 
 function CourseManagementForm({

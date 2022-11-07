@@ -12,7 +12,7 @@ import {
 import React, { useState } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { QuestionAttributes } from "@/validations/CourseFormValidation";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 function RadioQuestion() {
   const { watch, control, setValue } = useFormContext<QuestionAttributes>();
