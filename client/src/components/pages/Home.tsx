@@ -19,7 +19,7 @@ function Home() {
       <Link to='/notice-management'>Notice Management</Link> <br />
       <Link to='/signature-management'>Signature - 署名管理</Link> <br />
       <Link to='/organize-mail-management'>Organize Mail - メールテンプレート管理</Link> <br />
-      <Link to='/contact'>Contact - お問い合わせ</Link> <br /><br />
+      <Link to='/send-inquiry'>Contact - お問い合わせ</Link> <br /><br />
       CORPORATE Links <br />
       <Link to='/course-management'>Course Management - コース管理</Link> <br />
       <Link to='/account-management'>Account - アカウント管理</Link> <br />
@@ -27,11 +27,11 @@ function Home() {
       <Link to='/category-management'>Category - カテゴリー管理</Link> <br />
       <Link to='/notice-management'>Notice Management</Link> <br />
       <Link to='/organize-mail-management'>Organize Mail - メールテンプレート管理</Link> <br />
-      <Link to='/contact'>Contact - お問い合わせ</Link> <br /><br />
+      <Link to='/send-inquiry'>Contact - お問い合わせ</Link> <br /><br />
       STUDENT/INDIVIUDAL Links <br />
       <Link to='/course'>Course list</Link> <br />
       <Link to='/course/course-history'>Course History</Link> <br />
-      <Link to='/contact'>Contact - お問い合わせ</Link> <br />
+      <Link to='/send-inquiry'>Contact - お問い合わせ</Link> <br />
       <Link to='/unsubscribe'>Unsubscribe</Link> <br /><br />
     </div>;
 }

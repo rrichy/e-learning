@@ -35,7 +35,6 @@ import OrganizeMail from "./OrganizeMail";
 import Unsubscribe from "./Unsubscribe";
 import UnsubscribeReason from "./Unsubscribe/UnsubscribeReason";
 import UnsubscribeMessage from "./Unsubscribe/UnsubscribeMessage";
-import Contact from "./Contact";
 import Sidebar from "../organisms/Sidebar";
 import { Container, Stack, useMediaQuery, useTheme } from "@mui/material";
 import Footer from "../molecules/Footer";
@@ -49,6 +48,7 @@ import TestResult from "../organisms/Student/TestResult";
 import StudentProfile from "./StudentProfile";
 import StudentLecture from "./Student/StudentLecture";
 import Inquiries from "./Inquiries";
+import InquiryAdd from "./Inquiries/InquiryAdd";
 
 const { trial, individual, corporate, admin, guest } = MembershipType;
 const registered = [trial, individual, corporate, admin];
@@ -247,10 +247,10 @@ export default function Pages() {
       ],
     },
     {
-      path: "/contact",
+      path: "/send-inquiry",
       element: (
         <PrivateRoute membershipTypes={[corporate, individual, trial]}>
-          <Contact />
+          <InquiryAdd />
         </PrivateRoute>
       ),
     },

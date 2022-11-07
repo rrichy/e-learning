@@ -40,7 +40,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::middleware('membership:admin,corporate,individual')->group(function () {
 
         Route::middleware('membership:admin,corporate')->group(function () {
-
             Route::prefix('/account')->group(function () {
                 Route::post('/', [AccountController::class, 'store']);
                 Route::get('/{account}', [AccountController::class, 'show']);
@@ -99,8 +98,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::delete('/{ids}', [NoticeController::class, 'massDelete'])->middleware('membership:admin,corporate');
         });
 
-
-        Route::get('/inquiries', [InquiryController::class, 'index'])->middleware('membership:admin,corporate');
+        Route::prefix('/inquiries')->group(function () {
+            Route::post('/', [InquiryController::class, 'store'])->middleware('membership:corporate,individual');
+            Route::get('/', [InquiryController::class, 'index'])->middleware('membership:admin,corporate');
+        });
 
         Route::prefix('/chapter')->middleware('membership:individual')->group(function () {
             Route::post('/{chapter}/submit-test', [ChapterController::class, 'submitTest']);

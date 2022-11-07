@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Http\Resources\InquiryListResource;
 use App\Models\Inquiry;
+use App\Models\User;
 
 class InquiryService
 {
@@ -41,9 +42,15 @@ class InquiryService
     // }
 
 
-    // public function store(Request $request)
-    // {
-    // }
+    public function store(string $content, User $auth)
+    {
+        $inquiry = Inquiry::create([
+            'content' => $content,
+            'user_id' => $auth->id,
+        ]);
+
+        return $inquiry;
+    }
 
 
     // public function deleteIds(string $ids)

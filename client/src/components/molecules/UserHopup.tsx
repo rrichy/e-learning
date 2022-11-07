@@ -135,7 +135,7 @@ function UserHopup() {
         </MenuItem>
         <Divider /> */}
         {user.membership_type_id !== MembershipType.admin && (
-          <MenuItem component={Link} to="/contact">
+          <MenuItem component={Link} to="/send-inquiry">
             <InquiryIcon />
             お問い合わせ
           </MenuItem>

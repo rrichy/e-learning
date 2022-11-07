@@ -26,15 +26,21 @@ class InquiryController extends Controller
         return $inquiries;
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+    public function store(Request $request, InquiryService $service)
     {
-        //
+        $valid = $request->validate([
+            'content' => 'required|string',
+        ]);
+
+        try {
+            $result = $service->store($valid['content'], auth()->user());
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
+
+        return response()->json([
+            'message' => $result ? 'Successfully sent an inquiry!' : 'Failed to send inquiry'
+        ]);
     }
 
     /**
