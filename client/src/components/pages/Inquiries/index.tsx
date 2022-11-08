@@ -14,6 +14,8 @@ import { get } from "@/services/ApiService";
 import { TABLE_ROWS_PER_PAGE } from "@/settings/appconfig";
 import { jpDate } from "@/mixins/jpFormatter";
 import InquiryDetails from "@/components/molecules/InquiryDetails";
+import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
+import MyTable from "@/components/atoms/MyTable";
 
 export type InquiryRowAttribute = {
   id: number;
@@ -52,6 +54,8 @@ function getTableResults(
     }
   );
 }
+
+const columnHelper = createColumnHelper<InquiryRowAttribute>();
 
 function Inquiries() {
   const [pagination, setPagination] = useState(initPaginationFilter);
@@ -105,6 +109,27 @@ function Inquiries() {
     },
   ];
 
+  const tableColumns: ColumnDef<InquiryRowAttribute, string>[] = [
+    columnHelper.accessor("name", {
+      header: () => "氏名"
+    }),
+    columnHelper.accessor("email", {
+      header: () => "メールアドレス",
+    }),
+    columnHelper.accessor("content", {
+      header: () => "内容",
+      cell: (row) => (
+        <Link component="button" onClick={() => setSelectedRow(row.row.original)}>
+          {row.getValue()}
+        </Link>
+      )
+    }),
+    columnHelper.accessor("created_at", {
+      header: () => "created_at",
+      cell: (row) => jpDate(row.getValue())
+    })
+  ];
+
   return (
     <Stack justifyContent="space-between">
       <Paper variant="outlined">
@@ -116,6 +141,8 @@ function Inquiries() {
             fetchData={updateFilter}
             isLoading={isFetching}
           />
+          <Stack mt={6} />
+          <MyTable data={data?.data ?? []} columns={tableColumns} />
           <InquiryDetails
             propInquiry={selectedRow}
             onClose={() => setSelectedRow(null)}
