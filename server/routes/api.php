@@ -98,8 +98,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::delete('/{ids}', [NoticeController::class, 'massDelete'])->middleware('membership:admin,corporate');
         });
 
-        Route::prefix('/inquiries')->group(function () {
+        Route::prefix('/inquiry')->group(function () {
             Route::post('/', [InquiryController::class, 'store'])->middleware('membership:corporate,individual');
+            Route::get('/{inquiry}', [InquiryController::class, 'show'])->middleware('membership:admin,corporate');
             Route::get('/', [InquiryController::class, 'index'])->middleware('membership:admin,corporate');
         });
 

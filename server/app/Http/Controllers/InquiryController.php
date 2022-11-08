@@ -18,7 +18,7 @@ class InquiryController extends Controller
         ]);
 
         try {
-            $inquiries = $service->list($valid);
+            $inquiries = $service->index($valid);
         } catch (Exception $ex) {
             abort(500, $ex->getMessage());
         }
@@ -43,27 +43,15 @@ class InquiryController extends Controller
         ]);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Inquiry  $inquiry
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Inquiry $inquiry)
+    public function show(Inquiry $inquiry, InquiryService $service)
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Inquiry  $inquiry
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Inquiry $inquiry)
-    {
-        //
+        try {
+            $parsed = $service->show($inquiry);
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
+    
+        return $parsed;
     }
 
     /**
@@ -72,8 +60,8 @@ class InquiryController extends Controller
      * @param  \App\Models\Inquiry  $inquiry
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Inquiry $inquiry)
-    {
+    // public function destroy(Inquiry $inquiry)
+    // {
         //
-    }
+    // }
 }

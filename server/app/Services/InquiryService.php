@@ -3,12 +3,13 @@
 namespace App\Services;
 
 use App\Http\Resources\InquiryListResource;
+use App\Http\Resources\InquiryShowResource;
 use App\Models\Inquiry;
 use App\Models\User;
 
 class InquiryService
 {
-    public static function list(array $pagination = [])
+    public static function index(array $pagination = [])
     {
         return InquiryListResource::collection(
             Inquiry::query()
@@ -32,9 +33,14 @@ class InquiryService
     }
 
 
-    // public function details(Model $model)
-    // {
-    // }
+    public function show(Inquiry $inquiry)
+    {
+        return new InquiryShowResource(
+            $inquiry->load([
+                'user' => fn ($q) => $q->select('id', 'name', 'email')
+            ])
+        );
+    }
 
 
     // public function update(Request $request, Model $model)
