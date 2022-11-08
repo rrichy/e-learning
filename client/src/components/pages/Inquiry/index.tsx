@@ -8,12 +8,18 @@ import {
   OrderType,
   PaginationFilterInterface,
   ReactQueryPaginationInterface,
+  TableStateProps,
 } from "@/interfaces/CommonInterface";
 import { useQuery } from "@tanstack/react-query";
 import { get } from "@/services/ApiService";
 import { TABLE_ROWS_PER_PAGE } from "@/settings/appconfig";
 import { jpDate } from "@/mixins/jpFormatter";
-import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
+import {
+  ColumnDef,
+  createColumnHelper,
+  PaginationState,
+  SortingState,
+} from "@tanstack/react-table";
 import MyTable from "@/components/atoms/MyTable";
 import InquiryDetails from "./InquiryDetails";
 
@@ -25,27 +31,45 @@ export type InquiryRowAttribute = {
   created_at: string;
 };
 
-const init = initReactQueryPagination<InquiryRowAttribute>();
+const columnHelper = createColumnHelper<InquiryRowAttribute>();
 
-function getTableResults(
-  filters: PaginationFilterInterface & { [k: string]: any }
-) {
-  return useQuery(
-    ["inquiries", filters],
+function Inquiries() {
+  const [selectedRow, setSelectedRow] = useState<number | null>(null);
+
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: TABLE_ROWS_PER_PAGE[0],
+  });
+
+  const [sort, setSort] = useState<SortingState>([]);
+
+  const { data, isFetching } = useQuery(
+    ["inquiries", pagination, sort],
     async () => {
-      const params = Object.entries(filters)
-        .reduce(
-          (acc: string[], [key, value]) =>
-            !value || ["last_page", "total"].includes(key)
-              ? acc
-              : [...acc, `${key === "current_page" ? "page" : key}=${value}`],
-          []
-        )
-        .join("&");
+      // const params = Object.entries(pagination)
+      //   .reduce(
+      //     (acc: string[], [key, value]) =>
+      //       !value || ["last_page", "total"].includes(key)
+      //         ? acc
+      //         : [...acc, `${key === "current_page" ? "page" : key}=${value}`],
+      //     []
+      //   )
+      //   .join("&");
+      const sortKey = sort[0]?.id ?? "id";
+      const orderDir = sort[0] ? (sort[0].desc ? "desc" : "asc") : "desc";
 
-      const res = await get("/api/inquiry?" + params);
+      const res = await get(
+        `/api/inquiry?page=${pagination.pageIndex + 1}&per_page=${
+          pagination.pageSize
+        }&sort=${sortKey}&order=${orderDir}`
+      );
 
-      return res.data as ReactQueryPaginationInterface<InquiryRowAttribute>;
+      return {
+        sorter: setSort,
+        paginator: setPagination,
+        data: res.data.data,
+        meta: res.data.meta,
+      } as TableStateProps<InquiryRowAttribute>;
     },
     {
       staleTime: 5_000,
@@ -53,81 +77,38 @@ function getTableResults(
       refetchOnWindowFocus: false,
     }
   );
-}
-
-const columnHelper = createColumnHelper<InquiryRowAttribute>();
-
-function Inquiries() {
-  const [pagination, setPagination] = useState(initPaginationFilter);
-  const { data, isFetching } = getTableResults(pagination);
-  const [selectedRow, setSelectedRow] = useState<number | null>(
-    null
-  );
-
-  const updateFilter = (
-    page: number = 1,
-    pageSize: number = TABLE_ROWS_PER_PAGE[0],
-    sort: keyof InquiryRowAttribute = "id",
-    order: OrderType = "desc"
-  ) => {
-    setPagination({
-      ...pagination,
-      current_page: page,
-      per_page: pageSize,
-      sort,
-      order,
-    });
-  };
-
-  const columns: Column<InquiryRowAttribute>[] = [
-    {
-      field: "name",
-      title: "氏名",
-    },
-    {
-      field: "email",
-      title: "メールアドレス",
-    },
-    {
-      field: "content",
-      title: "内容",
-      render: (row) => (
-        <Link component="button" onClick={() => setSelectedRow(row.id)}>
-          {row.content}
-        </Link>
-      ),
-      cellStyle: {
-        maxWidth: "500px",
-        overflow: "hidden",
-        whiteSpace: "nowrap",
-      },
-    },
-    {
-      field: "created_at",
-      title: "created_at",
-      render: (row) => jpDate(row.created_at),
-    },
-  ];
 
   const tableColumns: ColumnDef<InquiryRowAttribute, string>[] = [
     columnHelper.accessor("name", {
-      header: () => "氏名"
+      header: () => "氏名",
     }),
     columnHelper.accessor("email", {
       header: () => "メールアドレス",
+      minSize: 160,
     }),
     columnHelper.accessor("content", {
       header: () => "内容",
       cell: (row) => (
-        <Link component="button" onClick={() => setSelectedRow(row.row.original.id)}>
+        <Link
+          component="button"
+          onClick={() => setSelectedRow(row.row.original.id)}
+          textOverflow="ellipsis"
+          width={1}
+          whiteSpace="nowrap"
+          overflow="hidden"
+        >
           {row.getValue()}
         </Link>
-      )
+      ),
+      minSize: 320,
     }),
     columnHelper.accessor("created_at", {
       header: () => "created_at",
-      cell: (row) => jpDate(row.getValue())
-    })
+      cell: (row) => (
+        <div style={{ textAlign: "center" }}>{jpDate(row.getValue())}</div>
+      ),
+      size: 150,
+    }),
   ];
 
   return (
@@ -135,14 +116,13 @@ function Inquiries() {
       <Paper variant="outlined">
         <Stack spacing={3}>
           <Typography variant="sectiontitle2">お問い合わせ</Typography>
-          <Table
+          {/* <Table
             columns={columns}
             state={data || init}
             fetchData={updateFilter}
             isLoading={isFetching}
-          />
-          <Stack mt={6} />
-          <MyTable data={data?.data ?? []} columns={tableColumns} />
+          /> */}
+          <MyTable state={data} columns={tableColumns} loading={isFetching} />
           <InquiryDetails
             id={selectedRow}
             onClose={() => setSelectedRow(null)}
