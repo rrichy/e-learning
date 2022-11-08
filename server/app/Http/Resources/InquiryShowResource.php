@@ -3,9 +3,8 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Str;
 
-class InquiryListResource extends JsonResource
+class InquiryShowResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -17,9 +16,9 @@ class InquiryListResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->name,
-            'email' => $this->email,
-            'content' => Str::limit($this->content, 40),
+            'name' => $this->user->name,
+            'email' => $this->user->email,
+            'content' => $this->content,
             'created_at' => $this->created_at,
         ];
     }

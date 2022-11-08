@@ -13,7 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { get } from "@/services/ApiService";
 import { TABLE_ROWS_PER_PAGE } from "@/settings/appconfig";
 import { jpDate } from "@/mixins/jpFormatter";
-import InquiryDetails from "@/components/molecules/InquiryDetails";
+import InquiryDetails from "./InquiryDetails";
 
 export type InquiryRowAttribute = {
   id: number;
@@ -41,7 +41,7 @@ function getTableResults(
         )
         .join("&");
 
-      const res = await get("/api/inquiries?" + params);
+      const res = await get("/api/inquiry?" + params);
 
       return res.data as ReactQueryPaginationInterface<InquiryRowAttribute>;
     },
@@ -56,7 +56,7 @@ function getTableResults(
 function Inquiries() {
   const [pagination, setPagination] = useState(initPaginationFilter);
   const { data, isFetching } = getTableResults(pagination);
-  const [selectedRow, setSelectedRow] = useState<InquiryRowAttribute | null>(
+  const [selectedRow, setSelectedRow] = useState<number | null>(
     null
   );
 
@@ -88,7 +88,7 @@ function Inquiries() {
       field: "content",
       title: "内容",
       render: (row) => (
-        <Link component="button" onClick={() => setSelectedRow(row)}>
+        <Link component="button" onClick={() => setSelectedRow(row.id)}>
           {row.content}
         </Link>
       ),
@@ -117,7 +117,7 @@ function Inquiries() {
             isLoading={isFetching}
           />
           <InquiryDetails
-            propInquiry={selectedRow}
+            id={selectedRow}
             onClose={() => setSelectedRow(null)}
           />
         </Stack>

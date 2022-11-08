@@ -20,7 +20,7 @@ function InquiryAdd() {
   const [sending, setSending] = useState(false);
   const { errorSnackbar, successSnackbar } = useAlerter();
   const sendMutation = useMutation(
-    (content: string) => post("/api/inquiries", { content }),
+    (content: string) => post("/api/inquiry", { content }),
     {
       onSuccess: (res: any) => {
         successSnackbar(res.data.message);

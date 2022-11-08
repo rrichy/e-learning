@@ -47,8 +47,8 @@ import TestAnswerScreen from "../organisms/Student/TestAnswerScreen";
 import TestResult from "../organisms/Student/TestResult";
 import StudentProfile from "./StudentProfile";
 import StudentLecture from "./Student/StudentLecture";
-import Inquiries from "./Inquiries";
-import InquiryAdd from "./Inquiries/InquiryAdd";
+import Inquiries from "./Inquiry";
+import InquiryAdd from "./Inquiry/InquiryAdd";
 
 const { trial, individual, corporate, admin, guest } = MembershipType;
 const registered = [trial, individual, corporate, admin];
