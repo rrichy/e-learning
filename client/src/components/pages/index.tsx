@@ -386,8 +386,8 @@ const PrivateRoute = ({
       <Header showMenu={!screenIsMd} useDarkColorScheme={useDarkColorScheme} />
       <Stack direction="row" flex={1}>
         {screenIsMd && <Sidebar useDarkColorScheme={useDarkColorScheme} />}
-        <Box maxWidth={{ xs: 1, md: "calc(100vw - 257px)" }}>
-        <Container sx={pageGlobalStyle}>{children}</Container>
+        <Box maxWidth={{ xs: 1, md: "calc(100vw - 257px)" }} flex={1}>
+          <Container sx={pageGlobalStyle}>{children}</Container>
         </Box>
       </Stack>
       <Footer />
