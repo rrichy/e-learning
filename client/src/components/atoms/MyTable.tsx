@@ -21,8 +21,16 @@ import {
   OnChangeFn,
   RowSelectionState,
   useReactTable,
+  Table as TableProps,
 } from "@tanstack/react-table";
 import Loading from "../molecules/Loading";
+import { DragDropContext, Draggable, Droppable, DropResult } from "@hello-pangea/dnd";
+import { DragIndicator } from "@mui/icons-material";
+
+interface DraggerProps<T> {
+  dragData: T[];
+  setDragData: OnChangeFn<T[]>;
+}
 
 interface MyTableProps<T> {
   state?: TableStateProps<T>;
@@ -32,6 +40,7 @@ interface MyTableProps<T> {
     selected: RowSelectionState;
     setSelected: OnChangeFn<RowSelectionState>;
   };
+  onDragEnd?: (r: DropResult) => void;
 }
 
 function MyTable<T extends unknown>({
@@ -39,6 +48,7 @@ function MyTable<T extends unknown>({
   columns,
   loading,
   selector,
+  onDragEnd,
 }: MyTableProps<T>) {
   const table = useReactTable({
     data: state.data,
@@ -70,9 +80,6 @@ function MyTable<T extends unknown>({
           overflowX: "auto",
           borderTopLeftRadius: 4,
           borderTopRightRadius: 4,
-          // borderRight: "1px solid #e6e6e6",
-          // borderLeft: "1px solid #e6e6e6",
-          // "& table, & td": { border: "1px solid red"},
           "& tbody tr": {
             "&:nth-of-type(odd)": {
               bgcolor: "#00000005",
@@ -81,9 +88,15 @@ function MyTable<T extends unknown>({
               bgcolor: "#0000000a",
             },
           },
+          // "& td, & th": {
+          //   border: "1px solid red",
+          // },
         }}
       >
-        <Table sx={{ width: 1, tableLayout: "fixed", minHeight: 300 }}>
+        <Table
+          sx={{ width: 1, tableLayout: "fixed", minHeight: 300 }}
+          size="small"
+        >
           <TableHead
             sx={{
               "& th, & th .MuiTableSortLabel-root, & th .Mui-active .MuiTableSortLabel-icon, & th .MuiCheckbox-root:not(.Mui-checked, .MuiCheckbox-indeterminate)":
@@ -93,10 +106,10 @@ function MyTable<T extends unknown>({
                   fontWeight: "bold",
                 },
             }}
-            //  & th .MuiButtonBase-root,
           >
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
+                {onDragEnd && <TableCell sx={{ width: 30, p: 0 }} />}
                 {headerGroup.headers.map((header) => {
                   // console.log({
                   //   "active-direction": header.column.getIsSorted(),
@@ -106,7 +119,11 @@ function MyTable<T extends unknown>({
                   return (
                     <TableCell
                       key={header.id}
-                      sx={{ width: header.getSize(), textAlign: "center" }}
+                      sx={{
+                        width: header.getSize(),
+                        textAlign: "center",
+                        p: header.getSize() <= 40 ? 0 : undefined,
+                      }}
                       sortDirection={header.column.getIsSorted() || undefined}
                     >
                       {header.isPlaceholder ? null : header.column.getCanSort() ? (
@@ -139,8 +156,8 @@ function MyTable<T extends unknown>({
               </TableRow>
             ))}
           </TableHead>
-          <TableBody>
-            {table.getRowModel().rows.length === 0 && (
+          {table.getRowModel().rows.length === 0 && (
+            <TableBody>
               <TableRow>
                 <TableCell colSpan={table.getAllColumns().length}>
                   <Box
@@ -156,24 +173,13 @@ function MyTable<T extends unknown>({
                   </Box>
                 </TableCell>
               </TableRow>
-            )}
-            {table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell
-                    key={cell.id}
-                    sx={{
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableBody>
+            </TableBody>
+          )}
+          {onDragEnd ? (
+            <DraggableTableBodyComponent table={table} onDragEnd={onDragEnd} />
+          ) : (
+            <TableBodyComponent table={table} />
+          )}
         </Table>
       </TableContainer>
       <TablePagination
@@ -223,10 +229,102 @@ function appendSelectColumn<T extends unknown>(c: ColumnDef<T, string>[]) {
         />
       ),
       enableSorting: false,
-      size: 70,
-      maxSize: 70,
-      minSize: 70,
+      size: 40,
     },
     ...c,
   ];
+}
+
+function TableBodyComponent<T extends unknown>({
+  table,
+}: {
+  table: TableProps<T>;
+}) {
+  return (
+    <TableBody>
+      {table.getRowModel().rows.map((row) => (
+        <TableRow key={row.id}>
+          {row.getVisibleCells().map((cell) => (
+            <TableCell
+              key={cell.id}
+              sx={
+                cell.column.getSize() > 40
+                  ? {
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }
+                  : {
+                      p: 0,
+                      textAlign: "center",
+                    }
+              }
+            >
+              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            </TableCell>
+          ))}
+        </TableRow>
+      ))}
+    </TableBody>
+  );
+}
+
+function DraggableTableBodyComponent<T extends unknown>({
+  table,
+  onDragEnd,
+}: {
+  table: TableProps<T>;
+  onDragEnd: (r: DropResult) => void;
+}) {
+  return (
+    <DragDropContext onDragEnd={onDragEnd}>
+      <Droppable droppableId="table-body-droppable">
+        {(provided, snapshot) => (
+          <TableBody {...provided.droppableProps} ref={provided.innerRef}>
+            {table.getRowModel().rows.map((row, index) => (
+              <Draggable key={row.id} draggableId={row.id} index={index}>
+                {(provided, snapshot) => (
+                  <TableRow
+                    key={row.id}
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                  >
+                    <TableCell
+                      {...provided.dragHandleProps}
+                      sx={{ p: 0, textAlign: "center" }}
+                    >
+                      <DragIndicator />
+                    </TableCell>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell
+                        key={cell.id}
+                        sx={
+                          cell.column.getSize() > 40
+                            ? {
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }
+                            : {
+                                p: 0,
+                                textAlign: "center",
+                              }
+                        }
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                )}
+              </Draggable>
+            ))}
+            {provided.placeholder}
+          </TableBody>
+        )}
+      </Droppable>
+    </DragDropContext>
+  );
 }
