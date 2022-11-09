@@ -2,6 +2,7 @@ import { initTableState, TableStateProps } from "@/interfaces/CommonInterface";
 import { TABLE_ROWS_PER_PAGE } from "@/settings/appconfig";
 import {
   Box,
+  Checkbox,
   Table,
   TableBody,
   TableCell,
@@ -17,6 +18,8 @@ import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
+  OnChangeFn,
+  RowSelectionState,
   useReactTable,
 } from "@tanstack/react-table";
 import Loading from "../molecules/Loading";
@@ -25,16 +28,21 @@ interface MyTableProps<T> {
   state?: TableStateProps<T>;
   columns: ColumnDef<T, string>[];
   loading?: boolean;
+  selector?: {
+    selected: RowSelectionState;
+    setSelected: OnChangeFn<RowSelectionState>;
+  };
 }
 
 function MyTable<T extends unknown>({
   state = initTableState,
   columns,
   loading,
+  selector,
 }: MyTableProps<T>) {
   const table = useReactTable({
     data: state.data,
-    columns,
+    columns: selector ? appendSelectColumn(columns) : columns,
     pageCount: state.meta.last_page,
     state: {
       pagination: {
@@ -44,10 +52,12 @@ function MyTable<T extends unknown>({
       sorting: [
         { id: state.meta.sort ?? "id", desc: state.meta.order === "desc" },
       ],
+      rowSelection: selector?.selected,
     },
     getCoreRowModel: getCoreRowModel(),
     onPaginationChange: state.paginator,
     onSortingChange: state.sorter,
+    onRowSelectionChange: selector?.setSelected,
     manualPagination: true,
     manualSorting: true,
   });
@@ -76,13 +86,14 @@ function MyTable<T extends unknown>({
         <Table sx={{ width: 1, tableLayout: "fixed", minHeight: 300 }}>
           <TableHead
             sx={{
-              "& th, & th .MuiButtonBase-root, & th .Mui-active .MuiTableSortLabel-icon":
+              "& th, & th .MuiTableSortLabel-root, & th .Mui-active .MuiTableSortLabel-icon, & th .MuiCheckbox-root:not(.Mui-checked, .MuiCheckbox-indeterminate)":
                 {
                   bgcolor: "common.black",
                   color: "common.white",
                   fontWeight: "bold",
                 },
             }}
+            //  & th .MuiButtonBase-root,
           >
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -171,8 +182,14 @@ function MyTable<T extends unknown>({
         page={table.getState().pagination.pageIndex}
         rowsPerPage={table.getState().pagination.pageSize}
         rowsPerPageOptions={TABLE_ROWS_PER_PAGE}
-        onPageChange={(_e, page) => table.setPageIndex(page)}
-        onRowsPerPageChange={(e) => table.setPageSize(+e.target.value)}
+        onPageChange={(_e, page) => {
+          table.setPageIndex(page);
+          table.resetRowSelection();
+        }}
+        onRowsPerPageChange={(e) => {
+          table.setPageSize(+e.target.value);
+          table.resetRowSelection();
+        }}
       />
       <Loading loading={loading} />
     </Box>
@@ -180,3 +197,36 @@ function MyTable<T extends unknown>({
 }
 
 export default MyTable;
+
+function appendSelectColumn<T extends unknown>(c: ColumnDef<T, string>[]) {
+  return [
+    {
+      id: "id",
+      header: ({ table }: any) => (
+        <Checkbox
+          {...{
+            checked: table.getIsAllRowsSelected(),
+            indeterminate: table.getIsSomeRowsSelected(),
+            onChange: table.getToggleAllRowsSelectedHandler(),
+          }}
+          size="small"
+        />
+      ),
+      cell: ({ row }: any) => (
+        <Checkbox
+          {...{
+            checked: row.getIsSelected(),
+            indeterminate: row.getIsSomeSelected(),
+            onChange: row.getToggleSelectedHandler(),
+          }}
+          size="small"
+        />
+      ),
+      enableSorting: false,
+      size: 70,
+      maxSize: 70,
+      minSize: 70,
+    },
+    ...c,
+  ];
+}

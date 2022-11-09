@@ -25,7 +25,7 @@ export type InquiryRowAttribute = {
 const columnHelper = createColumnHelper<InquiryRowAttribute>();
 
 function Inquiries() {
-  const [selectedRow, setSelectedRow] = useState<number | null>(null);
+  const [detailId, setDetailId] = useState<number | null>(null);
   const [sort, setSort] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -71,7 +71,7 @@ function Inquiries() {
       cell: (row) => (
         <Link
           component="button"
-          onClick={() => setSelectedRow(row.row.original.id)}
+          onClick={() => setDetailId(row.row.original.id)}
           textOverflow="ellipsis"
           width={1}
           whiteSpace="nowrap"
@@ -98,8 +98,8 @@ function Inquiries() {
           <Typography variant="sectiontitle2">お問い合わせ</Typography>
           <MyTable state={data} columns={columns} loading={isFetching} />
           <InquiryDetails
-            id={selectedRow}
-            onClose={() => setSelectedRow(null)}
+            id={detailId}
+            onClose={() => setDetailId(null)}
           />
         </Stack>
       </Paper>
