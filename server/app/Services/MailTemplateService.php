@@ -10,18 +10,21 @@ use Illuminate\Validation\Rule;
 
 class MailTemplateService
 {
-    public function list()
+    public function index(array $pagination = [])
     {
-        $order = request()->input('order', 'asc');
-        $per_page = request()->input('per_page', '10');
-        $sort = request()->input('sort', 'id');
-
         return MailTemplateIndexResource::collection(
             MailTemplate::when(
                 auth()->user()->isCorporate(),
                 fn ($q) => $q->where('affiliation_id', auth()->user()->affiliation_id)
-            )->orderBy($sort, $order)->paginate($per_page)
-        )->additional(['message' => 'Mail templates successfully fetched!']);
+            )->orderBy($pagination['sort'] ?? 'id', $pagination['order'] ?? 'desc')
+            ->paginate($pagination['per_page'] ?? 10)
+        )->additional([
+            'message' => 'Mail templates successfully fetched!',
+            'meta' => [
+                'sort' => $pagination['sort'] ?? 'priority',
+                'order' => $pagination['order'] ?? 'asc',
+            ],
+        ]);
     }
 
 
@@ -32,7 +35,7 @@ class MailTemplateService
             403,
             "This action is unauthorized."
         );
-        
+
         $valid = $request->validated();
 
         $mail_template->update($valid);

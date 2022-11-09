@@ -10,9 +10,15 @@ use Illuminate\Http\Request;
 
 class MailTemplateController extends Controller
 {
-    public function index(MailTemplateService $service)
+    public function index(Request $request, MailTemplateService $service)
     {
-        return $service->list();
+        $valid = $request->validate([
+            'order' => 'string|in:asc,desc',
+            'per_page' => 'numeric',
+            'sort' => 'string|in:id,title,content,priority,signature_id'
+        ]);
+
+        return $service->index($valid);
     }
     
     public function store(MailTemplateStoreUpdateRequest $request, MailTemplateService $service)
