@@ -45,12 +45,13 @@ const { corporate, individual, trial } = MembershipType;
 
 export const useOptions = () =>
   useQuery(
-    ["affiliations", "departments", "child_departments"],
+    ["affiliations", "departments", "child_departments", "courses"],
     async () => {
       const res = await getOptions([
         "affiliations",
         "departments",
         "child_departments",
+        "courses",
       ]);
       return res.data;
     },

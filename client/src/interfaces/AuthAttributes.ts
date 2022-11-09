@@ -67,3 +67,16 @@ export const userInit: UserAttributes = {
   department_1: null,
   department_2: null,
 };
+
+export interface AttendingCourseAttributes {
+  id?: number;
+  user_id: number;
+  course_id: number;
+  status: number;
+  progress_rate: number;
+  highest_score: number;
+  latest_score: string;
+  start_date: Date | null;
+  completion_date: Date | null;
+  created_at: Date | null;
+}

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\AdminCorporate;
 use App\Http\Controllers\Controller;
 use App\Models\Affiliation;
 use App\Models\Category;
+use App\Models\Course;
 use App\Models\Department;
 use App\Models\MembershipType;
 use App\Models\Signature;
@@ -59,9 +60,12 @@ class OptionsController extends Controller
                         }
                     case 'signatures': {
                             $value = Signature::get(['id', 'name']);
-
                             break;
                         }
+                    case 'courses': {
+                            $value = Course::get(['id', 'title as name']);
+                            break;
+                    }
                 }
 
                 return [$field => $value];
