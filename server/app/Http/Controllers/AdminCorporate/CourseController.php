@@ -15,6 +15,8 @@ class CourseController extends Controller
 {
     public function index(CourseService $service)
     {
+        Gate::authorize('check-membership', [['admin', 'corporate', 'individual']]);
+
         return $service->list();
     }
 
@@ -29,12 +31,14 @@ class CourseController extends Controller
 
     public function show(Course $course, CourseService $service)
     {
+        Gate::authorize('check-membership', [['admin', 'corporate', 'individual']]);
+
         return $service->details($course);
     }
 
     public function update(CourseRequest $request, Course $course, CourseService $service)
     {
-        Gate::authorize('update-course', $course);
+        Gate::authorize('check-membership', [['admin', 'corporate']]);
 
         $service->update($request, $course);
 
@@ -45,6 +49,8 @@ class CourseController extends Controller
 
     public function massDelete(string $ids, CourseService $service)
     {
+        Gate::authorize('check-membership', [['admin', 'corporate']]);
+
         $deleted_count = $service->deleteIds($ids);
 
         return response()->json([
@@ -54,6 +60,8 @@ class CourseController extends Controller
 
     public function massUpdate(Request $request, CourseService $service)
     {
+        Gate::authorize('check-membership', [['admin', 'corporate']]);
+
         $count = $service->updatePriorities($request);
 
         return response()->json([
@@ -63,6 +71,8 @@ class CourseController extends Controller
 
     public function toggleStatus(Request $request, CourseService $service)
     {
+        Gate::authorize('check-membership', [['admin', 'corporate']]);
+
         $service->updateStatus($request);
 
         return response()->json([
@@ -72,6 +82,8 @@ class CourseController extends Controller
 
     public function attendees(Request $request, Course $course, CourseService $service)
     {
+        Gate::authorize('check-membership', [['admin', 'corporate']]);
+
         try {
             $attendees = $service->listAttendees($request, $course, auth()->user());
         } catch (Exception $ex) {

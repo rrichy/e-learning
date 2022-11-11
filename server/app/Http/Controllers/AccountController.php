@@ -13,6 +13,8 @@ class AccountController extends Controller
 {
     public function index(Request $request, AccountService $service)
     {
+        Gate::authorize('check-membership', [['admin', 'corporate']]);
+
         try {
             $list = $service->list($request, auth()->user());
         } catch (Exception $ex) {
@@ -30,7 +32,7 @@ class AccountController extends Controller
      */
     public function store(AccountStoreUpdateRequest $request, AccountService $service)
     {
-        Gate::authorize('create-account');
+        Gate::authorize('check-membership', [['admin', 'corporate']]);
 
         $service->store($request);
 
@@ -47,6 +49,7 @@ class AccountController extends Controller
      */
     public function show(User $account, AccountService $service)
     {
+        Gate::authorize('check-membership', [['admin', 'corporate']]);
         Gate::authorize('view-account', $account);
         
         return $service->details($account);
@@ -61,6 +64,7 @@ class AccountController extends Controller
      */
     public function update(AccountStoreUpdateRequest $request, User $account, AccountService $service)
     {
+        Gate::authorize('check-membership', [['admin', 'corporate']]);
         Gate::authorize('update-account', $account);
 
         $service->update($request, $account);
@@ -78,7 +82,8 @@ class AccountController extends Controller
      */
     public function massDelete(string $ids, AccountService $service)
     {
-        Gate::authorize('massDelete-account', $ids);
+        Gate::authorize('check-membership', [['admin', 'corporate']]);
+        // TODO: when membership is corporate, check if all ids are under the same affiliation
 
         $deleted_count = $service->deleteIds($ids);
 

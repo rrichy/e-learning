@@ -13,6 +13,8 @@ class AffiliationController extends Controller
 {
     public function index(Request $request)
     {
+        Gate::authorize('check-membership', [['admin', 'corporate']]);
+
         $pagination = $request->validate([
             'order' => 'string|in:asc,desc',
             'per_page' => 'numeric',
@@ -44,6 +46,8 @@ class AffiliationController extends Controller
      */
     public function store(Request $request)
     {
+        Gate::authorize('check-membership', [['corporate']]);
+
         $valid = $request->validate([
             'name' => 'required|string|unique:affiliations,name',
             'priority' => 'required|numeric|min:1|unique:affiliations,priority',
@@ -65,6 +69,8 @@ class AffiliationController extends Controller
      */
     public function update(Request $request, Affiliation $affiliation)
     {
+        Gate::authorize('check-membership', [['corporate']]);
+
         $valid = $request->validate([
             'name' => 'required|string|unique:affiliations,name,' . $affiliation->id,
             'priority' => 'required|numeric|min:1|unique:affiliations,priority,' . $affiliation->id,
@@ -85,6 +91,8 @@ class AffiliationController extends Controller
      */
     public function destroy(string $affiliation)
     {
+        Gate::authorize('check-membership', [['corporate']]);
+
         $ids = explode(",", $affiliation);
         $deleted_count = \App\Models\Affiliation::destroy($ids);
 

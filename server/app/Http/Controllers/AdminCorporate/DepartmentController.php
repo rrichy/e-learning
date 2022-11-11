@@ -8,11 +8,14 @@ use App\Models\Department;
 use App\Services\DepartmentService;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class DepartmentController extends Controller
 {
     public function index(Request $request, DepartmentService $service)
     {
+        Gate::authorize('check-membership', [['admin', 'corporate']]);
+
         $valid = $request->validate([
             'order' => 'string|in:asc,desc',
             'per_page' => 'numeric',
@@ -30,6 +33,8 @@ class DepartmentController extends Controller
 
     public function store(DepartmentStoreUpdateRequest $request, DepartmentService $service)
     {
+        Gate::authorize('check-membership', [['admin', 'corporate']]);
+
         $service->store($request);
 
         return response()->json([
@@ -39,6 +44,8 @@ class DepartmentController extends Controller
 
     public function update(DepartmentStoreUpdateRequest $request, Department $department, DepartmentService $service)
     {
+        Gate::authorize('check-membership', [['admin', 'corporate']]);
+
         $service->update($request, $department);
 
         return response()->json([
@@ -48,6 +55,8 @@ class DepartmentController extends Controller
 
     public function destroy(string $department, DepartmentService $service)
     {
+        Gate::authorize('check-membership', [['admin', 'corporate']]);
+
         $deleted_count = $service->deleteIds($department);
 
         return response()->json([
