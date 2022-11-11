@@ -7,20 +7,31 @@ use App\Http\Resources\SignatureIndexResource;
 use App\Models\Signature;
 use Illuminate\Http\Request;
 
+// TODO: TRANSFER ALL LOGIC INTO A SERVICE CLASS
 class SignatureController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    public function index(Request $request)
     {
-        $order = request()->input('order', 'asc');
-        $per_page = request()->input('per_page', '10');
-        $sort = request()->input('sort', 'id');
+        $pagination = $request->validate([
+            'order' => 'string|in:asc,desc',
+            'per_page' => 'numeric',
+            'sort' => 'string|in:id,name,from_name,from_email,content,priority'
+        ]);
 
-        return SignatureIndexResource::collection(Signature::orderBy($sort, $order)->paginate($per_page))->additional(['message' => 'Signatures successfully fetched!']);
+        // $order = request()->input('order', 'asc');
+        // $per_page = request()->input('per_page', '10');
+        // $sort = request()->input('sort', 'id');
+
+        return SignatureIndexResource::collection(
+            Signature::orderBy($pagination['sort'] ?? 'id', $pagination['order'] ?? 'desc')
+                ->paginate($pagination['per_page'] ?? 10)
+            )->additional([
+            'message' => 'Signatures successfully fetched!',
+            'meta' => [
+                'sort' => $pagination['sort'] ?? 'id',
+                'order' => $pagination['order'] ?? 'desc',
+            ],
+        ]);
     }
 
     /**

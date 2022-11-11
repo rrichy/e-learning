@@ -114,7 +114,7 @@ function arrayMoveTo(
 ) {
   const reordered = [...arr];
   reordered.splice(to, 0, reordered.splice(from, 1)[0]);
-  
+
   let hasReordered = false;
 
   const mapped = reordered.map((a, i) => {
@@ -147,26 +147,16 @@ function OrganizeMail() {
     { setSort, setPagination }
   );
 
-  const resolver = useMemo(
-    () => ({
-      onSuccess: (res: any) => {
-        successSnackbar(res.data.message);
-        setDragData([]);
-        setHasReordered(false);
-        setSelected({});
-        queryClient.invalidateQueries(["mail-templates", pagination, sort]);
-      },
-      onError: (e: any) => errorSnackbar(e.message),
-    }),
-    [
-      successSnackbar,
-      setDragData,
-      setHasReordered,
-      setSelected,
-      queryClient,
-      errorSnackbar,
-    ]
-  );
+  const resolver = {
+    onSuccess: (res: any) => {
+      successSnackbar(res.data.message);
+      setDragData([]);
+      setHasReordered(false);
+      setSelected({});
+      queryClient.invalidateQueries(["mail-templates", pagination, sort]);
+    },
+    onError: (e: any) => errorSnackbar(e.message),
+  };
 
   const deleteMutation = useMutation(
     (ids: number[]) => destroyOrganizeMail(ids),

@@ -1,124 +1,159 @@
 import { IconButton, Link, Paper, Tooltip, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import Button from "@/components/atoms/Button";
-import Table from "@/components/atoms/Table";
 import useAlerter from "@/hooks/useAlerter";
-import {
-  initPaginatedData,
-  OrderType,
-  PageDialogProps,
-} from "@/interfaces/CommonInterface";
+import { PageDialogProps, TableStateProps } from "@/interfaces/CommonInterface";
 import { SignatureFormAttributeWithId } from "@/validations/SignatureFormValidation";
-import { Column } from "material-table";
 import { Delete } from "@mui/icons-material";
 import { TABLE_ROWS_PER_PAGE } from "@/settings/appconfig";
-import { destroySignature, indexSignature } from "@/services/SignatureService";
+import { destroySignature } from "@/services/SignatureService";
 import SignatureAddEdit from "./SignatureAddEdit";
+import {
+  ColumnDef,
+  createColumnHelper,
+  OnChangeFn,
+  PaginationState,
+  RowSelectionState,
+  SortingState,
+} from "@tanstack/react-table";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { get } from "@/services/ApiService";
+import MyTable from "@/components/atoms/MyTable";
+import useConfirm from "@/hooks/useConfirm";
+
+const columnHelper = createColumnHelper<SignatureFormAttributeWithId>();
+
+const getTableData = (
+  { pagination, sort }: { pagination: PaginationState; sort: SortingState },
+  {
+    setSort,
+    setPagination,
+  }: {
+    setSort: OnChangeFn<SortingState>;
+    setPagination: OnChangeFn<PaginationState>;
+  }
+) => {
+  const { data, isFetching } = useQuery(
+    ["signatures", pagination, sort],
+    async () => {
+      const sortKey = sort[0]?.id ?? "id";
+      const orderDir = sort[0] ? (sort[0].desc ? "desc" : "asc") : "asc";
+
+      const res = await get(
+        `/api/signature?page=${pagination.pageIndex + 1}&per_page=${
+          pagination.pageSize
+        }&sort=${sortKey}&order=${orderDir}`
+      );
+
+      return {
+        sorter: setSort,
+        paginator: setPagination,
+        data: res.data.data,
+        meta: res.data.meta,
+      } as TableStateProps<SignatureFormAttributeWithId>;
+    },
+    {
+      staleTime: 5_000,
+      keepPreviousData: true,
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  return { tableData: data, fetchingData: isFetching };
+};
 
 function Signature() {
-  const mounted = useRef(true);
+  const queryClient = useQueryClient();
+  const { isConfirmed } = useConfirm();
   const { successSnackbar, errorSnackbar } = useAlerter();
-  const [state, setState] = useState(
-    initPaginatedData<SignatureFormAttributeWithId>()
-  );
-  const [stateSelected, setStateSelected] = useState<
-    SignatureFormAttributeWithId[]
-  >([]);
+
   const [dialog, setDialog] =
     useState<PageDialogProps<SignatureFormAttributeWithId>>(null);
-
-  const fetchData = useCallback(
-    async (
-      page: number = 1,
-      pageSize: number = TABLE_ROWS_PER_PAGE[0],
-      sort: keyof SignatureFormAttributeWithId = "priority",
-      order: OrderType = "asc"
-    ) => {
-      try {
-        setState((s) => ({
-          ...s,
-          page,
-          order,
-          sort,
-          per_page: pageSize,
-          loading: true,
-        }));
-
-        const res = await indexSignature(page, pageSize, sort, order);
-        const { data, meta } = res.data;
-        if (mounted.current)
-          setState((s) => ({
-            ...s,
-            loading: false,
-            data,
-            page: meta.current_page,
-            total: meta.total,
-            order,
-            sort,
-            per_page: meta.per_page,
-            last_page: meta.last_page,
-          }));
-      } catch (e: any) {
-        errorSnackbar(e.message);
-      } finally {
-        setState((s) => ({ ...s, loading: false }));
-      }
-    },
-    []
+  const [selected, setSelected] = useState<RowSelectionState>({});
+  const [sort, setSort] = useState<SortingState>([]);
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: TABLE_ROWS_PER_PAGE[0],
+  });
+  const { tableData, fetchingData } = getTableData(
+    { sort, pagination },
+    { setSort, setPagination }
   );
 
-  const handleDelete = async (row?: SignatureFormAttributeWithId) => {
-    try {
-      setState((s) => ({ ...s, loading: true }));
-      const res = await destroySignature(
-        row ? [row.id] : stateSelected.map((a) => a.id)
-      );
+  const deleteMutation = useMutation((ids: number[]) => destroySignature(ids), {
+    onSuccess: (res: any) => {
       successSnackbar(res.data.message);
-      fetchData();
-    } catch (e: any) {
-      errorSnackbar(e.message);
-    } finally {
-      setState((s) => ({ ...s, loading: false }));
+      setSelected({});
+      queryClient.invalidateQueries(["signatures", pagination, sort]);
+    },
+    onError: (e: any) => errorSnackbar(e.message),
+  });
+
+  const handleDelete = async (id?: number) => {
+    const confirmed = await isConfirmed({
+      title: "sure",
+      content: "sure",
+    });
+
+    if (confirmed) {
+      if (id) deleteMutation.mutate([id]);
+      else {
+        const indexes = Object.keys(selected).map(Number);
+        deleteMutation.mutate(
+          indexes.map((index) => (tableData?.data ?? [])[index].id)
+        );
+      }
     }
   };
 
-  const columns: Column<SignatureFormAttributeWithId>[] = [
-    {
-      field: "name",
-      title: "登録名",
-      render: (row) => (
-        <Link component="button" onClick={() => setDialog(row)}>
-          {row.name}
+  const columns: ColumnDef<SignatureFormAttributeWithId, any>[] = [
+    columnHelper.accessor("name", {
+      header: () => "登録名",
+      cell: (row) => (
+        <Link
+          component="button"
+          onClick={() => setDialog(row.row.original)}
+          sx={{ textAlign: "center", width: 1 }}
+        >
+          {row.getValue()}
         </Link>
       ),
-    },
-    { field: "from_name", title: "from_name" },
-    { field: "from_email", title: "from_email" },
-    { field: "content", title: "署名" },
-    { field: "priority", title: "並び順" },
-    {
-      field: "id",
-      title: "アクション",
-      sorting: false,
-      render: (row) => (
-        <Tooltip title="削除">
-          <IconButton onClick={() => handleDelete(row)}>
-            <Delete />
-          </IconButton>
-        </Tooltip>
+    }),
+    columnHelper.accessor("from_name", {
+      header: () => "from_name",
+    }),
+    columnHelper.accessor("from_email", {
+      header: () => "from_email",
+    }),
+    columnHelper.accessor("content", {
+      header: () => "署名",
+    }),
+    columnHelper.accessor("priority", {
+      header: () => "並び順",
+      cell: (row) => (
+        <div style={{ textAlign: "center" }}>{row.getValue()}</div>
       ),
-    },
+      size: 110,
+    }),
+    columnHelper.accessor("id", {
+      header: () => "アクション",
+      enableSorting: false,
+      cell: (row) => (
+        <div style={{ textAlign: "center" }}>
+          <Tooltip title="削除">
+            <IconButton
+              onClick={() => handleDelete(row.getValue())}
+              size="small"
+            >
+              <Delete />
+            </IconButton>
+          </Tooltip>
+        </div>
+      ),
+      size: 110,
+    }),
   ];
-
-  useEffect(() => {
-    mounted.current = true;
-    fetchData();
-
-    return () => {
-      mounted.current = false;
-    };
-  }, []);
 
   return (
     <Stack justifyContent="space-between">
@@ -140,7 +175,7 @@ function Signature() {
               variant="contained"
               color="secondary"
               onClick={() => handleDelete()}
-              disabled={stateSelected.length === 0}
+              disabled={Object.keys(selected).length === 0}
             >
               削除
             </Button>
@@ -148,21 +183,18 @@ function Signature() {
               新規追加
             </Button>
           </Stack>
-          <Table
+          <MyTable
             columns={columns}
-            state={state}
-            fetchData={fetchData}
-            onSelectionChange={(rows) => setStateSelected(rows)}
-            options={{
-              selection: true,
-            }}
+            loading={fetchingData || deleteMutation.isLoading}
+            state={tableData}
+            selector={{ selected, setSelected }}
           />
         </Stack>
         <SignatureAddEdit
           state={dialog}
           closeFn={() => setDialog(null)}
           resolverFn={() =>
-            fetchData(state.page, state.per_page, state.sort, state.order)
+            queryClient.invalidateQueries(["signatures", pagination, sort])
           }
         />
       </Paper>
