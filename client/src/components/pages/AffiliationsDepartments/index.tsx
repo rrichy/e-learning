@@ -14,6 +14,7 @@ import {
   OptionsAttribute,
   OrderType,
   PageDialogProps,
+  TableStateProps,
 } from "@/interfaces/CommonInterface";
 import { TABLE_ROWS_PER_PAGE } from "@/settings/appconfig";
 import { DepartmentFormAttributeWithId } from "@/validations/DepartmentFormValidation";
@@ -28,6 +29,53 @@ import Table from "@/components/atoms/Table";
 import { Column } from "material-table";
 import useAuth from "@/hooks/useAuth";
 import { MembershipType } from "@/enums/membershipTypes";
+import {
+  OnChangeFn,
+  PaginationState,
+  SortingState,
+} from "@tanstack/react-table";
+import { useQuery } from "@tanstack/react-query";
+import { get } from "@/services/ApiService";
+import AffiliationTable from "./AffiliationTable";
+
+const getDepartments = (
+  { pagination, sort }: { pagination: PaginationState; sort: SortingState },
+  {
+    setSort,
+    setPagination,
+  }: {
+    setSort: OnChangeFn<SortingState>;
+    setPagination: OnChangeFn<PaginationState>;
+  }
+) => {
+  const { data, isFetching } = useQuery(
+    ["departments-table", pagination, sort],
+    async () => {
+      const sortKey = sort[0]?.id ?? "id";
+      const orderDir = sort[0] ? (sort[0].desc ? "desc" : "asc") : "asc";
+
+      const res = await get(
+        `/api/department?page=${pagination.pageIndex + 1}&per_page=${
+          pagination.pageSize
+        }&sort=${sortKey}&order=${orderDir}`
+      );
+
+      return {
+        sorter: setSort,
+        paginator: setPagination,
+        data: res.data.data,
+        meta: res.data.meta,
+      } as TableStateProps<DepartmentFormAttributeWithId>;
+    },
+    {
+      staleTime: 5_000,
+      keepPreviousData: true,
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  return { tableData: data, fetchingData: isFetching };
+};
 
 function AffiliationsDepartments() {
   const mounted = useRef(true);
@@ -182,12 +230,16 @@ function AffiliationsDepartments() {
       field: "name",
       title: "所属",
       render: (row) => (
-        <Link component="button" onClick={() => 
-          setDepartmentDialog(
-            row.parent_id
-              ? departmentsState.data.find((a) => a.id === row.parent_id)!
-              : row
-          )}>
+        <Link
+          component="button"
+          onClick={() =>
+            setDepartmentDialog(
+              row.parent_id
+                ? departmentsState.data.find((a) => a.id === row.parent_id)!
+                : row
+            )
+          }
+        >
           {row.name}
         </Link>
       ),
@@ -207,54 +259,7 @@ function AffiliationsDepartments() {
 
   return (
     <Stack spacing={3}>
-      {membershipTypeId === MembershipType.admin && (
-        <>
-          <Paper variant="outlined">
-            <Stack spacing={3}>
-              <Typography variant="sectiontitle2">所属の管理</Typography>
-              <Stack spacing={1} direction="row">
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  sx={{ width: "fit-content", borderRadius: 6 }}
-                  onClick={() => handleDelete("affiliation")}
-                  disabled={affiliationSelected.length === 0}
-                >
-                  削除
-                </Button>
-                <Button
-                  variant="contained"
-                  sx={{ width: "fit-content", borderRadius: 6 }}
-                  onClick={() => setAffiliationDialog("add")}
-                >
-                  追加
-                </Button>
-              </Stack>
-              <Table
-                columns={affiliationsColumns}
-                state={affiliationsState}
-                fetchData={fetchAffiliations}
-                onSelectionChange={(rows) => setAffiliationSelected(rows)}
-                options={{
-                  selection: true,
-                }}
-              />
-            </Stack>
-          </Paper>
-          <AffiliationAddEdit
-            state={affiliationDialog}
-            closeFn={() => setAffiliationDialog(null)}
-            resolverFn={() =>
-              fetchAffiliations(
-                affiliationsState.page,
-                affiliationsState.per_page,
-                affiliationsState.sort,
-                affiliationsState.order
-              )
-            }
-          />
-        </>
-      )}
+      {membershipTypeId === MembershipType.admin && <AffiliationTable />}
       {membershipTypeId >= MembershipType.corporate && (
         <>
           <Paper variant="outlined">
