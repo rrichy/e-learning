@@ -6,12 +6,26 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\DepartmentStoreUpdateRequest;
 use App\Models\Department;
 use App\Services\DepartmentService;
+use Exception;
+use Illuminate\Http\Request;
 
 class DepartmentController extends Controller
 {
-    public function index(DepartmentService $service)
+    public function index(Request $request, DepartmentService $service)
     {
-        return $service->list();
+        $valid = $request->validate([
+            'order' => 'string|in:asc,desc',
+            'per_page' => 'numeric',
+            'sort' => 'string|in:id,name,priority'
+        ]);
+
+        try {
+            $departments = $service->index($valid);
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
+
+        return $departments;
     }
 
     public function store(DepartmentStoreUpdateRequest $request, DepartmentService $service)

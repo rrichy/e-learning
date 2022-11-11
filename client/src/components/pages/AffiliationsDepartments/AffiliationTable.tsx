@@ -129,6 +129,7 @@ function AffiliationTable() {
       size: 110,
     }),
   ];
+
   return (
     <>
       <Paper variant="outlined">
@@ -163,13 +164,14 @@ function AffiliationTable() {
       <AffiliationAddEdit
         state={dialog}
         closeFn={() => setDialog(null)}
-        resolverFn={() =>
+        resolverFn={() => {
           queryClient.invalidateQueries([
             "affiliations-table",
             pagination,
             sort,
-          ])
-        }
+          ]);
+          queryClient.invalidateQueries(["affiliations-option"]);
+        }}
       />
     </>
   );

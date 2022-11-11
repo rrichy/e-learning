@@ -22,6 +22,8 @@ import {
   RowSelectionState,
   useReactTable,
   Table as TableProps,
+  ExpandedState,
+  getExpandedRowModel,
 } from "@tanstack/react-table";
 import Loading from "../molecules/Loading";
 import {
@@ -40,6 +42,11 @@ interface MyTableProps<T> {
     selected: RowSelectionState;
     setSelected: OnChangeFn<RowSelectionState>;
   };
+  expander?: {
+    expanded: ExpandedState;
+    setExpanded: OnChangeFn<ExpandedState>;
+    subRowKey: string;
+  };
   onDragEnd?: (r: DropResult) => void;
 }
 
@@ -48,6 +55,7 @@ function MyTable<T extends unknown>({
   columns,
   loading,
   selector,
+  expander,
   onDragEnd,
 }: MyTableProps<T>) {
   const table = useReactTable({
@@ -63,8 +71,12 @@ function MyTable<T extends unknown>({
         { id: state.meta.sort ?? "id", desc: state.meta.order === "desc" },
       ],
       rowSelection: selector?.selected,
+      expanded: expander?.expanded
     },
     getCoreRowModel: getCoreRowModel(),
+    getExpandedRowModel: expander ? getExpandedRowModel() : undefined,
+    onExpandedChange: expander?.setExpanded,
+    getSubRows: expander ? (row: any) => row[expander.subRowKey] : undefined,
     onPaginationChange: state.paginator,
     onSortingChange: state.sorter,
     onRowSelectionChange: selector?.setSelected,
@@ -216,7 +228,7 @@ export default MyTable;
 function appendSelectColumn<T extends unknown>(c: ColumnDef<T, string>[]) {
   return [
     {
-      id: "id",
+      id: "selection-column",
       header: ({ table }: any) => (
         <Checkbox
           {...{
@@ -235,6 +247,7 @@ function appendSelectColumn<T extends unknown>(c: ColumnDef<T, string>[]) {
             onChange: row.getToggleSelectedHandler(),
           }}
           size="small"
+          sx={{ pl: row.depth * 2 }}
         />
       ),
       enableSorting: false,
