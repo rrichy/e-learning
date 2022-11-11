@@ -24,13 +24,13 @@ import {
   Table as TableProps,
 } from "@tanstack/react-table";
 import Loading from "../molecules/Loading";
-import { DragDropContext, Draggable, Droppable, DropResult } from "@hello-pangea/dnd";
+import {
+  DragDropContext,
+  Draggable,
+  Droppable,
+  DropResult,
+} from "@hello-pangea/dnd";
 import { DragIndicator } from "@mui/icons-material";
-
-interface DraggerProps<T> {
-  dragData: T[];
-  setDragData: OnChangeFn<T[]>;
-}
 
 interface MyTableProps<T> {
   state?: TableStateProps<T>;
@@ -82,11 +82,18 @@ function MyTable<T extends unknown>({
           borderTopRightRadius: 4,
           "& tbody tr": {
             "&:nth-of-type(odd)": {
-              bgcolor: "#00000005",
+              // bgcolor: "#00000009",
+              bgcolor: "#33c3bb1a",
             },
             "&:hover": {
-              bgcolor: "#0000000a",
+              bgcolor: "primary.light",
+              "& *": {
+                color: "common.white",
+              },
             },
+          },
+          "& td": {
+            border: "none",
           },
           // "& td, & th": {
           //   border: "1px solid red",
@@ -196,6 +203,8 @@ function MyTable<T extends unknown>({
           table.setPageSize(+e.target.value);
           table.resetRowSelection();
         }}
+        showFirstButton
+        showLastButton
       />
       <Loading loading={loading} />
     </Box>
@@ -288,10 +297,21 @@ function DraggableTableBodyComponent<T extends unknown>({
                     key={row.id}
                     ref={provided.innerRef}
                     {...provided.draggableProps}
+                    sx={{
+                      ...provided.draggableProps.style,
+                      ...(snapshot.isDragging
+                        ? {
+                            bgcolor: "#33c3bb !important",
+                            "& *": {
+                              color: "common.white",
+                            },
+                          }
+                        : {}),
+                    }}
                   >
                     <TableCell
-                      {...provided.dragHandleProps}
                       sx={{ p: 0, textAlign: "center" }}
+                      {...provided.dragHandleProps}
                     >
                       <DragIndicator />
                     </TableCell>

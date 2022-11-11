@@ -1,11 +1,9 @@
-import { Box, Checkbox, Paper, Typography } from "@mui/material";
+import { Box, Link, Paper, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
 import Button from "@/components/atoms/Button";
-import Table from "@/components/atoms/Table";
 import OrganizeMailAddEdit from "./OrganizeMailAddEdit";
-import useOrganizeMail from "@/hooks/pages/useOrganizeMail";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ColumnDef,
   createColumnHelper,
@@ -15,16 +13,22 @@ import {
   SortingState,
 } from "@tanstack/react-table";
 import { TABLE_ROWS_PER_PAGE } from "@/settings/appconfig";
-import { OptionAttribute, TableStateProps } from "@/interfaces/CommonInterface";
+import {
+  OptionAttribute,
+  PageDialogProps,
+  TableStateProps,
+} from "@/interfaces/CommonInterface";
 import { OrganizeMailFormAttributeWithId } from "@/validations/OrganizeMailFormValidation";
 import { get } from "@/services/ApiService";
 import MyTable from "@/components/atoms/MyTable";
 import { getOptions } from "@/services/CommonService";
-import { destroyOrganizeMail } from "@/services/OrganizeMailService";
+import {
+  destroyOrganizeMail,
+  massUpdateOrganizeMailPriority,
+} from "@/services/OrganizeMailService";
 import useAlerter from "@/hooks/useAlerter";
 import useConfirm from "@/hooks/useConfirm";
 import { DropResult } from "@hello-pangea/dnd";
-import arrayMoveTo from "@/utils/arrayMoveTo";
 
 export type MailRowAttribute = {
   id: number;
@@ -32,6 +36,7 @@ export type MailRowAttribute = {
   content: string;
   priority: number;
   signature_id: number;
+  reordered?: boolean;
 };
 
 const columnHelper = createColumnHelper<MailRowAttribute>();
@@ -101,10 +106,31 @@ const getSignatures = () => {
   return { signatures: data, fetchingSignatures: isFetching };
 };
 
+function arrayMoveTo(
+  original: MailRowAttribute[],
+  arr: MailRowAttribute[],
+  from: number,
+  to: number
+) {
+  const reordered = [...arr];
+  reordered.splice(to, 0, reordered.splice(from, 1)[0]);
+  
+  let hasReordered = false;
+
+  const mapped = reordered.map((a, i) => {
+    const areordered = a.id !== original[i].id;
+    if (areordered) hasReordered = true;
+    return { ...a, reordered: areordered, priority: original[i].priority };
+  });
+
+  return { reordered: mapped, hasReordered };
+}
+
 function OrganizeMail() {
   const { isConfirmed } = useConfirm();
   const queryClient = useQueryClient();
   const { successSnackbar, errorSnackbar } = useAlerter();
+  const [hasReordered, setHasReordered] = useState(false);
   const [sort, setSort] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -112,22 +138,44 @@ function OrganizeMail() {
   });
   const [selected, setSelected] = useState<RowSelectionState>({});
   const [dragData, setDragData] = useState<MailRowAttribute[]>([]);
+  const [dialog, setDialog] =
+    useState<PageDialogProps<OrganizeMailFormAttributeWithId>>(null);
 
   const { signatures, fetchingSignatures } = getSignatures();
   const { tableData, fetchingData } = getTableData(
     { sort, pagination },
     { setSort, setPagination }
   );
-  const deleteMutation = useMutation(
-    (ids: number[]) => destroyOrganizeMail(ids),
-    {
+
+  const resolver = useMemo(
+    () => ({
       onSuccess: (res: any) => {
         successSnackbar(res.data.message);
+        setDragData([]);
+        setHasReordered(false);
         setSelected({});
         queryClient.invalidateQueries(["mail-templates", pagination, sort]);
       },
       onError: (e: any) => errorSnackbar(e.message),
-    }
+    }),
+    [
+      successSnackbar,
+      setDragData,
+      setHasReordered,
+      setSelected,
+      queryClient,
+      errorSnackbar,
+    ]
+  );
+
+  const deleteMutation = useMutation(
+    (ids: number[]) => destroyOrganizeMail(ids),
+    resolver
+  );
+  const priorityMutation = useMutation(
+    (changes: { id: number; priority: number }[]) =>
+      massUpdateOrganizeMailPriority(changes),
+    resolver
   );
 
   const handleDelete = async () => {
@@ -144,28 +192,41 @@ function OrganizeMail() {
     }
   };
 
-  const data = dragData.length ? dragData : (tableData?.data ?? []);
-  
+  const data = dragData.length ? dragData : tableData?.data ?? [];
+
   const handleDragEnd = ({ source, destination }: DropResult) => {
     if (destination && source.index !== destination.index) {
       const newdata = arrayMoveTo(
-        [...data],
+        tableData?.data ?? [],
+        data,
         source.index,
-        destination.index,
-        "priority"
+        destination.index
       );
 
-      setDragData(newdata);
+      setDragData(newdata.reordered);
+      setHasReordered(newdata.hasReordered);
+    }
+  };
 
-      // const changes = newdata.reduce(
-      //   (acc, { id, priority }) =>
-      //     prioritySnapshot.get(id) !== priority
-      //       ? [...acc, { id, priority }]
-      //       : acc,
-      //   [] as { id: number; priority: number }[]
-      // );
+  const handleRevertOrder = () => {
+    setDragData([]);
+    setHasReordered(false);
+  };
 
-      // setChanges(changes);
+  const handleUpdateOrder = async () => {
+    const confirmed = await isConfirmed({
+      title: "update priorty",
+      content: "update priority",
+    });
+    if (confirmed) {
+      const changes = dragData.reduce(
+        (acc, row) =>
+          row.reordered
+            ? [...acc, { id: row.id, priority: row.priority }]
+            : acc,
+        [] as { id: number; priority: number }[]
+      );
+      priorityMutation.mutate(changes);
     }
   };
 
@@ -173,7 +234,13 @@ function OrganizeMail() {
     columnHelper.accessor("title", {
       header: () => "タイトル",
       cell: (row) => (
-        <div style={{ textAlign: "center" }}>{row.getValue()}</div>
+        <Link
+          component="button"
+          onClick={() => setDialog(row.row.original)}
+          sx={{ textAlign: "center", width: 1 }}
+        >
+          {row.getValue()}
+        </Link>
       ),
       enableSorting: false,
     }),
@@ -184,16 +251,26 @@ function OrganizeMail() {
     columnHelper.accessor("priority", {
       header: () => "並び順",
       cell: (row) => (
-        <div style={{ textAlign: "center" }}>{row.getValue()}</div>
+        <div
+          style={{
+            textAlign: "center",
+            color: row.row.original.reordered ? "red" : "unset",
+          }}
+        >
+          {row.getValue()}
+        </div>
       ),
       enableSorting: false,
-      minSize: 70,
-      size: 70,
+      size: 80,
     }),
     columnHelper.accessor("signature_id", {
       header: () => "署名",
       cell: (row) => (
-        <div style={{ textAlign: "center" }}>
+        <div
+          style={{
+            textAlign: "center",
+          }}
+        >
           {signatures?.lookup[row.getValue()]}
         </div>
       ),
@@ -202,21 +279,10 @@ function OrganizeMail() {
     }),
   ];
 
-  const {
-    // handleDelete,
-    stateSelected,
-    setDialog,
-    handleRevertOrder,
-    changes,
-    handleUpdateOrder,
-    columns,
-    state,
-    fetchData,
-    setStateSelected,
-    // handleDragEnd,
-    dialog,
-    // signatures,
-  } = useOrganizeMail();
+  useEffect(() => {
+    setDragData([]);
+    setHasReordered(false);
+  }, [sort[0]?.id, sort[0]?.desc, pagination.pageIndex, pagination.pageSize]);
 
   return (
     <Stack justifyContent="space-between">
@@ -253,31 +319,19 @@ function OrganizeMail() {
               color="dull"
               sx={{ width: 75, borderRadius: 6 }}
               onClick={handleRevertOrder}
-              disabled={changes.length === 0}
+              disabled={!hasReordered}
             >
               戻す
             </Button>
             <Button
               variant="contained"
               sx={{ width: 75, borderRadius: 6 }}
-              disabled={changes.length === 0}
+              disabled={!hasReordered}
               onClick={handleUpdateOrder}
             >
               更新
             </Button>
           </Stack>
-          {/* <Table
-            columns={columns}
-            state={state}
-            fetchData={fetchData}
-            onSelectionChange={(rows) => setStateSelected(rows)}
-            onDragEnd={handleDragEnd}
-            options={{
-              selection: true,
-              sorting: false,
-            }}
-          /> */}
-          <Stack mb={4} />
           <MyTable
             columns={tablecolumns}
             state={tableData ? { ...tableData, data } : undefined}
@@ -295,7 +349,7 @@ function OrganizeMail() {
           state={dialog}
           closeFn={() => setDialog(null)}
           resolverFn={() =>
-            fetchData(state.page, state.per_page, state.sort, state.order)
+            queryClient.invalidateQueries(["mail-templates", pagination, sort])
           }
           signatures={signatures?.option ?? []}
         />
