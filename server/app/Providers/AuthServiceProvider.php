@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\MembershipType;
 use App\Models\User;
 use App\Policies\AccountPolicy;
 use App\Policies\AffiliationPolicy;
@@ -9,6 +10,7 @@ use App\Policies\CoursePolicy;
 use App\Policies\DepartmentPolicy;
 use App\Policies\NoticePolicy;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Cache\MemcachedLock;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 
@@ -50,5 +52,22 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('create-account', [AccountPolicy::class, 'create']);
         Gate::define('update-account', [AccountPolicy::class, 'update']);
         Gate::define('massDelete-account', [AccountPolicy::class, 'massDelete']);
+
+        Gate::define('check-membership', function (User $user, array $allowed) {
+            $allowed_ids = array_map(function ($str) {
+                switch($str) {
+                    case 'trial':
+                        return MembershipType::TRIAL;
+                    case 'individual':
+                        return MembershipType::INDIVIDUAL;
+                    case 'corporate':
+                        return MembershipType::CORPORATE;
+                    case 'admin':
+                        return MembershipType::ADMIN;
+                }
+            }, $allowed);
+            
+            return in_array($user->membership_type_id, $allowed_ids);
+        });
     }
 }

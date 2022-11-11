@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\SignatureIndexResource;
 use App\Models\Signature;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class SignatureController extends Controller
 {
@@ -16,6 +17,8 @@ class SignatureController extends Controller
      */
     public function index()
     {
+        Gate::authorize('check-membership', [['admin']]);
+
         $order = request()->input('order', 'asc');
         $per_page = request()->input('per_page', '10');
         $sort = request()->input('sort', 'id');
@@ -31,6 +34,8 @@ class SignatureController extends Controller
      */
     public function store(Request $request)
     {
+        Gate::authorize('check-membership', [['admin']]);
+
         $valid = $request->validate([
             'name' => 'required|string',
             'from_email' => 'required|string|email',
@@ -55,6 +60,8 @@ class SignatureController extends Controller
      */
     public function update(Request $request, \App\Models\Signature $signature)
     {
+        Gate::authorize('check-membership', [['admin']]);
+
         $valid = $request->validate([
             'name' => 'required|string',
             'from_email' => 'required|string|email',
@@ -78,6 +85,8 @@ class SignatureController extends Controller
      */
     public function massDelete($ids)
     {
+        Gate::authorize('check-membership', [['admin']]);
+
         $ids = explode(",", $ids);
         $deleted_count = \App\Models\Signature::destroy($ids);
 

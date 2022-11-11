@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateSelfRequest;
 use App\Models\ExplainerVideo;
 use App\Services\AuthenticatedService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -43,6 +44,8 @@ class AuthenticatedSessionController extends Controller
 
     public function updatePlayback(Request $request, ExplainerVideo $video, AuthenticatedService $service)
     {
+        Gate::authorize('check-membership', [['admin']]);
+
         return $service->updatePlayback($request, $video);
     }
 }

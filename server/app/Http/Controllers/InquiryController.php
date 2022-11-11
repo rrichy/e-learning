@@ -6,11 +6,14 @@ use App\Models\Inquiry;
 use App\Services\InquiryService;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class InquiryController extends Controller
 {
     public function index(Request $request, InquiryService $service)
     {
+        Gate::authorize('check-membership', [['admin', 'corporate']]);
+
         $valid = $request->validate([
             'order' => 'string|in:asc,desc',
             'per_page' => 'numeric',
@@ -28,6 +31,8 @@ class InquiryController extends Controller
 
     public function store(Request $request, InquiryService $service)
     {
+        Gate::authorize('check-membership', [['corporate', 'individual']]);
+
         $valid = $request->validate([
             'content' => 'required|string',
         ]);
@@ -45,6 +50,8 @@ class InquiryController extends Controller
 
     public function show(Inquiry $inquiry, InquiryService $service)
     {
+        Gate::authorize('check-membership', [['admin', 'corporate']]);
+
         try {
             $parsed = $service->show($inquiry);
         } catch (Exception $ex) {

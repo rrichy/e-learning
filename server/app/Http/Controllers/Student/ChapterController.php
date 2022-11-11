@@ -7,6 +7,7 @@ use App\Http\Requests\SubmitTestRequest;
 use App\Models\Chapter;
 use App\Services\ChapterService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class ChapterController extends Controller
 {
@@ -49,21 +50,29 @@ class ChapterController extends Controller
      */
     public function showTest(Chapter $chapter, ChapterService $service)
     {
+        Gate::authorize('check-membership', [['individual']]);
+
         return $service->testDetails($chapter);
     }
 
     public function proceedTest(Chapter $chapter, ChapterService $service)
     {
+        Gate::authorize('check-membership', [['individual']]);
+
         return $service->proceedTest($chapter);
     }
 
     public function submitTest(SubmitTestRequest $request, Chapter $chapter, ChapterService $service)
     {
+        Gate::authorize('check-membership', [['individual']]);
+
         return $service->submitTest($request, $chapter);
     }
 
     public function listVideos(Chapter $chapter, ChapterService $service)
     {
+        Gate::authorize('check-membership', [['individual']]);
+
         return $service->listVideos($chapter);
     }
 
