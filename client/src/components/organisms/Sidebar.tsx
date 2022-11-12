@@ -112,9 +112,9 @@ function Sidebar({
 
   return (
     <Box
-      width={240}
       bgcolor={useDarkColorScheme ? "common.black" : "common.white"}
-      flexShrink={0}
+      width={240}
+      flex="0 0 240px"
       position="relative"
       overflow="visible"
       sx={{
@@ -371,7 +371,7 @@ const SidebarCategory = ({
             onClick={onClick}
             sx={{
               position: "relative",
-              display:"block",
+              display: "block",
               "&:before": {
                 content: "''",
                 top: 6,

@@ -9,21 +9,23 @@ use Illuminate\Support\Facades\DB;
 
 class DepartmentService
 {
-    public function list()
+    public function index(array $pagination)
     {
-        $order = request()->input('order', 'asc');
-        $per_page = request()->input('per_page', '10');
-        $sort = request()->input('sort', 'id');
-
         return DepartmentResource::collection(
             Department::with('childDepartments')
                 ->whereNull('parent_id')
                 ->when(
                     auth()->user()->isCorporate(), 
                     fn ($q) => $q->where('affiliation_id', auth()->user()->affiliation_id)
-                )->orderBy($sort, $order)
-                ->paginate($per_page)
-        )->additional(['message' => 'Departments successfully fetched!']);
+                )->orderBy($pagination['sort'] ?? 'id', $pagination['order'] ?? 'asc')
+                ->paginate($pagination['per_page'] ?? 10)
+        )->additional([
+            'message' => 'Departments successfully fetched!',
+            'meta' => [
+                'sort' => $pagination['sort'] ?? 'id',
+                'order' => $pagination['order'] ?? 'asc',
+            ]
+        ]);
     }
 
 

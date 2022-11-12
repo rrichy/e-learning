@@ -36,7 +36,7 @@ import Unsubscribe from "./Unsubscribe";
 import UnsubscribeReason from "./Unsubscribe/UnsubscribeReason";
 import UnsubscribeMessage from "./Unsubscribe/UnsubscribeMessage";
 import Sidebar from "../organisms/Sidebar";
-import { Container, Stack, useMediaQuery, useTheme } from "@mui/material";
+import { Box, Container, Stack, useMediaQuery, useTheme } from "@mui/material";
 import Footer from "../molecules/Footer";
 import pageGlobalStyle from "./indexStyle";
 import StudentCourseDetail from "./Student/StudentCourseDetail";
@@ -386,7 +386,9 @@ const PrivateRoute = ({
       <Header showMenu={!screenIsMd} useDarkColorScheme={useDarkColorScheme} />
       <Stack direction="row" flex={1}>
         {screenIsMd && <Sidebar useDarkColorScheme={useDarkColorScheme} />}
-        <Container sx={pageGlobalStyle}>{children}</Container>
+        <Box maxWidth={{ xs: 1, md: "calc(100vw - 257px)" }} flex={1}>
+          <Container sx={pageGlobalStyle}>{children}</Container>
+        </Box>
       </Stack>
       <Footer />
     </Stack>

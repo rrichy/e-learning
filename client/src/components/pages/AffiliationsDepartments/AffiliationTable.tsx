@@ -1,14 +1,12 @@
-import { IconButton, Link, Paper, Tooltip, Typography } from "@mui/material";
-import { Stack } from "@mui/system";
-import { useState } from "react";
-import Button from "@/components/atoms/Button";
+import { Link, Paper, Stack, Typography } from "@mui/material";
 import useAlerter from "@/hooks/useAlerter";
+import useConfirm from "@/hooks/useConfirm";
 import { PageDialogProps, TableStateProps } from "@/interfaces/CommonInterface";
-import { SignatureFormAttributeWithId } from "@/validations/SignatureFormValidation";
-import { Delete } from "@mui/icons-material";
+import { destroyAffiliation } from "@/services/AffiliationService";
+import { get } from "@/services/ApiService";
 import { TABLE_ROWS_PER_PAGE } from "@/settings/appconfig";
-import { destroySignature } from "@/services/SignatureService";
-import SignatureAddEdit from "./SignatureAddEdit";
+import { AffiliationFormAttributeWithId } from "@/validations/AffiliationFormValidation";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ColumnDef,
   createColumnHelper,
@@ -17,14 +15,14 @@ import {
   RowSelectionState,
   SortingState,
 } from "@tanstack/react-table";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { get } from "@/services/ApiService";
+import { useState } from "react";
+import Button from "@/components/atoms/Button";
 import MyTable from "@/components/atoms/MyTable";
-import useConfirm from "@/hooks/useConfirm";
+import AffiliationAddEdit from "./AffiliationAddEdit";
 
-const columnHelper = createColumnHelper<SignatureFormAttributeWithId>();
+const columnHelper = createColumnHelper<AffiliationFormAttributeWithId>();
 
-const getTableData = (
+const getData = (
   { pagination, sort }: { pagination: PaginationState; sort: SortingState },
   {
     setSort,
@@ -35,13 +33,13 @@ const getTableData = (
   }
 ) => {
   const { data, isFetching } = useQuery(
-    ["signatures", pagination, sort],
+    ["affiliations-table", pagination, sort],
     async () => {
       const sortKey = sort[0]?.id ?? "id";
       const orderDir = sort[0] ? (sort[0].desc ? "desc" : "asc") : "asc";
 
       const res = await get(
-        `/api/signature?page=${pagination.pageIndex + 1}&per_page=${
+        `/api/affiliation?page=${pagination.pageIndex + 1}&per_page=${
           pagination.pageSize
         }&sort=${sortKey}&order=${orderDir}`
       );
@@ -51,7 +49,7 @@ const getTableData = (
         paginator: setPagination,
         data: res.data.data,
         meta: res.data.meta,
-      } as TableStateProps<SignatureFormAttributeWithId>;
+      } as TableStateProps<AffiliationFormAttributeWithId>;
     },
     {
       staleTime: 5_000,
@@ -63,32 +61,35 @@ const getTableData = (
   return { tableData: data, fetchingData: isFetching };
 };
 
-function Signature() {
+function AffiliationTable() {
   const queryClient = useQueryClient();
   const { isConfirmed } = useConfirm();
   const { successSnackbar, errorSnackbar } = useAlerter();
 
   const [dialog, setDialog] =
-    useState<PageDialogProps<SignatureFormAttributeWithId>>(null);
+    useState<PageDialogProps<AffiliationFormAttributeWithId>>(null);
   const [selected, setSelected] = useState<RowSelectionState>({});
   const [sort, setSort] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: TABLE_ROWS_PER_PAGE[0],
   });
-  const { tableData, fetchingData } = getTableData(
+  const { tableData, fetchingData } = getData(
     { sort, pagination },
     { setSort, setPagination }
   );
 
-  const deleteMutation = useMutation((ids: number[]) => destroySignature(ids), {
-    onSuccess: (res: any) => {
-      successSnackbar(res.data.message);
-      setSelected({});
-      queryClient.invalidateQueries(["signatures", pagination, sort]);
-    },
-    onError: (e: any) => errorSnackbar(e.message),
-  });
+  const deleteMutation = useMutation(
+    (ids: number[]) => destroyAffiliation(ids),
+    {
+      onSuccess: (res: any) => {
+        successSnackbar(res.data.message);
+        setSelected({});
+        queryClient.invalidateQueries(["affiliations-table", pagination, sort]);
+      },
+      onError: (e: any) => errorSnackbar(e.message),
+    }
+  );
 
   const handleDelete = async (id?: number) => {
     const confirmed = await isConfirmed({
@@ -107,9 +108,9 @@ function Signature() {
     }
   };
 
-  const columns: ColumnDef<SignatureFormAttributeWithId, any>[] = [
+  const columns: ColumnDef<AffiliationFormAttributeWithId, any>[] = [
     columnHelper.accessor("name", {
-      header: () => "登録名",
+      header: () => "所属",
       cell: (row) => (
         <Link
           component="button"
@@ -120,15 +121,6 @@ function Signature() {
         </Link>
       ),
     }),
-    columnHelper.accessor("from_name", {
-      header: () => "from_name",
-    }),
-    columnHelper.accessor("from_email", {
-      header: () => "from_email",
-    }),
-    columnHelper.accessor("content", {
-      header: () => "署名",
-    }),
     columnHelper.accessor("priority", {
       header: () => "並び順",
       cell: (row) => (
@@ -136,70 +128,53 @@ function Signature() {
       ),
       size: 110,
     }),
-    columnHelper.accessor("id", {
-      header: () => "アクション",
-      enableSorting: false,
-      cell: (row) => (
-        <div style={{ textAlign: "center" }}>
-          <Tooltip title="削除">
-            <IconButton
-              onClick={() => handleDelete(row.getValue())}
-              size="small"
-            >
-              <Delete />
-            </IconButton>
-          </Tooltip>
-        </div>
-      ),
-      size: 110,
-    }),
   ];
 
   return (
-    <Stack justifyContent="space-between">
+    <>
       <Paper variant="outlined">
         <Stack spacing={3}>
-          <Typography variant="sectiontitle2">署名の管理</Typography>
-          <Stack
-            spacing={1}
-            direction="row"
-            sx={{
-              "& button": {
-                borderRadius: 6,
-                maxWidth: "fit-content",
-                wordBreak: "keep-all",
-              },
-            }}
-          >
+          <Typography variant="sectiontitle2">所属の管理</Typography>
+          <Stack spacing={1} direction="row">
             <Button
               variant="contained"
               color="secondary"
+              sx={{ width: "fit-content", borderRadius: 6 }}
               onClick={() => handleDelete()}
               disabled={Object.keys(selected).length === 0}
             >
               削除
             </Button>
-            <Button variant="contained" onClick={() => setDialog("add")}>
-              新規追加
+            <Button
+              variant="contained"
+              sx={{ width: "fit-content", borderRadius: 6 }}
+              onClick={() => setDialog("add")}
+            >
+              追加
             </Button>
           </Stack>
           <MyTable
-            columns={columns}
             loading={fetchingData || deleteMutation.isLoading}
             state={tableData}
+            columns={columns}
             selector={{ selected, setSelected }}
           />
         </Stack>
-        <SignatureAddEdit
-          state={dialog}
-          closeFn={() => setDialog(null)}
-          resolverFn={() =>
-            queryClient.invalidateQueries(["signatures", pagination, sort])
-          }
-        />
       </Paper>
-    </Stack>
+      <AffiliationAddEdit
+        state={dialog}
+        closeFn={() => setDialog(null)}
+        resolverFn={() => {
+          queryClient.invalidateQueries([
+            "affiliations-table",
+            pagination,
+            sort,
+          ]);
+          queryClient.invalidateQueries(["affiliations-option"]);
+        }}
+      />
+    </>
   );
 }
 
-export default Signature;
+export default AffiliationTable;
