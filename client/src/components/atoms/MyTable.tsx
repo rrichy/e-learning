@@ -24,6 +24,8 @@ import {
   Table as TableProps,
   ExpandedState,
   getExpandedRowModel,
+  Row,
+  Table as ReactTableProps,
 } from "@tanstack/react-table";
 import Loading from "../molecules/Loading";
 import {
@@ -41,6 +43,8 @@ interface MyTableProps<T> {
   selector?: {
     selected: RowSelectionState;
     setSelected: OnChangeFn<RowSelectionState>;
+    index?: number;
+    selectCondition?: (r: Row<T>) => boolean;
   };
   expander?: {
     expanded: ExpandedState;
@@ -48,6 +52,7 @@ interface MyTableProps<T> {
     subRowKey: string;
   };
   onDragEnd?: (r: DropResult) => void;
+  debug?: boolean;
 }
 
 function MyTable<T extends unknown>({
@@ -57,21 +62,26 @@ function MyTable<T extends unknown>({
   selector,
   expander,
   onDragEnd,
+  debug,
 }: MyTableProps<T>) {
   const table = useReactTable({
     data: state.data,
-    columns: selector ? appendSelectColumn(columns) : columns,
-    pageCount: state.meta.last_page,
+    columns: selector
+      ? appendSelectColumn(columns, Boolean(expander), selector.index)
+      : columns,
+    pageCount: state.paginator ? state.meta.last_page : undefined,
     state: {
-      pagination: {
-        pageIndex: state.meta.current_page - 1,
-        pageSize: state.meta.per_page,
-      },
-      sorting: [
-        { id: state.meta.sort ?? "id", desc: state.meta.order === "desc" },
-      ],
+      pagination: state.paginator
+        ? {
+            pageIndex: state.meta.current_page - 1,
+            pageSize: state.meta.per_page,
+          }
+        : undefined,
+      sorting: state.sorter
+        ? [{ id: state.meta.sort ?? "id", desc: state.meta.order === "desc" }]
+        : undefined,
       rowSelection: selector?.selected,
-      expanded: expander?.expanded
+      expanded: expander?.expanded,
     },
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: expander ? getExpandedRowModel() : undefined,
@@ -80,6 +90,7 @@ function MyTable<T extends unknown>({
     onPaginationChange: state.paginator,
     onSortingChange: state.sorter,
     onRowSelectionChange: selector?.setSelected,
+    enableRowSelection: selector?.selectCondition,
     manualPagination: true,
     manualSorting: true,
   });
@@ -107,9 +118,9 @@ function MyTable<T extends unknown>({
           "& td": {
             border: "none",
           },
-          // "& td, & th": {
-          //   border: "1px solid red",
-          // },
+          "& td, & th": {
+            border: debug ? "1px solid red" : undefined,
+          },
         }}
       >
         <Table
@@ -201,23 +212,25 @@ function MyTable<T extends unknown>({
           )}
         </Table>
       </TableContainer>
-      <TablePagination
-        component="div"
-        count={state.meta.total}
-        page={table.getState().pagination.pageIndex}
-        rowsPerPage={table.getState().pagination.pageSize}
-        rowsPerPageOptions={TABLE_ROWS_PER_PAGE}
-        onPageChange={(_e, page) => {
-          table.setPageIndex(page);
-          table.resetRowSelection();
-        }}
-        onRowsPerPageChange={(e) => {
-          table.setPageSize(+e.target.value);
-          table.resetRowSelection();
-        }}
-        showFirstButton
-        showLastButton
-      />
+      {state.paginator && (
+        <TablePagination
+          component="div"
+          count={state.meta.total}
+          page={table.getState().pagination.pageIndex}
+          rowsPerPage={table.getState().pagination.pageSize}
+          rowsPerPageOptions={TABLE_ROWS_PER_PAGE}
+          onPageChange={(_e, page) => {
+            table.setPageIndex(page);
+            table.resetRowSelection();
+          }}
+          onRowsPerPageChange={(e) => {
+            table.setPageSize(+e.target.value);
+            table.resetRowSelection();
+          }}
+          showFirstButton
+          showLastButton
+        />
+      )}
       <Loading loading={loading} />
     </Box>
   );
@@ -225,21 +238,25 @@ function MyTable<T extends unknown>({
 
 export default MyTable;
 
-function appendSelectColumn<T extends unknown>(c: ColumnDef<T, string>[]) {
-  return [
-    {
-      id: "selection-column",
-      header: ({ table }: any) => (
-        <Checkbox
-          {...{
-            checked: table.getIsAllRowsSelected(),
-            indeterminate: table.getIsSomeRowsSelected(),
-            onChange: table.getToggleAllRowsSelectedHandler(),
-          }}
-          size="small"
-        />
-      ),
-      cell: ({ row }: any) => (
+function appendSelectColumn<T extends unknown>(
+  c: ColumnDef<T, string>[],
+  expandable: boolean,
+  index?: number
+) {
+  const selectorColumn = {
+    id: "selection-column",
+    header: ({ table }: { table: ReactTableProps<T> }) => (
+      <Checkbox
+        {...{
+          checked: table.getIsAllRowsSelected(),
+          indeterminate: table.getIsSomeRowsSelected(),
+          onChange: table.getToggleAllRowsSelectedHandler(),
+        }}
+        size="small"
+      />
+    ),
+    cell: ({ row }: { row: Row<T> }) =>
+      row.getCanSelect() ? (
         <Checkbox
           {...{
             checked: row.getIsSelected(),
@@ -247,14 +264,17 @@ function appendSelectColumn<T extends unknown>(c: ColumnDef<T, string>[]) {
             onChange: row.getToggleSelectedHandler(),
           }}
           size="small"
-          sx={{ pl: row.depth * 2 }}
+          sx={{ pl: expandable ? row.depth * 2 : undefined }}
         />
-      ),
-      enableSorting: false,
-      size: 40,
-    },
-    ...c,
-  ];
+      ) : null,
+    enableSorting: false,
+    size: 40,
+  };
+
+  const partial = [...c];
+  partial.splice(index ?? 0, 0, selectorColumn);
+
+  return partial;
 }
 
 function TableBodyComponent<T extends unknown>({

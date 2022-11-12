@@ -13,11 +13,15 @@ use Illuminate\Support\Facades\Gate;
 
 class CourseController extends Controller
 {
-    public function index(CourseService $service)
+    public function index(Request $request, CourseService $service)
     {
         Gate::authorize('check-membership', [['admin', 'corporate', 'individual']]);
 
-        return $service->list();
+        $valid = $request->validate([
+            'status' => 'required|string|in:both,private,public',
+        ]);
+        
+        return $service->index($valid['status'], auth()->user());
     }
 
     public function store(CourseRequest $request, CourseService $service)
