@@ -1,5 +1,6 @@
 import Link from "@/components/atoms/Link";
 import { jpDate } from "@/mixins/jpFormatter";
+import { AffiliationFormAttributeWithId } from "@/validations/AffiliationFormValidation";
 import { SignatureFormAttributeWithId } from "@/validations/SignatureFormValidation";
 import {
   ArticleOutlined,
@@ -233,6 +234,34 @@ export function signatureColumns(
             </IconButton>
           </Tooltip>
         </div>
+      ),
+      size: 110,
+    }),
+  ];
+
+  return columns;
+}
+
+const affiliationHelper = createColumnHelper<AffiliationFormAttributeWithId>();
+
+export function affiliationColumns(handleClick: (d: AffiliationFormAttributeWithId) => void) {
+  const columns: ColumnDef<AffiliationFormAttributeWithId, any>[] = [
+    affiliationHelper.accessor("name", {
+      header: () => "所属",
+      cell: ({ row, getValue }) => (
+        <MuiLink
+          component="button"
+          onClick={() => handleClick(row.original)}
+          sx={{ textAlign: "center", width: 1 }}
+        >
+          {getValue()}
+        </MuiLink>
+      ),
+    }),
+    affiliationHelper.accessor("priority", {
+      header: () => "並び順",
+      cell: ({ getValue }) => (
+        <div style={{ textAlign: "center" }}>{getValue()}</div>
       ),
       size: 110,
     }),
