@@ -7,33 +7,49 @@ use App\Http\Resources\NoticeHomepageResource;
 use App\Http\Resources\NoticeIndexResource;
 use App\Http\Resources\NoticeShowResource;
 use App\Models\Notice;
+use App\Models\User;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class NoticeService
 {
-    public function list()
+    public function index(array $pagination, User $user)
     {
-        $order = request()->input('order', 'asc');
-        $per_page = request()->input('per_page', '10');
-        $sort = request()->input('sort', 'id');
+        $order = $pagination['order'] ?? 'asc';
+        $per_page = $pagination['per_page'] ?? 10;
+        $sort = $pagination['sort'] ?? 'id';
 
-        if (auth()->user()->isIndividual()) {
+        if ($user->isIndividual()) {
             return NoticeHomepageResource::collection(
                 Notice::with('user')
-                    ->where(fn ($q) => $q->where('affiliation_id', auth()->user()->affiliation_id)->orWhereNull('affiliation_id'))
+                    ->where(fn ($q) => $q->where('affiliation_id', $user->affiliation_id)->orWhereNull('affiliation_id'))
                     ->where('shown_in_bulletin', true)
                     ->orderBy($sort, $order)
                     ->paginate($per_page)
             );
         }
-        
-        return NoticeIndexResource::collection(
-            Notice::with('user')
+
+        return JsonResource::collection(
+            Notice::query()
+                ->select([
+                    'notices.id',
+                    'notices.subject',
+                    'notices.priority',
+                    'notices.date_publish_start as publish_start',
+                    'notices.date_publish_end as publish_end',
+                    'notices.shown_in_bulletin',
+                    'notices.shown_in_mail',
+                    'users.name as author',
+                ])
+                ->join('users', 'users.id', '=', 'notices.user_id')
                 ->when(
-                    auth()->user()->isCorporate(), 
-                    fn ($q) => $q->where('affiliation_id', auth()->user()->affiliation_id)
+                    $user->isCorporate(),
+                    fn ($q) => $q->where('notices.affiliation_id', $user->affiliation_id)
                 )->orderBy($sort, $order)
                 ->paginate($per_page)
-        )->additional(['message' => 'Notices successfully fetched!']);
+        )->additional([
+            'message' => 'Notices successfully fetched!',
+            'meta' => compact('order', 'sort'),
+        ]);
     }
 
 
@@ -44,7 +60,7 @@ class NoticeService
             403,
             "This action is unauthorized."
         );
-        
+
         return new NoticeShowResource($notice);
     }
 
@@ -61,7 +77,7 @@ class NoticeService
                 'priority' => Notice::max('priority') + 1,
             ]
         ));
-        
+
         // event(new NoticePost($notice));
 
         return $notice;
@@ -84,7 +100,7 @@ class NoticeService
                 'shown_in_mail' => in_array(2, $valid['posting_method']),
             ]
         ));
-        
+
         // event(new NoticePost($notice));
 
         return $notice;

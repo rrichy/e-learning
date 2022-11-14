@@ -6,15 +6,29 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\NoticeStoreUpdateRequest;
 use App\Models\Notice;
 use App\Services\NoticeService;
+use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class NoticeController extends Controller
 {
-    public function index(NoticeService $service)
+    public function index(Request $request, NoticeService $service)
     {
         Gate::authorize('check-membership', [['admin', 'corporate', 'individual']]);
 
-        return $service->list();
+        $valid = $request->validate([
+            'order' => 'string|in:asc,desc',
+            'per_page' => 'numeric',
+            'sort' => 'string|in:id,author,subject,priority'
+        ]);
+
+        try {
+            $notices = $service->index($valid, auth()->user());
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
+
+        return $notices;
     }
 
     public function store(NoticeStoreUpdateRequest $request, NoticeService $service)
