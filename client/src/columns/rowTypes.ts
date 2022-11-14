@@ -17,3 +17,12 @@ export type InquiryRowAttribute = {
   content: string;
   created_at: string;
 };
+
+export type MailRowAttribute = {
+  id: number;
+  title: string;
+  content: string;
+  priority: number;
+  signature_id: number;
+  reordered?: boolean;
+};

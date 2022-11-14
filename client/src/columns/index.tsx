@@ -1,10 +1,17 @@
 import Link from "@/components/atoms/Link";
 import { jpDate } from "@/mixins/jpFormatter";
-import { ArticleOutlined, Delete, MarkunreadOutlined } from "@mui/icons-material";
+import {
+  ArticleOutlined,
+  Delete,
+  MarkunreadOutlined,
+} from "@mui/icons-material";
 import { Box, IconButton, Link as MuiLink, Tooltip } from "@mui/material";
 import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
-import { InquiryRowAttribute, NoticeTableRowAttribute } from "./rowTypes";
-
+import {
+  InquiryRowAttribute,
+  MailRowAttribute,
+  NoticeTableRowAttribute,
+} from "./rowTypes";
 
 const noticeHelper = createColumnHelper<NoticeTableRowAttribute>();
 
@@ -76,7 +83,6 @@ export function noticeColumns(handleDelete: (id: number) => void) {
   return columns;
 }
 
-
 const inquiryHelper = createColumnHelper<InquiryRowAttribute>();
 
 export function inquiryColumns(handleClick: (id: number) => void) {
@@ -110,6 +116,64 @@ export function inquiryColumns(handleClick: (id: number) => void) {
         <div style={{ textAlign: "center" }}>{jpDate(row.getValue())}</div>
       ),
       size: 150,
+    }),
+  ];
+
+  return columns;
+}
+
+const organizedMailHelper = createColumnHelper<MailRowAttribute>();
+
+export function organizedMailColumns(
+  handleClick: (row: MailRowAttribute) => void,
+  lookup: { [k: number]: string }
+) {
+  const columns: ColumnDef<MailRowAttribute, any>[] = [
+    organizedMailHelper.accessor("title", {
+      header: () => "タイトル",
+      cell: (row) => (
+        <MuiLink
+          component="button"
+          onClick={() => handleClick(row.row.original)}
+          sx={{ textAlign: "center", width: 1 }}
+        >
+          {row.getValue()}
+        </MuiLink>
+      ),
+      enableSorting: false,
+    }),
+    organizedMailHelper.accessor("content", {
+      header: () => "内容",
+      enableSorting: false,
+    }),
+    organizedMailHelper.accessor("priority", {
+      header: () => "並び順",
+      cell: (row) => (
+        <div
+          style={{
+            textAlign: "center",
+            color: row.row.original.reordered ? "red" : "unset",
+          }}
+        >
+          {row.getValue()}
+        </div>
+      ),
+      enableSorting: false,
+      size: 80,
+    }),
+    organizedMailHelper.accessor("signature_id", {
+      header: () => "署名",
+      cell: (row) => (
+        <div
+          style={{
+            textAlign: "center",
+          }}
+        >
+          {lookup[row.getValue()]}
+        </div>
+      ),
+      minSize: 120,
+      enableSorting: false,
     }),
   ];
 

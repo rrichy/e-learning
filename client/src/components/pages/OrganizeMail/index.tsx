@@ -1,27 +1,19 @@
-import { Box, Link, Paper, Typography } from "@mui/material";
+import { Box, Paper, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
 import Button from "@/components/atoms/Button";
 import OrganizeMailAddEdit from "./OrganizeMailAddEdit";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import {
-  ColumnDef,
-  createColumnHelper,
   OnChangeFn,
   PaginationState,
-  RowSelectionState,
   SortingState,
 } from "@tanstack/react-table";
-import { TABLE_ROWS_PER_PAGE } from "@/settings/appconfig";
-import {
-  OptionAttribute,
-  PageDialogProps,
-  TableStateProps,
-} from "@/interfaces/CommonInterface";
+import { PageDialogProps, TableStateProps } from "@/interfaces/CommonInterface";
 import { OrganizeMailFormAttributeWithId } from "@/validations/OrganizeMailFormValidation";
 import { get } from "@/services/ApiService";
 import MyTable from "@/components/atoms/MyTable";
-import { getOptions } from "@/services/CommonService";
+import { getCacheableOptions } from "@/services/CommonService";
 import {
   destroyOrganizeMail,
   massUpdateOrganizeMailPriority,
@@ -29,131 +21,50 @@ import {
 import useAlerter from "@/hooks/useAlerter";
 import useConfirm from "@/hooks/useConfirm";
 import { DropResult } from "@hello-pangea/dnd";
-
-export type MailRowAttribute = {
-  id: number;
-  title: string;
-  content: string;
-  priority: number;
-  signature_id: number;
-  reordered?: boolean;
-};
-
-const columnHelper = createColumnHelper<MailRowAttribute>();
-
-const getTableData = (
-  { pagination, sort }: { pagination: PaginationState; sort: SortingState },
-  {
-    setSort,
-    setPagination,
-  }: {
-    setSort: OnChangeFn<SortingState>;
-    setPagination: OnChangeFn<PaginationState>;
-  }
-) => {
-  const { data, isFetching } = useQuery(
-    ["mail-templates", pagination, sort],
-    async () => {
-      const sortKey = sort[0]?.id ?? "priority";
-      const orderDir = sort[0] ? (sort[0].desc ? "desc" : "asc") : "asc";
-
-      const res = await get(
-        `/api/mail-template?page=${pagination.pageIndex + 1}&per_page=${
-          pagination.pageSize
-        }&sort=${sortKey}&order=${orderDir}`
-      );
-
-      return {
-        sorter: setSort,
-        paginator: setPagination,
-        data: res.data.data,
-        meta: res.data.meta,
-      } as TableStateProps<MailRowAttribute>;
-    },
-    {
-      staleTime: 5_000,
-      keepPreviousData: true,
-      refetchOnWindowFocus: false,
-    }
-  );
-
-  return { tableData: data, fetchingData: isFetching };
-};
-
-const getSignatures = () => {
-  const { data, isFetching } = useQuery(
-    ["signature-options"],
-    async () => {
-      const res = await getOptions(["signatures"]);
-
-      return {
-        lookup: res.data.signatures.reduce(
-          (acc: any, b: any) => ({ ...acc, [b.id]: b.name }),
-          {} as any
-        ),
-        option: [
-          { id: 0, name: "未選択", selectionType: "disabled" },
-          ...res.data.signatures,
-        ] as OptionAttribute[],
-      };
-    },
-    {
-      staleTime: 10_000,
-      refetchOnWindowFocus: false,
-    }
-  );
-
-  return { signatures: data, fetchingSignatures: isFetching };
-};
-
-function arrayMoveTo(
-  original: MailRowAttribute[],
-  arr: MailRowAttribute[],
-  from: number,
-  to: number
-) {
-  const reordered = [...arr];
-  reordered.splice(to, 0, reordered.splice(from, 1)[0]);
-
-  let hasReordered = false;
-
-  const mapped = reordered.map((a, i) => {
-    const areordered = a.id !== original[i].id;
-    if (areordered) hasReordered = true;
-    return { ...a, reordered: areordered, priority: original[i].priority };
-  });
-
-  return { reordered: mapped, hasReordered };
-}
+import { useMyTable } from "@/hooks/useMyTable";
+import { organizedMailColumns } from "@/columns";
+import { MailRowAttribute } from "@/columns/rowTypes";
+import generateLookup from "@/mixins/generateLookup";
 
 function OrganizeMail() {
   const { isConfirmed } = useConfirm();
-  const queryClient = useQueryClient();
   const { successSnackbar, errorSnackbar } = useAlerter();
+  const queryClient = useQueryClient();
+  const { sorter, selector, pagination, setPagination } = useMyTable();
   const [hasReordered, setHasReordered] = useState(false);
-  const [sort, setSort] = useState<SortingState>([]);
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: TABLE_ROWS_PER_PAGE[0],
-  });
-  const [selected, setSelected] = useState<RowSelectionState>({});
+
   const [dragData, setDragData] = useState<MailRowAttribute[]>([]);
   const [dialog, setDialog] =
     useState<PageDialogProps<OrganizeMailFormAttributeWithId>>(null);
 
-  const { signatures, fetchingSignatures } = getSignatures();
-  const { tableData, fetchingData } = getTableData(
-    { sort, pagination },
-    { setSort, setPagination }
-  );
+  const { options, fetchingOptions } = getCacheableOptions("signatures");
+  const lookup = useMemo(() => {
+    if (!fetchingOptions && options.signatures) {
+      return generateLookup(options.signatures);
+    }
+    return {} as { [k: number]: string };
+  }, [fetchingOptions, options]);
+
+  const { tableData, fetchingData } = getTableData({
+    sort: sorter.sort,
+    setSort: sorter.setSort,
+    pagination,
+    setPagination,
+  });
+
+  const data = dragData.length ? dragData : tableData?.data ?? [];
 
   const resolver = {
     onSuccess: (res: any) => {
       successSnackbar(res.data.message);
       setDragData([]);
       setHasReordered(false);
-      setSelected({});
-      queryClient.invalidateQueries(["mail-templates", pagination, sort]);
+      selector.setSelected({});
+      queryClient.invalidateQueries([
+        "mail-templates",
+        pagination,
+        sorter.sort,
+      ]);
     },
     onError: (e: any) => errorSnackbar(e.message),
   };
@@ -162,6 +73,7 @@ function OrganizeMail() {
     (ids: number[]) => destroyOrganizeMail(ids),
     resolver
   );
+
   const priorityMutation = useMutation(
     (changes: { id: number; priority: number }[]) =>
       massUpdateOrganizeMailPriority(changes),
@@ -175,14 +87,12 @@ function OrganizeMail() {
     });
 
     if (confirmed) {
-      const indexes = Object.keys(selected).map(Number);
+      const indexes = Object.keys(selector.selected).map(Number);
       deleteMutation.mutate(
         indexes.map((index) => (tableData?.data ?? [])[index].id)
       );
     }
   };
-
-  const data = dragData.length ? dragData : tableData?.data ?? [];
 
   const handleDragEnd = ({ source, destination }: DropResult) => {
     if (destination && source.index !== destination.index) {
@@ -220,59 +130,17 @@ function OrganizeMail() {
     }
   };
 
-  const tablecolumns: ColumnDef<MailRowAttribute, any>[] = [
-    columnHelper.accessor("title", {
-      header: () => "タイトル",
-      cell: (row) => (
-        <Link
-          component="button"
-          onClick={() => setDialog(row.row.original)}
-          sx={{ textAlign: "center", width: 1 }}
-        >
-          {row.getValue()}
-        </Link>
-      ),
-      enableSorting: false,
-    }),
-    columnHelper.accessor("content", {
-      header: () => "内容",
-      enableSorting: false,
-    }),
-    columnHelper.accessor("priority", {
-      header: () => "並び順",
-      cell: (row) => (
-        <div
-          style={{
-            textAlign: "center",
-            color: row.row.original.reordered ? "red" : "unset",
-          }}
-        >
-          {row.getValue()}
-        </div>
-      ),
-      enableSorting: false,
-      size: 80,
-    }),
-    columnHelper.accessor("signature_id", {
-      header: () => "署名",
-      cell: (row) => (
-        <div
-          style={{
-            textAlign: "center",
-          }}
-        >
-          {signatures?.lookup[row.getValue()]}
-        </div>
-      ),
-      minSize: 120,
-      enableSorting: false,
-    }),
-  ];
+  const columns = organizedMailColumns(setDialog, lookup);
 
   useEffect(() => {
     setDragData([]);
     setHasReordered(false);
-  }, [sort[0]?.id, sort[0]?.desc, pagination.pageIndex, pagination.pageSize]);
+  }, [
+    sorter.sort[0]?.id,
+    sorter.sort[0]?.desc,
+    pagination.pageIndex,
+    pagination.pageSize,
+  ]);
 
   return (
     <Stack justifyContent="space-between">
@@ -296,7 +164,7 @@ function OrganizeMail() {
               variant="contained"
               color="secondary"
               onClick={handleDelete}
-              disabled={Object.keys(selected).length === 0}
+              disabled={Object.keys(selector.selected).length === 0}
             >
               削除
             </Button>
@@ -323,15 +191,12 @@ function OrganizeMail() {
             </Button>
           </Stack>
           <MyTable
-            columns={tablecolumns}
+            columns={columns}
             state={tableData ? { ...tableData, data } : undefined}
             loading={
-              fetchingData || fetchingSignatures || deleteMutation.isLoading
+              fetchingData || fetchingOptions || deleteMutation.isLoading
             }
-            selector={{
-              selected,
-              setSelected,
-            }}
+            selector={selector}
             onDragEnd={handleDragEnd}
           />
         </Stack>
@@ -339,9 +204,13 @@ function OrganizeMail() {
           state={dialog}
           closeFn={() => setDialog(null)}
           resolverFn={() =>
-            queryClient.invalidateQueries(["mail-templates", pagination, sort])
+            queryClient.invalidateQueries([
+              "mail-templates",
+              pagination,
+              sorter.sort,
+            ])
           }
-          signatures={signatures?.option ?? []}
+          signatures={options.signatures ?? []}
         />
       </Paper>
     </Stack>
@@ -349,3 +218,63 @@ function OrganizeMail() {
 }
 
 export default OrganizeMail;
+
+const getTableData = ({
+  sort,
+  setSort,
+  pagination,
+  setPagination,
+}: {
+  sort: SortingState;
+  setSort: OnChangeFn<SortingState>;
+  pagination: PaginationState;
+  setPagination: OnChangeFn<PaginationState>;
+}) => {
+  const { data, isFetching } = useQuery(
+    ["mail-templates", pagination, sort],
+    async () => {
+      const sortKey = sort[0]?.id ?? "priority";
+      const orderDir = sort[0] ? (sort[0].desc ? "desc" : "asc") : "asc";
+
+      const res = await get(
+        `/api/mail-template?page=${pagination.pageIndex + 1}&per_page=${
+          pagination.pageSize
+        }&sort=${sortKey}&order=${orderDir}`
+      );
+
+      return {
+        sorter: setSort,
+        paginator: setPagination,
+        data: res.data.data,
+        meta: res.data.meta,
+      } as TableStateProps<MailRowAttribute>;
+    },
+    {
+      staleTime: 5_000,
+      keepPreviousData: true,
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  return { tableData: data, fetchingData: isFetching };
+};
+
+function arrayMoveTo(
+  original: MailRowAttribute[],
+  arr: MailRowAttribute[],
+  from: number,
+  to: number
+) {
+  const reordered = [...arr];
+  reordered.splice(to, 0, reordered.splice(from, 1)[0]);
+
+  let hasReordered = false;
+
+  const mapped = reordered.map((a, i) => {
+    const areordered = a.id !== original[i].id;
+    if (areordered) hasReordered = true;
+    return { ...a, reordered: areordered, priority: original[i].priority };
+  });
+
+  return { reordered: mapped, hasReordered };
+}
