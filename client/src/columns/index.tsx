@@ -1,5 +1,6 @@
 import Link from "@/components/atoms/Link";
 import { jpDate } from "@/mixins/jpFormatter";
+import { SignatureFormAttributeWithId } from "@/validations/SignatureFormValidation";
 import {
   ArticleOutlined,
   Delete,
@@ -174,6 +175,66 @@ export function organizedMailColumns(
       ),
       minSize: 120,
       enableSorting: false,
+    }),
+  ];
+
+  return columns;
+}
+
+const signatureHelper = createColumnHelper<SignatureFormAttributeWithId>();
+
+export function signatureColumns(
+  handleClick: (d: SignatureFormAttributeWithId) => void,
+  handleDelete: (id: number) => void
+) {
+  const columns: ColumnDef<SignatureFormAttributeWithId, any>[] = [
+    signatureHelper.accessor("name", {
+      header: () => "登録名",
+      cell: (row) => (
+        <MuiLink
+          component="button"
+          onClick={() => handleClick(row.row.original)}
+          sx={{ textAlign: "center", width: 1 }}
+        >
+          {row.getValue()}
+        </MuiLink>
+      ),
+    }),
+    signatureHelper.accessor("from_name", {
+      header: () => "from_name",
+      cell: ({ getValue }) => (
+        <div style={{ textAlign: "center" }}>{getValue()}</div>
+      )
+    }),
+    signatureHelper.accessor("from_email", {
+      header: () => "from_email",
+    }),
+    signatureHelper.accessor("content", {
+      header: () => "署名",
+    }),
+    signatureHelper.accessor("priority", {
+      header: () => "並び順",
+      cell: ({ getValue }) => (
+        <div style={{ textAlign: "center" }}>{getValue()}</div>
+      ),
+      size: 110,
+    }),
+    signatureHelper.display({
+      id: "action",
+      header: () => "アクション",
+      cell: ({ row }) => (
+        <div style={{ textAlign: "center" }}>
+          <Tooltip title="削除">
+            <IconButton
+              onClick={() => handleDelete(row.original.id)}
+              size="small"
+            >
+              <Delete />
+            </IconButton>
+          </Tooltip>
+        </div>
+      ),
+      size: 110,
     }),
   ];
 
