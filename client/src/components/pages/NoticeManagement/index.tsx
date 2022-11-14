@@ -1,7 +1,6 @@
 import { Paper, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
 import Button from "@/components/atoms/Button";
-import { NoticeTableRowAttribute } from "@/validations/NoticeFormValidation";
 import MyTable from "@/components/atoms/MyTable";
 import useConfirm from "@/hooks/useConfirm";
 import useAlerter from "@/hooks/useAlerter";
@@ -11,6 +10,7 @@ import { TableStateProps } from "@/interfaces/CommonInterface";
 import { destroyNotice } from "@/services/NoticeService";
 import { get } from "@/services/ApiService";
 import { noticeColumns } from "@/columns";
+import { NoticeTableRowAttribute } from "@/columns/rowTypes";
 
 function NoticeManagement() {
   const { isConfirmed } = useConfirm();

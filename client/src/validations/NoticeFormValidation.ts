@@ -3,17 +3,6 @@ import Yup from "./localizedYup";
 
 const { string, number } = Yup;
 
-export interface NoticeTableRowAttribute {
-  id: number;
-  author: string;
-  subject: string;
-  priority: number;
-  publish_start: string;
-  publish_end: string;
-  shown_in_bulletin: boolean;
-  shown_in_mail: boolean;
-}
-
 export const noticeFormSchema = Yup.object({
   subject: string().label("件名").required(),
   content: string().label("内容").required(),

@@ -1,16 +1,16 @@
 import Link from "@/components/atoms/Link";
 import { jpDate } from "@/mixins/jpFormatter";
-import { NoticeTableRowAttribute } from "@/validations/NoticeFormValidation";
 import { ArticleOutlined, Delete, MarkunreadOutlined } from "@mui/icons-material";
-import { Box, IconButton, Tooltip } from "@mui/material";
+import { Box, IconButton, Link as MuiLink, Tooltip } from "@mui/material";
 import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
+import { InquiryRowAttribute, NoticeTableRowAttribute } from "./rowTypes";
 
 
-const columnHelper = createColumnHelper<NoticeTableRowAttribute>();
+const noticeHelper = createColumnHelper<NoticeTableRowAttribute>();
 
-export function noticeColumns(onDelete: (id: number) => void) {
+export function noticeColumns(handleDelete: (id: number) => void) {
   const columns: ColumnDef<NoticeTableRowAttribute, any>[] = [
-    columnHelper.accessor("author", {
+    noticeHelper.accessor("author", {
       header: () => "作成者",
       cell: ({ row, getValue }) => (
         <div style={{ textAlign: "center" }}>
@@ -20,10 +20,10 @@ export function noticeColumns(onDelete: (id: number) => void) {
         </div>
       ),
     }),
-    columnHelper.accessor("subject", {
+    noticeHelper.accessor("subject", {
       header: () => "件名",
     }),
-    columnHelper.display({
+    noticeHelper.display({
       id: "publish-date",
       header: () => "掲載期間",
       cell: ({ row }) => (
@@ -35,7 +35,7 @@ export function noticeColumns(onDelete: (id: number) => void) {
       ),
       size: 250,
     }),
-    columnHelper.display({
+    noticeHelper.display({
       id: "posting-details",
       header: () => "掲載方法",
       cell: ({ row }) => (
@@ -54,7 +54,7 @@ export function noticeColumns(onDelete: (id: number) => void) {
       ),
       size: 110,
     }),
-    columnHelper.display({
+    noticeHelper.display({
       id: "action",
       header: () => "アクション",
       cell: ({ row }) => (
@@ -62,7 +62,7 @@ export function noticeColumns(onDelete: (id: number) => void) {
           <Tooltip title="削除">
             <IconButton
               size="small"
-              onClick={() => onDelete(row.original.id)}
+              onClick={() => handleDelete(row.original.id)}
             >
               <Delete fontSize="small" />
             </IconButton>
@@ -70,6 +70,46 @@ export function noticeColumns(onDelete: (id: number) => void) {
         </div>
       ),
       size: 110,
+    }),
+  ];
+
+  return columns;
+}
+
+
+const inquiryHelper = createColumnHelper<InquiryRowAttribute>();
+
+export function inquiryColumns(handleClick: (id: number) => void) {
+  const columns: ColumnDef<InquiryRowAttribute, string>[] = [
+    inquiryHelper.accessor("name", {
+      header: () => "氏名",
+    }),
+    inquiryHelper.accessor("email", {
+      header: () => "メールアドレス",
+      minSize: 160,
+    }),
+    inquiryHelper.accessor("content", {
+      header: () => "内容",
+      cell: (row) => (
+        <MuiLink
+          component="button"
+          onClick={() => handleClick(row.row.original.id)}
+          textOverflow="ellipsis"
+          width={1}
+          whiteSpace="nowrap"
+          overflow="hidden"
+        >
+          {row.getValue()}
+        </MuiLink>
+      ),
+      minSize: 320,
+    }),
+    inquiryHelper.accessor("created_at", {
+      header: () => "created_at",
+      cell: (row) => (
+        <div style={{ textAlign: "center" }}>{jpDate(row.getValue())}</div>
+      ),
+      size: 150,
     }),
   ];
 
