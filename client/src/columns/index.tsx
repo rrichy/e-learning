@@ -229,7 +229,7 @@ export function signatureColumns(
               onClick={() => handleDelete(row.original.id)}
               size="small"
             >
-              <Delete />
+              <Delete fontSize="small" />
             </IconButton>
           </Tooltip>
         </div>
