@@ -2,7 +2,6 @@ import { SxProps, Theme } from "@mui/material";
 
 export default {
   py: { xs: 2, sm: 3 },
-  flex: 1,
   "& .MuiDataGrid-columnHeaders": {
     bgcolor: "common.black",
     "& .MuiCheckbox-root:not(.Mui-checked)": {

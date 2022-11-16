@@ -1,3 +1,5 @@
+import { OptionsAttribute } from "@/interfaces/CommonInterface";
+import { useQuery } from "@tanstack/react-query";
 import { get } from "./ApiService";
 
 export const getOptions = (
@@ -19,6 +21,23 @@ export const getOptions = (
   }
 
   return get(url);
+};
+
+export const getCacheableOptions = (...options: string[]) => {
+  const { data, isFetching } = useQuery(
+    options.map((o) => o + "-options"),
+    async () => {
+      const res = await getOptions(options);
+
+      return res.data as OptionsAttribute;
+    },
+    {
+      staleTime: 10_000,
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  return { options: data ?? {}, fetchingOptions: isFetching };
 };
 
 export const getOptionsWithBelongsToId = (

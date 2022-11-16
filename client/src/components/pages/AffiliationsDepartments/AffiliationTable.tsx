@@ -1,47 +1,53 @@
-import { Paper, Typography } from "@mui/material";
-import { Stack } from "@mui/system";
-import { useState } from "react";
-import Button from "@/components/atoms/Button";
+import { Paper, Stack, Typography } from "@mui/material";
 import useAlerter from "@/hooks/useAlerter";
+import useConfirm from "@/hooks/useConfirm";
 import { PageDialogProps, TableStateProps } from "@/interfaces/CommonInterface";
-import { SignatureFormAttributeWithId } from "@/validations/SignatureFormValidation";
-import { destroySignature } from "@/services/SignatureService";
-import SignatureAddEdit from "./SignatureAddEdit";
+import { destroyAffiliation } from "@/services/AffiliationService";
+import { get } from "@/services/ApiService";
+import { AffiliationFormAttributeWithId } from "@/validations/AffiliationFormValidation";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   OnChangeFn,
   PaginationState,
   SortingState,
 } from "@tanstack/react-table";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { get } from "@/services/ApiService";
+import { useState } from "react";
+import Button from "@/components/atoms/Button";
 import MyTable from "@/components/atoms/MyTable";
-import useConfirm from "@/hooks/useConfirm";
+import AffiliationAddEdit from "./AffiliationAddEdit";
+import { affiliationColumns } from "@/columns";
 import { useMyTable } from "@/hooks/useMyTable";
-import { signatureColumns } from "@/columns";
 
-function Signature() {
+function AffiliationTable() {
   const queryClient = useQueryClient();
   const { isConfirmed } = useConfirm();
   const { successSnackbar, errorSnackbar } = useAlerter();
 
   const [dialog, setDialog] =
-    useState<PageDialogProps<SignatureFormAttributeWithId>>(null);
-  const { sorter, selector, pagination, setPagination } = useMyTable();
-  const { tableData, fetchingData } = getTableData({
+    useState<PageDialogProps<AffiliationFormAttributeWithId>>(null);
+  const { selector, sorter, pagination, setPagination } = useMyTable();
+  const { tableData, fetchingData } = getData({
     sort: sorter.sort,
     setSort: sorter.setSort,
     pagination,
     setPagination,
   });
 
-  const deleteMutation = useMutation((ids: number[]) => destroySignature(ids), {
-    onSuccess: (res: any) => {
-      successSnackbar(res.data.message);
-      selector.setSelected({});
-      queryClient.invalidateQueries(["signatures", pagination, sorter.sort]);
-    },
-    onError: (e: any) => errorSnackbar(e.message),
-  });
+  const deleteMutation = useMutation(
+    (ids: number[]) => destroyAffiliation(ids),
+    {
+      onSuccess: (res: any) => {
+        successSnackbar(res.data.message);
+        selector.setSelected({});
+        queryClient.invalidateQueries([
+          "affiliations-table",
+          pagination,
+          sorter.sort,
+        ]);
+      },
+      onError: (e: any) => errorSnackbar(e.message),
+    }
+  );
 
   const handleDelete = async (id?: number) => {
     const confirmed = await isConfirmed({
@@ -60,62 +66,58 @@ function Signature() {
     }
   };
 
-  const columns = signatureColumns(setDialog, handleDelete);
+  const columns = affiliationColumns(setDialog);
 
   return (
-    <Stack justifyContent="space-between">
+    <>
       <Paper variant="outlined">
         <Stack spacing={3}>
-          <Typography variant="sectiontitle2">署名の管理</Typography>
-          <Stack
-            spacing={1}
-            direction="row"
-            sx={{
-              "& button": {
-                borderRadius: 6,
-                maxWidth: "fit-content",
-                wordBreak: "keep-all",
-              },
-            }}
-          >
+          <Typography variant="sectiontitle2">所属の管理</Typography>
+          <Stack spacing={1} direction="row">
             <Button
               variant="contained"
               color="secondary"
+              sx={{ width: "fit-content", borderRadius: 6 }}
               onClick={() => handleDelete()}
               disabled={Object.keys(selector.selected).length === 0}
             >
               削除
             </Button>
-            <Button variant="contained" onClick={() => setDialog("add")}>
-              新規追加
+            <Button
+              variant="contained"
+              sx={{ width: "fit-content", borderRadius: 6 }}
+              onClick={() => setDialog("add")}
+            >
+              追加
             </Button>
           </Stack>
           <MyTable
-            columns={columns}
             loading={fetchingData || deleteMutation.isLoading}
             state={tableData}
+            columns={columns}
             selector={selector}
           />
         </Stack>
-        <SignatureAddEdit
-          state={dialog}
-          closeFn={() => setDialog(null)}
-          resolverFn={() =>
-            queryClient.invalidateQueries([
-              "signatures",
-              pagination,
-              sorter.sort,
-            ])
-          }
-        />
       </Paper>
-    </Stack>
+      <AffiliationAddEdit
+        state={dialog}
+        closeFn={() => setDialog(null)}
+        resolverFn={() => {
+          queryClient.invalidateQueries([
+            "affiliations-table",
+            pagination,
+            sorter.sort,
+          ]);
+          queryClient.invalidateQueries(["affiliations-option"]);
+        }}
+      />
+    </>
   );
 }
 
-export default Signature;
+export default AffiliationTable;
 
-const getTableData = ({
+const getData = ({
   sort,
   setSort,
   pagination,
@@ -127,13 +129,13 @@ const getTableData = ({
   setPagination: OnChangeFn<PaginationState>;
 }) => {
   const { data, isFetching } = useQuery(
-    ["signatures", pagination, sort],
+    ["affiliations-table", pagination, sort],
     async () => {
       const sortKey = sort[0]?.id ?? "id";
       const orderDir = sort[0] ? (sort[0].desc ? "desc" : "asc") : "asc";
 
       const res = await get(
-        `/api/signature?page=${pagination.pageIndex + 1}&per_page=${
+        `/api/affiliation?page=${pagination.pageIndex + 1}&per_page=${
           pagination.pageSize
         }&sort=${sortKey}&order=${orderDir}`
       );
@@ -143,7 +145,7 @@ const getTableData = ({
         paginator: setPagination,
         data: res.data.data,
         meta: res.data.meta,
-      } as TableStateProps<SignatureFormAttributeWithId>;
+      } as TableStateProps<AffiliationFormAttributeWithId>;
     },
     {
       staleTime: 5_000,

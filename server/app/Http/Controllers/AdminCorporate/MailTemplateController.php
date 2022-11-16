@@ -7,16 +7,27 @@ use App\Http\Requests\MailTemplateStoreUpdateRequest;
 use App\Models\MailTemplate;
 use App\Services\MailTemplateService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class MailTemplateController extends Controller
 {
-    public function index(MailTemplateService $service)
+    public function index(Request $request, MailTemplateService $service)
     {
-        return $service->list();
+        Gate::authorize('check-membership', [['admin', 'corporate']]);
+
+        $valid = $request->validate([
+            'order' => 'string|in:asc,desc',
+            'per_page' => 'numeric',
+            'sort' => 'string|in:id,title,content,priority,signature_id'
+        ]);
+
+        return $service->index($valid);
     }
     
     public function store(MailTemplateStoreUpdateRequest $request, MailTemplateService $service)
     {
+        Gate::authorize('check-membership', [['admin', 'corporate']]);
+
         $service->store($request);
 
         return response()->json([
@@ -26,6 +37,8 @@ class MailTemplateController extends Controller
     
     public function update(MailTemplateStoreUpdateRequest $request, MailTemplate $mail_template, MailTemplateService $service)
     {
+        Gate::authorize('check-membership', [['admin', 'corporate']]);
+
         $service->update($request, $mail_template);
 
         return response()->json([
@@ -35,6 +48,8 @@ class MailTemplateController extends Controller
     
     public function massDelete(string $ids, MailTemplateService $service)
     {
+        Gate::authorize('check-membership', [['admin', 'corporate']]);
+
         $deleted_count = $service->deleteIds($ids);
 
         return response()->json([
@@ -44,6 +59,8 @@ class MailTemplateController extends Controller
     
     public function massUpdate(Request $request, MailTemplateService $service)
     {
+        Gate::authorize('check-membership', [['admin', 'corporate']]);
+
         $count = $service->updatePriorities($request);
 
         return response()->json([

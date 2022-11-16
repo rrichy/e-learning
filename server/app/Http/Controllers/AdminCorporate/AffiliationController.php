@@ -11,22 +11,31 @@ use Illuminate\Validation\Rule;
 
 class AffiliationController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    public function index(Request $request)
     {
-        $order = request()->input('order', 'asc');
-        $per_page = request()->input('per_page', '10');
-        $sort = request()->input('sort', 'id');
+        Gate::authorize('check-membership', [['admin', 'corporate']]);
+
+        $pagination = $request->validate([
+            'order' => 'string|in:asc,desc',
+            'per_page' => 'numeric',
+            'sort' => 'string|in:id,name,from_name,from_email,content,priority'
+        ]);
+        
+        // $order = request()->input('order', 'asc');
+        // $per_page = request()->input('per_page', '10');
+        // $sort = request()->input('sort', 'id');
 
         return AffiliationResource::collection(
-            Affiliation::orderBy($sort, $order)
+            Affiliation::orderBy($pagination['sort'] ?? 'id', $pagination['order' ?? 'asc'])
                 ->when(auth()->user()->isCorporate(), fn ($q) => $q->where('id', auth()->user()->affiliation_id))
-                ->paginate($per_page)
-        )->additional(['message' => 'Affiliations successfully fetched!']);
+                ->paginate($pagination['per_page'] ?? 10)
+        )->additional([
+            'message' => 'Affiliations successfully fetched!',
+            'meta' => [
+                'sort' => $pagination['sort'] ?? 'id',
+                'order' => $pagination['order'] ?? 'desc',
+            ],
+        ]);
     }
 
     /**
@@ -37,6 +46,8 @@ class AffiliationController extends Controller
      */
     public function store(Request $request)
     {
+        Gate::authorize('check-membership', [['corporate']]);
+
         $valid = $request->validate([
             'name' => 'required|string|unique:affiliations,name',
             'priority' => 'required|numeric|min:1|unique:affiliations,priority',
@@ -58,6 +69,8 @@ class AffiliationController extends Controller
      */
     public function update(Request $request, Affiliation $affiliation)
     {
+        Gate::authorize('check-membership', [['corporate']]);
+
         $valid = $request->validate([
             'name' => 'required|string|unique:affiliations,name,' . $affiliation->id,
             'priority' => 'required|numeric|min:1|unique:affiliations,priority,' . $affiliation->id,
@@ -78,6 +91,8 @@ class AffiliationController extends Controller
      */
     public function destroy(string $affiliation)
     {
+        Gate::authorize('check-membership', [['corporate']]);
+
         $ids = explode(",", $affiliation);
         $deleted_count = \App\Models\Affiliation::destroy($ids);
 

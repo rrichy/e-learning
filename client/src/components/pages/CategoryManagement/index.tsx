@@ -1,21 +1,105 @@
 import { Paper, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
 import Button from "@/components/atoms/Button";
-import Table from "@/components/atoms/Table";
 import CategoryAddEdit from "./CategoryAddEdit";
-import useCategory from "@/hooks/pages/useCategory";
+import { categoryColumns } from "@/columns";
+import { useMemo, useState } from "react";
+import { CategoryFormAttribute } from "@/validations/CategoryFormValidation";
+import { PageDialogProps, TableStateProps } from "@/interfaces/CommonInterface";
+import {
+  ExpandedState,
+  OnChangeFn,
+  PaginationState,
+  SortingState,
+} from "@tanstack/react-table";
+import { useMyTable } from "@/hooks/useMyTable";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import useConfirm from "@/hooks/useConfirm";
+import useAlerter from "@/hooks/useAlerter";
+import { get } from "@/services/ApiService";
+import { destroyCategory, duplicateCategory } from "@/services/CategoryService";
+import MyTable from "@/components/atoms/MyTable";
 
 function CategoryManagement() {
-  const {
-    handleDelete,
-    categorySelected,
-    setCategoryDialog,
-    columns,
-    categoriesState,
-    fetchCategories,
-    setCategorySelected,
-    categoryDialog,
-  } = useCategory();
+  const queryClient = useQueryClient();
+  const { isConfirmed } = useConfirm();
+  const { successSnackbar, errorSnackbar } = useAlerter();
+  const [dialog, setDialog] =
+    useState<PageDialogProps<CategoryFormAttribute>>(null);
+  const [expanded, setExpanded] = useState<ExpandedState>({});
+  const { sorter, selector, pagination, setPagination } = useMyTable();
+  const { tableData, fetchingData } = getData({
+    sort: sorter.sort,
+    setSort: sorter.setSort,
+    pagination,
+    setPagination,
+  });
+
+  const resolver = {
+    onSuccess: (res: any) => {
+      successSnackbar(res.data.message);
+      selector.setSelected({});
+      queryClient.invalidateQueries([
+        "categories-table",
+        pagination,
+        sorter.sort,
+      ]);
+    },
+    onError: (e: any) => errorSnackbar(e.message),
+  };
+
+  const deleteMutation = useMutation(
+    (ids: number[]) => destroyCategory(ids),
+    resolver
+  );
+
+  const copyMutation = useMutation(
+    (id: number) => duplicateCategory(id),
+    resolver
+  );
+
+  const lookup = useMemo(() => {
+    if (!fetchingData && tableData) {
+      return tableData.data.reduce(
+        (acc: { [k: number]: CategoryFormAttribute }, category) => ({
+          ...acc,
+          [category.id!]: category,
+        }),
+        {}
+      );
+    }
+    return {} as { [k: number]: CategoryFormAttribute };
+  }, [fetchingData, tableData]);
+
+  const handleDelete = async () => {
+    const confirmed = await isConfirmed({
+      title: "sure",
+      content: "sure",
+    });
+
+    if (confirmed) {
+      const indexes = Object.keys(selector.selected).map((a) =>
+        a.split(".").map(Number)
+      );
+      const ids = indexes.map(([parentIndex, childIndex]) => {
+        const parent: CategoryFormAttribute = (tableData?.data ?? [])[
+          parentIndex
+        ];
+        if (childIndex >= 0) return parent.child_categories[childIndex].id!;
+
+        return parent.id!;
+      });
+
+      deleteMutation.mutate(ids);
+    }
+  };
+
+  const handleDuplicate = async (category: CategoryFormAttribute) => {
+    copyMutation.mutate(category.id!);
+  };
+
+  const columns = categoryColumns(setDialog, handleDuplicate, lookup);
+
   return (
     <Stack justifyContent="space-between">
       <Paper variant="outlined">
@@ -36,40 +120,32 @@ function CategoryManagement() {
               variant="contained"
               color="secondary"
               onClick={handleDelete}
-              disabled={categorySelected.length === 0}
+              disabled={Object.keys(selector.selected).length === 0}
             >
               削除
             </Button>
-            <Button
-              variant="contained"
-              onClick={() => setCategoryDialog("add")}
-            >
+            <Button variant="contained" onClick={() => setDialog("add")}>
               追加
             </Button>
           </Stack>
-          <Table
-            columns={columns}
-            state={categoriesState}
-            fetchData={fetchCategories}
-            onSelectionChange={(rows) => setCategorySelected(rows)}
-            parentChildData={(row, rows) =>
-              rows.find((a) => a.id === row.parent_id)
+          <MyTable
+            state={tableData}
+            loading={
+              fetchingData || deleteMutation.isLoading || copyMutation.isLoading
             }
-            options={{
-              selection: true,
-              actionsColumnIndex: -1,
-            }}
+            columns={columns}
+            selector={selector}
+            expander={{ expanded, setExpanded, subRowKey: "child_categories" }}
           />
           <CategoryAddEdit
-            state={categoryDialog}
-            closeFn={() => setCategoryDialog(null)}
+            state={dialog}
+            closeFn={() => setDialog(null)}
             resolverFn={() =>
-              fetchCategories(
-                categoriesState.page,
-                categoriesState.per_page,
-                categoriesState.sort,
-                categoriesState.order
-              )
+              queryClient.invalidateQueries([
+                "categories-table",
+                pagination,
+                sorter.sort,
+              ])
             }
           />
         </Stack>
@@ -79,3 +155,43 @@ function CategoryManagement() {
 }
 
 export default CategoryManagement;
+
+const getData = ({
+  sort,
+  setSort,
+  pagination,
+  setPagination,
+}: {
+  sort: SortingState;
+  setSort: OnChangeFn<SortingState>;
+  pagination: PaginationState;
+  setPagination: OnChangeFn<PaginationState>;
+}) => {
+  const { data, isFetching } = useQuery(
+    ["categories-table", pagination, sort],
+    async () => {
+      const sortKey = sort[0]?.id ?? "id";
+      const orderDir = sort[0] ? (sort[0].desc ? "desc" : "asc") : "desc";
+
+      const res = await get(
+        `/api/category?page=${pagination.pageIndex + 1}&per_page=${
+          pagination.pageSize
+        }&sort=${sortKey}&order=${orderDir}`
+      );
+
+      return {
+        sorter: setSort,
+        paginator: setPagination,
+        data: res.data.data,
+        meta: res.data.meta,
+      } as TableStateProps<CategoryFormAttribute>;
+    },
+    {
+      staleTime: 5_000,
+      keepPreviousData: true,
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  return { tableData: data, fetchingData: isFetching };
+};

@@ -26,14 +26,9 @@ use Illuminate\Validation\Rule;
 
 class CourseService
 {
-    public function list()
+    public function index(string $status, User $user)
     {
-        $auth = auth()->user();
-        $status = request()->input('status');
-
-        abort_if($status === null, 400, "No status parameter");
-
-        if ($auth->isIndividual()) {
+        if ($user->isIndividual()) {
             return CourseListResource::collection(
                 Category::whereHas('courses', fn ($q) => $q->isPublic())
                     ->with(
@@ -47,9 +42,9 @@ class CourseService
                 Category::with(['courses' => function ($q) {
                     $q->orderBy('priority', 'asc');
                 }])->when(
-                    $auth->isCorporate(),
-                    function ($q) use ($auth) {
-                        $q->where('affiliation_id', $auth->affiliation_id);
+                    $user->isCorporate(),
+                    function ($q) use ($user) {
+                        $q->where('affiliation_id', $user->affiliation_id);
                     }
                 )->orderBy('priority', 'asc')
                     ->get()
@@ -60,9 +55,9 @@ class CourseService
             Category::with(['courses' => function ($q) use ($status) {
                 $q->where('status', Course::STATUS[$status] ?? Course::STATUS['public']);
             }])->when(
-                $auth->isCorporate(),
-                function ($q) use ($auth) {
-                    $q->where('affiliation_id', $auth->affiliation_id);
+                $user->isCorporate(),
+                function ($q) use ($user) {
+                    $q->where('affiliation_id', $user->affiliation_id);
                 }
             )->get()
         );
@@ -184,7 +179,7 @@ class CourseService
     public function updatePriorities(Request $request)
     {
         $auth = auth()->user();
-        $course_ids = array_map(fn ($q) => $q['id'], $request->payload);
+        $course_ids = array_map(fn ($q) => $q['category_id'], $request->payload);
 
         $rules = [
             'payload' => 'array',

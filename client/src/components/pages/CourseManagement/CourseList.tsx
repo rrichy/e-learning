@@ -1,96 +1,109 @@
 import Button from "@/components/atoms/Button";
-import { TextField } from "@/components/atoms/HookForms";
-import Table from "@/components/atoms/Table";
+import MyTable from "@/components/atoms/MyTable";
 import useAlerter from "@/hooks/useAlerter";
 import useConfirm from "@/hooks/useConfirm";
-import { initPaginatedData, OrderType } from "@/interfaces/CommonInterface";
+import { TableStateProps } from "@/interfaces/CommonInterface";
 import { CourseIndexItemInterface } from "@/interfaces/CourseIndexItemInterface";
 import {
   indexCourse,
   massDestroyCourse,
   massUpdateCoursePriority,
 } from "@/services/CourseService";
-import { TABLE_ROWS_PER_PAGE } from "@/settings/appconfig";
+import { Close } from "@mui/icons-material";
 import {
-  CheckBox,
-  CheckBoxOutlineBlank,
-  CheckBoxOutlined,
-  Close,
-} from "@mui/icons-material";
-import {
-  Checkbox,
   Dialog,
   DialogContent,
   DialogTitle,
   IconButton,
-  Paper,
   Stack,
+  TextField as MuiTextField,
   Typography,
 } from "@mui/material";
-import { Column } from "material-table";
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import { FormContainer } from "react-hook-form-mui";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  ColumnDef,
+  createColumnHelper,
+  RowSelectionState,
+} from "@tanstack/react-table";
+import { useEffect, useState } from "react";
+
+const columnHelper = createColumnHelper<CourseIndexItemInterface>();
 
 interface CourseListProps {
   open: boolean;
   onClose: () => void;
-  // resolveFn: () => void;
 }
 
 function CourseList({ open, onClose }: CourseListProps) {
-  const mounted = useRef(true);
-  const [state, setState] = useState(
-    initPaginatedData<CourseIndexItemInterface>()
-  );
-  const [stateSelected, setStateSelected] = useState<number[]>([]);
-  const [snapshot, setSnapshot] = useState<number[]>([]);
-  // keyby category_id with value of {priority and id (course)}[]
-  const [changes, setChanges] = useState(
-    new Map<number, { priority: number; id: number }[]>()
-  );
-  const { errorSnackbar, successSnackbar } = useAlerter();
-  const { isConfirmed } = useConfirm();
+  const queryClient = useQueryClient();
+  const { data, isFetching } = useQuery(
+    ["courses-list"],
+    async () => {
+      const res = await indexCourse("both");
 
-  const fetchData = useCallback(
-    async (
-      page: number = 1,
-      pageSize: number = TABLE_ROWS_PER_PAGE[0],
-      sort: keyof CourseIndexItemInterface = "category_id",
-      order: OrderType = "desc"
-    ) => {
-      setChanges(new Map());
-      setStateSelected([]);
+      const { data } = res.data;
 
-      try {
-        setState((s) => ({
-          ...s,
-          loading: true,
-        }));
-
-        const res = await indexCourse("both");
-
-        const { data } = res.data;
-        const parsed = data.reduce(
+      return {
+        data: data.reduce(
           (acc: CourseIndexItemInterface[], b: CourseIndexItemInterface[]) =>
             acc.concat(b),
           []
-        );
-        if (mounted.current) {
-          setState((s) => ({
-            ...s,
-            loading: false,
-            data: parsed,
-          }));
-          setSnapshot(
-            parsed.map((a: CourseIndexItemInterface) => a.course_priority)
-          );
-        }
-      } catch (e: any) {
-        errorSnackbar(e.message);
-      }
+        ),
+        meta: res.data.meta,
+      } as TableStateProps<CourseIndexItemInterface>;
     },
-    []
+    {
+      staleTime: 10_000,
+      refetchOnWindowFocus: false,
+      enabled: open,
+      keepPreviousData: true,
+    }
+  );
+  const [errors, setErrors] = useState<number[]>([]);
+  const [selected, setSelected] = useState<RowSelectionState>({});
+  const [updated, setUpdated] = useState<{
+    [k: number]: { category_id: number; id: number; priority: number };
+  }>({});
+  const { errorSnackbar, successSnackbar } = useAlerter();
+  const { isConfirmed } = useConfirm();
+
+  const onSuccess = (res: any) => {
+    successSnackbar(res.data.message);
+    setUpdated({});
+    setSelected({});
+    setErrors([]);
+    queryClient.invalidateQueries(["courses-list"]);
+  };
+
+  const deleteMutation = useMutation(
+    (ids: number[]) => massDestroyCourse(ids),
+    {
+      onSuccess,
+      onError: (e: any) => errorSnackbar(e.message),
+    }
+  );
+
+  const updateMutation = useMutation(
+    (
+      payload: {
+        category_id: number;
+        changes: { id: number; priority: number }[];
+      }[]
+    ) => massUpdateCoursePriority(payload),
+    {
+      onSuccess,
+      onError: (e: any, payload) => {
+        errorSnackbar(e.message);
+        const pointers = Object.keys(e.response.data.errors).map((a) =>
+          a.match(/\d+/g)!.map(Number)
+        );
+        setErrors(
+          pointers.map(
+            ([catIndex, couIndex]) => payload[catIndex].changes[couIndex].id
+          )
+        );
+      },
+    }
   );
 
   const handleUpdate = async () => {
@@ -100,29 +113,37 @@ function CourseList({ open, onClose }: CourseListProps) {
     });
 
     if (confirmed) {
-      try {
-        setState((s) => ({ ...s, loading: true }));
+      const parsed: {
+        category_id: number;
+        changes: {
+          id: number;
+          priority: number;
+        }[];
+      }[] = [];
 
-        const parsed: {
-          category_id: number;
-          changes: {
-            id: number;
-            priority: number;
-          }[];
-        }[] = [];
-        changes.forEach((courses, category_id) =>
-          parsed.push({ category_id, changes: courses })
-        );
+      let parsedIndex: number | null = null;
+      Object.values(updated).forEach((update) => {
+        if (
+          parsedIndex === null ||
+          update.category_id !== parsed[parsedIndex].category_id
+        ) {
+          parsed.push({
+            category_id: update.category_id,
+            changes: [{ id: update.id, priority: update.priority }],
+          });
+        } else {
+          parsed[parsedIndex].changes.push({
+            id: update.id,
+            priority: update.priority,
+          });
+        }
 
-        const res = await massUpdateCoursePriority(parsed);
-        successSnackbar(res.data.message);
-        fetchData();
-      } catch (e: any) {
-        errorSnackbar(e.message);
-      } finally {
-        setState((s) => ({ ...s, loading: false }));
-        setStateSelected([]);
-      }
+        if (parsedIndex === null) parsedIndex = 0;
+        if (update.category_id !== parsed[parsedIndex].category_id)
+          parsedIndex++;
+      });
+
+      updateMutation.mutate(parsed);
     }
   };
 
@@ -133,76 +154,111 @@ function CourseList({ open, onClose }: CourseListProps) {
     });
 
     if (confirmed) {
-      try {
-        setState((s) => ({ ...s, loading: true }));
-        const res = await massDestroyCourse(stateSelected);
-        successSnackbar(res.data.message);
-        fetchData();
-      } catch (e: any) {
-        errorSnackbar(e.message);
-      } finally {
-        setState((s) => ({ ...s, loading: false }));
-        setStateSelected([]);
-      }
+      const course_ids = Object.keys(selected).map(
+        (index) => data!.data[+index].course_id!
+      );
+      deleteMutation.mutate(course_ids);
     }
   };
 
-  const columns: Column<CourseIndexItemInterface>[] = [
-    {
-      field: "category_priority",
-      title: "並び順",
-      editable: "never",
-    },
-    {
-      field: "category_name",
-      title: "カテゴリー名",
-      editable: "never",
-      cellStyle: { textAlign: "left" },
-      width: "20%",
-    },
-    {
-      field: "course_title",
-      title: "コース名",
-      editable: "never",
-      cellStyle: { textAlign: "left" },
-      width: "30%",
-    },
-    {
-      field: "course_priority",
-      title: "並び順",
-      type: "numeric",
-      cellStyle: (_d, row) => ({
-        color: changes.get(row.category_id)?.find((a) => a.id === row.course_id)
-          ? "#00b4aa"
-          : "inherit",
-        textAlign: "center",
-      }),
-      align: "center",
-      render: (row) =>
-        row.course_id
-          ? changes.get(row.category_id)?.find((a) => a.id === row.course_id)
-              ?.priority ?? row.course_priority
-          : null,
-      initialEditValue: 234,
-    },
-    {
-      field: "course_status",
-      title: "ステータス",
-      editable: "never",
-      render: (row) => (row.course_status === 1 ? "非公開" : "公開"),
-    },
-    { field: "course_size", title: "利用容量", editable: "never", render: () => "???" },
+  const tableColumns: ColumnDef<CourseIndexItemInterface, any>[] = [
+    columnHelper.accessor("category_priority", {
+      header: () => "並び順",
+      cell: ({ getValue }) => (
+        <div style={{ textAlign: "center" }}>{getValue()}</div>
+      ),
+      enableSorting: false,
+      size: 80,
+    }),
+    columnHelper.accessor("category_name", {
+      header: () => "カテゴリー名",
+      cell: ({ getValue }) => (
+        <div style={{ textAlign: "center" }}>{getValue()}</div>
+      ),
+      enableSorting: false,
+    }),
+    columnHelper.accessor("course_title", {
+      header: () => "コース名",
+      cell: ({ getValue }) => (
+        <div style={{ textAlign: "center" }}>{getValue()}</div>
+      ),
+      enableSorting: false,
+    }),
+    columnHelper.accessor("course_priority", {
+      header: () => "並び順",
+      cell: ({ row, getValue }) =>
+        row.original.course_id ? (
+          <MuiTextField
+            type="number"
+            value={updated[row.index]?.priority ?? getValue()}
+            size="small"
+            variant="standard"
+            onChange={(e) => {
+              setUpdated((old) => {
+                const temp = { ...old };
+                const item = { ...row.original };
+
+                if (+e.target.value === item.course_priority) {
+                  delete temp[row.index];
+                } else {
+                  item.course_priority = +e.target.value;
+                  temp[row.index] = {
+                    category_id: item.category_id,
+                    id: item.course_id!,
+                    priority: +e.target.value,
+                  };
+                }
+
+                return temp;
+              });
+              setErrors(
+                errors.filter(
+                  (course_id) => course_id !== row.original.course_id
+                )
+              );
+            }}
+            sx={{
+              "& input": {
+                textAlign: "center",
+                ...(updated[row.index] &&
+                updated[row.index].priority !== row.original.course_priority
+                  ? {
+                      color: "secondary.main",
+                      fontWeight: "bold",
+                    }
+                  : {}),
+              },
+            }}
+            error={errors.includes(row.original.course_id)}
+          />
+        ) : null,
+      enableSorting: false,
+      size: 80,
+    }),
+    columnHelper.accessor("course_status", {
+      header: () => "ステータス",
+      cell: ({ row }) => (
+        <div style={{ textAlign: "center" }}>
+          {row.original.course_status === 1 ? "非公開" : "公開"}
+        </div>
+      ),
+      enableSorting: false,
+      size: 110,
+    }),
+    columnHelper.accessor("course_size", {
+      header: () => "利用容量",
+      cell: () => <div style={{ textAlign: "center" }}>???</div>,
+      enableSorting: false,
+      size: 100,
+    }),
   ];
 
   useEffect(() => {
-    mounted.current = true;
-    if (open) {
-      fetchData();
+    if (!open) {
+      setUpdated({});
+      setSelected({});
+      setErrors([]);
     }
-
-    return () => {
-      mounted.current = false;
-    };
   }, [open]);
 
   return (
@@ -225,80 +281,18 @@ function CourseList({ open, onClose }: CourseListProps) {
         <Typography variant="sectiontitle1">コース状況</Typography>
       </DialogTitle>
       <DialogContent>
-        <Table
-          columns={columns}
-          state={state}
-          fetchData={fetchData}
-          actions={[
-            (row) => ({
-              icon: stateSelected.includes(row.course_id)
-                ? CheckBox
-                : CheckBoxOutlineBlank,
-              onClick: (_e, rowData) => {
-                if (stateSelected.includes(rowData.course_id))
-                  setStateSelected(
-                    stateSelected.filter((a) => a !== rowData.course_id)
-                  );
-                else setStateSelected([...stateSelected, rowData.course_id]);
-              },
-              hidden: row.course_id === null,
-            }),
-          ]}
-          localization={{
-            header: {
-              actions: "削除",
-            },
-          }}
-          options={{
-            actionsColumnIndex: 5,
-            paging: false,
-            sorting: false,
-            rowStyle: {
-              position: "relative",
-            },
-          }}
-          cellEditable={{
-            cellStyle: {
-              backgroundColor: "white",
-              zIndex: 10,
-              position: "absolute",
-              minWidth: "200px",
-              top: "50%",
-              transform: "translateY(-50%)",
-            },
-            onCellEditApproved: (newValue, _old, row) =>
-              new Promise((resolve, reject) => {
-                const temp = [...state.data];
-                const index = temp.findIndex(
-                  (a) => a.course_id === row.course_id
-                );
-                temp[index]!.course_priority = +newValue;
-
-                const touches = new Map(changes);
-                const cat_clone = touches.get(row.category_id) || [];
-                if (snapshot[index] === +newValue) {
-                  const filtered = cat_clone.filter(
-                    (a) => a.id !== +row.course_id
-                  );
-                  if (filtered.length > 0)
-                    touches.set(row.category_id, filtered);
-                  else touches.delete(row.category_id);
-                } else {
-                  const obj = cat_clone.find((a) => a.id === +row.course_id);
-                  if (obj) {
-                    obj.priority = +newValue;
-                  } else {
-                    cat_clone.push({ id: +row.course_id, priority: +newValue });
-                  }
-                  touches.set(row.category_id, cat_clone);
-                }
-
-                setChanges(touches);
-                setState({ ...state, data: temp });
-                resolve();
-              }),
+        <MyTable
+          state={data}
+          columns={tableColumns}
+          loading={isFetching || deleteMutation.isLoading}
+          selector={{
+            selected,
+            setSelected,
+            index: -2,
+            selectCondition: (row) => Boolean(row.original.course_id),
           }}
         />
+
         <Stack direction="row" spacing={1} justifyContent="center" pt={2}>
           <Button
             large
@@ -306,7 +300,7 @@ function CourseList({ open, onClose }: CourseListProps) {
             color="inherit"
             variant="outlined"
             onClick={handleUpdate}
-            disabled={changes.size === 0}
+            disabled={Object.keys(updated).length === 0}
           >
             アップデート
           </Button>
@@ -315,7 +309,7 @@ function CourseList({ open, onClose }: CourseListProps) {
             rounded
             color="secondary"
             variant="contained"
-            disabled={stateSelected.length === 0}
+            disabled={Object.keys(selected).length === 0}
             onClick={handleDelete}
           >
             削除する

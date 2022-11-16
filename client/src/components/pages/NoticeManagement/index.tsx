@@ -1,13 +1,80 @@
 import { Paper, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
 import Button from "@/components/atoms/Button";
-import Table from "@/components/atoms/Table";
-import noticeColumns from "@/columns/noticeColumns";
-import useNotice from "@/hooks/pages/useNotice";
+import MyTable from "@/components/atoms/MyTable";
+import useConfirm from "@/hooks/useConfirm";
+import useAlerter from "@/hooks/useAlerter";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMyTable } from "@/hooks/useMyTable";
+import { TableStateProps } from "@/interfaces/CommonInterface";
+import { destroyNotice } from "@/services/NoticeService";
+import { get } from "@/services/ApiService";
+import { noticeColumns } from "@/columns";
+import { NoticeTableRowAttribute } from "@/columns/rowTypes";
 
 function NoticeManagement() {
-  const { handleDelete, stateSelected, state, fetchData, setStateSelected } =
-    useNotice();
+  const { isConfirmed } = useConfirm();
+  const { successSnackbar, errorSnackbar } = useAlerter();
+  const { selector, pagination, setPagination, sorter } = useMyTable();
+  const queryClient = useQueryClient();
+  const { data, isFetching } = useQuery(
+    ["notices-management", pagination, sorter.sort],
+    async () => {
+      const sort = sorter.sort;
+      const sortKey = sort[0]?.id ?? "id";
+      const orderDir = sort[0] ? (sort[0].desc ? "desc" : "asc") : "asc";
+
+      const res = await get(
+        `/api/notice?page=${pagination.pageIndex + 1}&per_page=${
+          pagination.pageSize
+        }&sort=${sortKey}&order=${orderDir}`
+      );
+
+      return {
+        sorter: sorter.setSort,
+        paginator: setPagination,
+        data: res.data.data,
+        meta: res.data.meta,
+      } as TableStateProps<NoticeTableRowAttribute>;
+    },
+    {
+      staleTime: 5_000,
+      keepPreviousData: true,
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  const deleteMutation = useMutation((ids: number[]) => destroyNotice(ids), {
+    onSuccess: (res: any) => {
+      successSnackbar(res.data.message);
+      selector.setSelected({});
+      queryClient.invalidateQueries([
+        "notices-management",
+        pagination,
+        sorter.sort,
+      ]);
+    },
+    onError: (e: any) => errorSnackbar(e.message),
+  });
+
+  const handleDelete = async (id?: number) => {
+    const confirmed = await isConfirmed({
+      title: "delete?",
+      content: "delete?",
+    });
+
+    if (confirmed) {
+      if (id) deleteMutation.mutate([id]);
+      else {
+        const notice_ids = Object.keys(selector.selected).map(
+          (a) => data!.data[+a].id
+        );
+        deleteMutation.mutate(notice_ids);
+      }
+    }
+  };
+
+  const columns = noticeColumns(handleDelete);
 
   return (
     <Stack justifyContent="space-between">
@@ -19,7 +86,7 @@ function NoticeManagement() {
               variant="contained"
               color="secondary"
               onClick={() => handleDelete()}
-              disabled={stateSelected.length === 0}
+              disabled={Object.keys(selector.selected).length === 0}
               fit
               rounded
             >
@@ -34,15 +101,11 @@ function NoticeManagement() {
               追加
             </Button>
           </Stack>
-          <Table
-            columns={noticeColumns(handleDelete)}
-            state={state}
-            fetchData={fetchData}
-            onSelectionChange={(rows) => setStateSelected(rows)}
-            options={{
-              selection: true,
-              sorting: false,
-            }}
+          <MyTable
+            columns={columns}
+            selector={selector}
+            state={data}
+            loading={isFetching}
           />
         </Stack>
       </Paper>

@@ -25,8 +25,16 @@ export interface DepartmentFormAttribute {
   }[];
 }
 
-export type DepartmentFormAttributeWithId = DepartmentFormAttribute & {
+export type DepartmentFormAttributeWithId = Omit<
+  DepartmentFormAttribute,
+  "child_departments"
+> & {
   id: number;
+  child_departments: {
+    id: number;
+    name: string;
+    priority: number;
+  }[];
 };
 
 export const departmentFormInit: DepartmentFormAttribute = {

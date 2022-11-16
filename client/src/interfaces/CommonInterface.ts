@@ -1,4 +1,6 @@
 import { TABLE_ROWS_PER_PAGE } from "@/settings/appconfig";
+import { PaginationState, SortingState } from "@tanstack/react-table";
+import React from "react";
 
 export interface OptionsAttribute {
   [k: string]: OptionAttribute[];
@@ -85,3 +87,21 @@ export const initReactQueryPagination = <
     total: 0,
   },
 });
+
+export interface TableStateProps<T> {
+  data: T[];
+  meta: PaginationFilterInterface;
+  message?: string;
+  paginator?: React.Dispatch<React.SetStateAction<PaginationState>>;
+  sorter?: React.Dispatch<React.SetStateAction<SortingState>>;
+}
+
+export const initTableState: TableStateProps<any> = {
+  data: [],
+  meta: {
+    current_page: 1,
+    last_page: 1,
+    per_page: TABLE_ROWS_PER_PAGE[0],
+    total: 0,
+  },
+};

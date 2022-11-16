@@ -6,21 +6,35 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\SignatureIndexResource;
 use App\Models\Signature;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
+// TODO: TRANSFER ALL LOGIC INTO A SERVICE CLASS
 class SignatureController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    public function index(Request $request)
     {
-        $order = request()->input('order', 'asc');
-        $per_page = request()->input('per_page', '10');
-        $sort = request()->input('sort', 'id');
+        Gate::authorize('check-membership', [['admin']]);
 
-        return SignatureIndexResource::collection(Signature::orderBy($sort, $order)->paginate($per_page))->additional(['message' => 'Signatures successfully fetched!']);
+        $pagination = $request->validate([
+            'order' => 'string|in:asc,desc',
+            'per_page' => 'numeric',
+            'sort' => 'string|in:id,name,from_name,from_email,content,priority'
+        ]);
+
+        // $order = request()->input('order', 'asc');
+        // $per_page = request()->input('per_page', '10');
+        // $sort = request()->input('sort', 'id');
+
+        return SignatureIndexResource::collection(
+            Signature::orderBy($pagination['sort'] ?? 'id', $pagination['order'] ?? 'desc')
+                ->paginate($pagination['per_page'] ?? 10)
+            )->additional([
+            'message' => 'Signatures successfully fetched!',
+            'meta' => [
+                'sort' => $pagination['sort'] ?? 'id',
+                'order' => $pagination['order'] ?? 'desc',
+            ],
+        ]);
     }
 
     /**
@@ -31,6 +45,8 @@ class SignatureController extends Controller
      */
     public function store(Request $request)
     {
+        Gate::authorize('check-membership', [['admin']]);
+
         $valid = $request->validate([
             'name' => 'required|string',
             'from_email' => 'required|string|email',
@@ -55,6 +71,8 @@ class SignatureController extends Controller
      */
     public function update(Request $request, \App\Models\Signature $signature)
     {
+        Gate::authorize('check-membership', [['admin']]);
+
         $valid = $request->validate([
             'name' => 'required|string',
             'from_email' => 'required|string|email',
@@ -78,6 +96,8 @@ class SignatureController extends Controller
      */
     public function massDelete($ids)
     {
+        Gate::authorize('check-membership', [['admin']]);
+
         $ids = explode(",", $ids);
         $deleted_count = \App\Models\Signature::destroy($ids);
 

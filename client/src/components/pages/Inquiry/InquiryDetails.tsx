@@ -11,6 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 
 interface InquiryDetailsAttribute {
   id: number;
@@ -26,19 +27,31 @@ interface InquiryDetailsProps {
 }
 
 function InquiryDetails({ id, onClose }: InquiryDetailsProps) {
+  const [localId, setLocalId] = useState<number | null>(null);
   const { data, isFetching } = useQuery(
-    ["inquiry", id],
+    ["inquiry", localId],
     async () => {
-      const res = await get("/api/inquiry/" + id);
+      const res = await get("/api/inquiry/" + localId);
 
       return res.data.data as InquiryDetailsAttribute;
     },
     {
       staleTime: 10_000,
       refetchOnWindowFocus: false,
-      enabled: !!id,
+      enabled: !!localId,
     }
   );
+
+  const handleClose = () => {
+    onClose();
+    setTimeout(() => {
+      setLocalId(null);
+    }, 200);
+  };
+
+  useEffect(() => {
+    if (id) setLocalId(id);
+  }, [id]);
 
   return (
     <Dialog
@@ -48,7 +61,7 @@ function InquiryDetails({ id, onClose }: InquiryDetailsProps) {
       PaperProps={{ sx: { bgcolor: "#f7f7f7", position: "relative" } }}
     >
       <IconButton
-        onClick={onClose}
+        onClick={handleClose}
         color="primary"
         size="large"
         disableRipple

@@ -1,49 +1,40 @@
-import { Link, Paper, Stack, Typography } from "@mui/material";
+import { Paper, Stack, Typography } from "@mui/material";
 import { useState } from "react";
-import { Column } from "material-table";
-import Table from "@/components/atoms/Table";
-import {
-  initPaginationFilter,
-  initReactQueryPagination,
-  OrderType,
-  PaginationFilterInterface,
-  ReactQueryPaginationInterface,
-} from "@/interfaces/CommonInterface";
+import { TableStateProps } from "@/interfaces/CommonInterface";
 import { useQuery } from "@tanstack/react-query";
 import { get } from "@/services/ApiService";
-import { TABLE_ROWS_PER_PAGE } from "@/settings/appconfig";
-import { jpDate } from "@/mixins/jpFormatter";
+import MyTable from "@/components/atoms/MyTable";
 import InquiryDetails from "./InquiryDetails";
+import { InquiryRowAttribute } from "@/columns/rowTypes";
+import { inquiryColumns } from "@/columns";
+import { useMyTable } from "@/hooks/useMyTable";
 
-export type InquiryRowAttribute = {
-  id: number;
-  name: string;
-  email: string;
-  content: string;
-  created_at: string;
-};
+function Inquiries() {
+  const [detailId, setDetailId] = useState<number | null>(null);
+  const { sorter, pagination, setPagination } = useMyTable();
 
-const init = initReactQueryPagination<InquiryRowAttribute>();
-
-function getTableResults(
-  filters: PaginationFilterInterface & { [k: string]: any }
-) {
-  return useQuery(
-    ["inquiries", filters],
+  const { data, isFetching } = useQuery(
+    ["inquiries", pagination, sorter.sort],
     async () => {
-      const params = Object.entries(filters)
-        .reduce(
-          (acc: string[], [key, value]) =>
-            !value || ["last_page", "total"].includes(key)
-              ? acc
-              : [...acc, `${key === "current_page" ? "page" : key}=${value}`],
-          []
-        )
-        .join("&");
+      const sortKey = sorter.sort[0]?.id ?? "id";
+      const orderDir = sorter.sort[0]
+        ? sorter.sort[0].desc
+          ? "desc"
+          : "asc"
+        : "desc";
 
-      const res = await get("/api/inquiry?" + params);
+      const res = await get(
+        `/api/inquiry?page=${pagination.pageIndex + 1}&per_page=${
+          pagination.pageSize
+        }&sort=${sortKey}&order=${orderDir}`
+      );
 
-      return res.data as ReactQueryPaginationInterface<InquiryRowAttribute>;
+      return {
+        sorter: sorter.setSort,
+        paginator: setPagination,
+        data: res.data.data,
+        meta: res.data.meta,
+      } as TableStateProps<InquiryRowAttribute>;
     },
     {
       staleTime: 5_000,
@@ -51,75 +42,16 @@ function getTableResults(
       refetchOnWindowFocus: false,
     }
   );
-}
 
-function Inquiries() {
-  const [pagination, setPagination] = useState(initPaginationFilter);
-  const { data, isFetching } = getTableResults(pagination);
-  const [selectedRow, setSelectedRow] = useState<number | null>(
-    null
-  );
-
-  const updateFilter = (
-    page: number = 1,
-    pageSize: number = TABLE_ROWS_PER_PAGE[0],
-    sort: keyof InquiryRowAttribute = "id",
-    order: OrderType = "desc"
-  ) => {
-    setPagination({
-      ...pagination,
-      current_page: page,
-      per_page: pageSize,
-      sort,
-      order,
-    });
-  };
-
-  const columns: Column<InquiryRowAttribute>[] = [
-    {
-      field: "name",
-      title: "氏名",
-    },
-    {
-      field: "email",
-      title: "メールアドレス",
-    },
-    {
-      field: "content",
-      title: "内容",
-      render: (row) => (
-        <Link component="button" onClick={() => setSelectedRow(row.id)}>
-          {row.content}
-        </Link>
-      ),
-      cellStyle: {
-        maxWidth: "500px",
-        overflow: "hidden",
-        whiteSpace: "nowrap",
-      },
-    },
-    {
-      field: "created_at",
-      title: "created_at",
-      render: (row) => jpDate(row.created_at),
-    },
-  ];
+  const columns = inquiryColumns(setDetailId);
 
   return (
     <Stack justifyContent="space-between">
       <Paper variant="outlined">
         <Stack spacing={3}>
           <Typography variant="sectiontitle2">お問い合わせ</Typography>
-          <Table
-            columns={columns}
-            state={data || init}
-            fetchData={updateFilter}
-            isLoading={isFetching}
-          />
-          <InquiryDetails
-            id={selectedRow}
-            onClose={() => setSelectedRow(null)}
-          />
+          <MyTable state={data} columns={columns} loading={isFetching} />
+          <InquiryDetails id={detailId} onClose={() => setDetailId(null)} />
         </Stack>
       </Paper>
     </Stack>
