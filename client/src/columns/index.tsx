@@ -1,9 +1,11 @@
 import Link from "@/components/atoms/Link";
 import { jpDate } from "@/mixins/jpFormatter";
 import { AffiliationFormAttributeWithId } from "@/validations/AffiliationFormValidation";
+import { DepartmentFormAttributeWithId } from "@/validations/DepartmentFormValidation";
 import { SignatureFormAttributeWithId } from "@/validations/SignatureFormValidation";
 import {
   ArticleOutlined,
+  ChevronRight,
   Delete,
   MarkunreadOutlined,
 } from "@mui/icons-material";
@@ -98,24 +100,24 @@ export function inquiryColumns(handleClick: (id: number) => void) {
     }),
     inquiryHelper.accessor("content", {
       header: () => "内容",
-      cell: (row) => (
+      cell: ({ row, getValue }) => (
         <MuiLink
           component="button"
-          onClick={() => handleClick(row.row.original.id)}
+          onClick={() => handleClick(row.original.id)}
           textOverflow="ellipsis"
           width={1}
           whiteSpace="nowrap"
           overflow="hidden"
         >
-          {row.getValue()}
+          {getValue()}
         </MuiLink>
       ),
       minSize: 320,
     }),
     inquiryHelper.accessor("created_at", {
       header: () => "created_at",
-      cell: (row) => (
-        <div style={{ textAlign: "center" }}>{jpDate(row.getValue())}</div>
+      cell: ({ getValue }) => (
+        <div style={{ textAlign: "center" }}>{jpDate(getValue())}</div>
       ),
       size: 150,
     }),
@@ -133,13 +135,13 @@ export function organizedMailColumns(
   const columns: ColumnDef<MailRowAttribute, any>[] = [
     organizedMailHelper.accessor("title", {
       header: () => "タイトル",
-      cell: (row) => (
+      cell: ({ row, getValue }) => (
         <MuiLink
           component="button"
-          onClick={() => handleClick(row.row.original)}
+          onClick={() => handleClick(row.original)}
           sx={{ textAlign: "center", width: 1 }}
         >
-          {row.getValue()}
+          {getValue()}
         </MuiLink>
       ),
       enableSorting: false,
@@ -150,14 +152,14 @@ export function organizedMailColumns(
     }),
     organizedMailHelper.accessor("priority", {
       header: () => "並び順",
-      cell: (row) => (
+      cell: ({ row, getValue }) => (
         <div
           style={{
             textAlign: "center",
-            color: row.row.original.reordered ? "red" : "unset",
+            color: row.original.reordered ? "red" : "unset",
           }}
         >
-          {row.getValue()}
+          {getValue()}
         </div>
       ),
       enableSorting: false,
@@ -165,13 +167,13 @@ export function organizedMailColumns(
     }),
     organizedMailHelper.accessor("signature_id", {
       header: () => "署名",
-      cell: (row) => (
+      cell: ({ getValue }) => (
         <div
           style={{
             textAlign: "center",
           }}
         >
-          {lookup[row.getValue()]}
+          {lookup[getValue()]}
         </div>
       ),
       minSize: 120,
@@ -191,13 +193,13 @@ export function signatureColumns(
   const columns: ColumnDef<SignatureFormAttributeWithId, any>[] = [
     signatureHelper.accessor("name", {
       header: () => "登録名",
-      cell: (row) => (
+      cell: ({ row, getValue }) => (
         <MuiLink
           component="button"
-          onClick={() => handleClick(row.row.original)}
+          onClick={() => handleClick(row.original)}
           sx={{ textAlign: "center", width: 1 }}
         >
-          {row.getValue()}
+          {getValue()}
         </MuiLink>
       ),
     }),
@@ -205,7 +207,7 @@ export function signatureColumns(
       header: () => "from_name",
       cell: ({ getValue }) => (
         <div style={{ textAlign: "center" }}>{getValue()}</div>
-      )
+      ),
     }),
     signatureHelper.accessor("from_email", {
       header: () => "from_email",
@@ -244,7 +246,9 @@ export function signatureColumns(
 
 const affiliationHelper = createColumnHelper<AffiliationFormAttributeWithId>();
 
-export function affiliationColumns(handleClick: (d: AffiliationFormAttributeWithId) => void) {
+export function affiliationColumns(
+  handleClick: (d: AffiliationFormAttributeWithId) => void
+) {
   const columns: ColumnDef<AffiliationFormAttributeWithId, any>[] = [
     affiliationHelper.accessor("name", {
       header: () => "所属",
@@ -259,6 +263,72 @@ export function affiliationColumns(handleClick: (d: AffiliationFormAttributeWith
       ),
     }),
     affiliationHelper.accessor("priority", {
+      header: () => "並び順",
+      cell: ({ getValue }) => (
+        <div style={{ textAlign: "center" }}>{getValue()}</div>
+      ),
+      size: 110,
+    }),
+  ];
+
+  return columns;
+}
+
+const departmentHelper = createColumnHelper<DepartmentFormAttributeWithId>();
+
+export function departmentColumns(
+  handleClick: (d: DepartmentFormAttributeWithId) => void,
+  lookup: { [k: number]: DepartmentFormAttributeWithId }
+) {
+  const columns: ColumnDef<DepartmentFormAttributeWithId, any>[] = [
+    departmentHelper.display({
+      id: "expand-id",
+      header: ({ table }) => (
+        <IconButton
+          onClick={table.getToggleAllRowsExpandedHandler()}
+          size="small"
+        >
+          <ChevronRight
+            sx={{
+              transform: `rotate(${table.getIsAllRowsExpanded() ? 90 : 0}deg)`,
+              color: "white",
+            }}
+            fontSize="small"
+          />
+        </IconButton>
+      ),
+      cell: ({ row }) =>
+        row.getCanExpand() ? (
+          <IconButton onClick={row.getToggleExpandedHandler()} size="small">
+            <ChevronRight
+              sx={{
+                transform: `rotate(${row.getIsExpanded() ? 90 : 0}deg)`,
+              }}
+              fontSize="small"
+            />
+          </IconButton>
+        ) : null,
+      size: 40,
+    }),
+    departmentHelper.accessor("name", {
+      header: () => "所属",
+      cell: ({ row, getValue }) => (
+        <MuiLink
+          component="button"
+          onClick={() =>
+            handleClick(
+              row.original.parent_id
+                ? lookup[row.original.parent_id]
+                : row.original
+            )
+          }
+          sx={{ textAlign: "center", width: 1 }}
+        >
+          {getValue()}
+        </MuiLink>
+      ),
+    }),
+    departmentHelper.accessor("priority", {
       header: () => "並び順",
       cell: ({ getValue }) => (
         <div style={{ textAlign: "center" }}>{getValue()}</div>
