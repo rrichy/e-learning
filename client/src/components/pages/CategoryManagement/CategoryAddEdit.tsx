@@ -6,7 +6,6 @@ import DisabledComponentContextProvider from "@/providers/DisabledComponentConte
 import { storeCategory, updateCategory } from "@/services/CategoryService";
 import {
   CategoryFormAttribute,
-  CategoryFormAttributeWithId,
   categoryFormInit,
   categoryFormSchema,
 } from "@/validations/CategoryFormValidation";
@@ -31,7 +30,7 @@ function CategoryAddEdit({
   closeFn,
   resolverFn,
 }: {
-  state: "add" | CategoryFormAttributeWithId | null;
+  state: "add" | CategoryFormAttribute | null;
   closeFn: () => void;
   resolverFn: () => void;
 }) {
@@ -73,7 +72,7 @@ function CategoryAddEdit({
         try {
           const res = await (state === "add"
             ? storeCategory(raw)
-            : updateCategory(state!.id, raw));
+            : updateCategory(state!.id!, raw));
 
           successSnackbar(res.data.message);
           handleClose();

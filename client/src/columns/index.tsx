@@ -1,11 +1,13 @@
 import Link from "@/components/atoms/Link";
 import { jpDate } from "@/mixins/jpFormatter";
 import { AffiliationFormAttributeWithId } from "@/validations/AffiliationFormValidation";
+import { CategoryFormAttribute } from "@/validations/CategoryFormValidation";
 import { DepartmentFormAttributeWithId } from "@/validations/DepartmentFormValidation";
 import { SignatureFormAttributeWithId } from "@/validations/SignatureFormValidation";
 import {
   ArticleOutlined,
   ChevronRight,
+  ContentCopy,
   Delete,
   MarkunreadOutlined,
 } from "@mui/icons-material";
@@ -334,6 +336,100 @@ export function departmentColumns(
         <div style={{ textAlign: "center" }}>{getValue()}</div>
       ),
       size: 110,
+    }),
+  ];
+
+  return columns;
+}
+
+const categoryHelper = createColumnHelper<CategoryFormAttribute>();
+
+export function categoryColumns(
+  handleClick: (d: CategoryFormAttribute) => void,
+  handleDuplicate: (d: CategoryFormAttribute) => void,
+  lookup: { [k: number]: CategoryFormAttribute }
+) {
+  const columns: ColumnDef<CategoryFormAttribute, any>[] = [
+    categoryHelper.display({
+      id: "expand-id",
+      header: ({ table }) => (
+        <IconButton
+          onClick={table.getToggleAllRowsExpandedHandler()}
+          size="small"
+        >
+          <ChevronRight
+            sx={{
+              transform: `rotate(${table.getIsAllRowsExpanded() ? 90 : 0}deg)`,
+              color: "white",
+            }}
+            fontSize="small"
+          />
+        </IconButton>
+      ),
+      cell: ({ row }) =>
+        row.getCanExpand() ? (
+          <IconButton onClick={row.getToggleExpandedHandler()} size="small">
+            <ChevronRight
+              sx={{
+                transform: `rotate(${row.getIsExpanded() ? 90 : 0}deg)`,
+              }}
+              fontSize="small"
+            />
+          </IconButton>
+        ) : null,
+      size: 40,
+    }),
+    categoryHelper.accessor("name", {
+      header: () => "カテゴリー名",
+      cell: ({ row, getValue }) => (
+        <MuiLink
+          component="button"
+          onClick={() =>
+            handleClick(
+              row.original.parent_id
+                ? lookup[row.original.parent_id]
+                : row.original
+            )
+          }
+          sx={{ textAlign: "center", width: 1 }}
+        >
+          {getValue()}
+        </MuiLink>
+      ),
+    }),
+    categoryHelper.accessor("priority", {
+      header: () => "並び順",
+      cell: ({ getValue }) => (
+        <div style={{ textAlign: "center" }}>{getValue()}</div>
+      ),
+    }),
+    categoryHelper.accessor("start_period", {
+      header: () => "開発期間",
+      cell: ({ getValue }) => (
+        <div style={{ textAlign: "center" }}>{jpDate(getValue())}</div>
+      ),
+    }),
+    categoryHelper.accessor("end_period", {
+      header: () => "終了期間",
+      cell: ({ getValue }) => (
+        <div style={{ textAlign: "center" }}>{jpDate(getValue())}</div>
+      ),
+    }),
+    categoryHelper.display({
+      id: "actions",
+      header: () => "アクション",
+      cell: ({ row }) => (
+        <div style={{ textAlign: "center" }}>
+          <Tooltip title="コピー">
+            <IconButton
+              onClick={() => handleDuplicate(row.original)}
+              size="small"
+            >
+              <ContentCopy fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </div>
+      ),
     }),
   ];
 

@@ -38,7 +38,7 @@ function DepartmentTable() {
   });
 
   const lookup = useMemo(() => {
-    if (!fetchingOptions && tableData) {
+    if (!fetchingData && tableData) {
       return tableData.data.reduce(
         (acc: { [k: number]: DepartmentFormAttributeWithId }, department) => ({
           ...acc,

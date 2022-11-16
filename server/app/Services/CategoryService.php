@@ -5,27 +5,31 @@ namespace App\Services;
 use App\Http\Requests\CategoryStoreUpdateRequest;
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class CategoryService
 {
-    public function list()
+    public function index(array $pagination, User $auth)
     {
-        $order = request()->input('order', 'asc');
-        $per_page = request()->input('per_page', '10');
-        $sort = request()->input('sort', 'id');
+        $order = $pagination['order'] ?? 'asc';
+        $per_page = $pagination['per_page'] ?? 10;
+        $sort = $pagination['sort'] ?? 'id';
 
         return CategoryResource::collection(
             Category::query()
             ->when(
-                auth()->user()->isCorporate(), 
+                $auth->isCorporate(), 
                 fn ($q) => $q->where('affiliation_id', auth()->user()->affiliation_id)
             )->with([
                 'childCategories' => function ($q) use ($sort, $order) { $q->orderBy($sort, $order)->get(); }
             ])->whereNull('parent_id')
             ->orderBy($sort, $order)
             ->paginate($per_page)
-        )->additional(['message' => 'Categories successfully fetched!']);
+        )->additional([
+            'message' => 'Categories successfully fetched!',
+            'meta' => compact('order', 'sort'),
+        ]);
     }
 
 

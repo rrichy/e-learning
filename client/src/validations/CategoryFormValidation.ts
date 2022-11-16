@@ -16,12 +16,14 @@ export const categoryFormSchema = Yup.object({
 });
 
 export interface CategoryFormAttribute {
+  id?: number;
   name: string;
   priority: string | null;
   start_period: Date | null;
   end_period: Date | null;
   parent_id: number | null;
   child_categories: {
+    id?: number;
     name: string;
     priority: string | null;
   }[];
