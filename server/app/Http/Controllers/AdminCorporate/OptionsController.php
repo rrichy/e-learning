@@ -59,7 +59,6 @@ class OptionsController extends Controller
                         }
                     case 'signatures': {
                             $value = Signature::get(['id', 'name']);
-
                             break;
                         }
                 }

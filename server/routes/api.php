@@ -9,6 +9,7 @@ use App\Http\Controllers\AdminCorporate\MailTemplateController;
 use App\Http\Controllers\AdminCorporate\NoticeController;
 use App\Http\Controllers\AdminCorporate\OptionsController;
 use App\Http\Controllers\AdminCorporate\SignatureController;
+use App\Http\Controllers\AttendingCourseController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\InquiryController;
 use App\Http\Controllers\Student\ChapterController;
@@ -64,6 +65,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/', [AffiliationController::class, 'index']);
         Route::put('/{affiliation}', [AffiliationController::class, 'update']);
         Route::delete('/{affiliation}', [AffiliationController::class, 'destroy']);
+    });
+
+    Route::prefix('/attending-course')->group(function () {
+        Route::get('/', [AttendingCourseController::class, 'index']);
     });
 
     Route::prefix('/category')->group(function () {
