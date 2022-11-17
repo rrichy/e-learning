@@ -3,7 +3,7 @@ import { useState } from "react";
 import Labeler from "../molecules/Labeler";
 import CommonProfile from "../organisms/Student/CommonProfile";
 import useAuth from "@/hooks/useAuth";
-import { jpDate } from "@/mixins/jpFormatter";
+import { jpDate } from "@/utils/jpFormatter";
 import Table from "@/components/atoms/Table";
 import {
   initPaginationFilter,

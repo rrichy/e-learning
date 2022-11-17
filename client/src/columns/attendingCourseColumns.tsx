@@ -1,5 +1,5 @@
 import { AttendingCourseAttributes } from "@/interfaces/AuthAttributes";
-import { jpDate } from "@/mixins/jpFormatter";
+import { jpDate } from "@/utils/jpFormatter";
 import { Column } from "material-table";
   
 export default function generate() {
