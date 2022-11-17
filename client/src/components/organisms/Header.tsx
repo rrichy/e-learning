@@ -60,7 +60,7 @@ function Header({ showMenu, useDarkColorScheme }: HeaderProps) {
             </Drawer>
           </>
         )}
-        <Stack alignItems="center" flex={1}>
+        <Stack alignItems="center" flex={1} ml={!showMenu ? `${240+24}px` : undefined}>
           <Link to="/home" flex={1} width="fit-content">
             <img src={logo} alt="logo" />
           </Link>
