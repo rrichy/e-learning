@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\AttendingCourseHomepageResource;
 use App\Models\AttendingCourse;
+use App\Services\AttendingCourseService;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class AttendingCourseController extends Controller
 {
@@ -13,13 +16,25 @@ class AttendingCourseController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request, AttendingCourseService $service)
     {
-        $order = request()->input('order', 'asc');
-        $per_page = request()->input('per_page', '10');
-        $sort = request()->input('sort', 'id');
+        Gate::authorize('check-membership', [['individual']]);
 
-        return AttendingCourseHomepageResource::collection(AttendingCourse::where('user_id', auth()->user()->id)->orderBy($sort, $order)->paginate($per_page))->additional(['message' => 'Signatures successfully fetched!']);
+        $valid = $request->validate([
+            'order' => 'string|in:asc,desc',
+            'per_page' => 'numeric',
+            'sort' => 'string|in:id,title,start_date,completion_date,progress_rate,latest_score'
+        ]);
+
+        try {
+            $attending_courses = $service->index($valid, auth()->user());
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
+
+        return $attending_courses;
+
+        // return AttendingCourseHomepageResource::collection(AttendingCourse::where('user_id', auth()->user()->id)->orderBy($sort, $order)->paginate($per_page))->additional(['message' => 'Signatures successfully fetched!']);
     }
 
     /**

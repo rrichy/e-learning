@@ -62,10 +62,6 @@ class OptionsController extends Controller
                             $value = Signature::get(['id', 'name']);
                             break;
                         }
-                    case 'courses': {
-                            $value = Course::get(['id', 'title as name']);
-                            break;
-                    }
                 }
 
                 return [$field => $value];

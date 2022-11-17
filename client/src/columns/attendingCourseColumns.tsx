@@ -2,16 +2,11 @@ import { AttendingCourseAttributes } from "@/interfaces/AuthAttributes";
 import { jpDate } from "@/mixins/jpFormatter";
 import { Column } from "material-table";
   
-export default function generate({
-  course_lookup,
-}: {
-  course_lookup: { [k: number]: string };
-}) {
+export default function generate() {
   const columns: Column<AttendingCourseAttributes>[] = [
     { 
       field: "title", 
       title: "コース名", 
-      render: (row) => course_lookup[row.course_id ?? 0] ?? "-",
     },
     { 
       field: "start_date", 
