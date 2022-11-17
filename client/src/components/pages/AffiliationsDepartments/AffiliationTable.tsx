@@ -25,7 +25,7 @@ function AffiliationTable() {
 
   const [dialog, setDialog] =
     useState<PageDialogProps<AffiliationFormAttributeWithId>>(null);
-  const { selector, sorter, pagination, setPagination } = useMyTable();
+  const { selector, sorter, pagination, setPagination, resetTable } = useMyTable();
   const { tableData, fetchingData } = getData({
     sort: sorter.sort,
     setSort: sorter.setSort,
@@ -38,7 +38,7 @@ function AffiliationTable() {
     {
       onSuccess: (res: any) => {
         successSnackbar(res.data.message);
-        selector.setSelected({});
+        resetTable();
         queryClient.invalidateQueries([
           "affiliations-table",
           pagination,

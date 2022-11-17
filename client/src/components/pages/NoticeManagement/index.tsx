@@ -15,7 +15,7 @@ import { NoticeTableRowAttribute } from "@/columns/rowTypes";
 function NoticeManagement() {
   const { isConfirmed } = useConfirm();
   const { successSnackbar, errorSnackbar } = useAlerter();
-  const { selector, pagination, setPagination, sorter } = useMyTable();
+  const { selector, pagination, setPagination, sorter, resetTable } = useMyTable();
   const queryClient = useQueryClient();
   const { data, isFetching } = useQuery(
     ["notices-management", pagination, sorter.sort],
@@ -47,7 +47,7 @@ function NoticeManagement() {
   const deleteMutation = useMutation((ids: number[]) => destroyNotice(ids), {
     onSuccess: (res: any) => {
       successSnackbar(res.data.message);
-      selector.setSelected({});
+      resetTable();
       queryClient.invalidateQueries([
         "notices-management",
         pagination,
