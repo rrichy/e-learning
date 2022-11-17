@@ -26,6 +26,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+/* 
+TODO: how attending course is populated, updated
+ */
+
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
     Route::post('/upload', [AuthenticatedSessionController::class, 'upload']);
