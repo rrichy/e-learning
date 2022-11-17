@@ -22,7 +22,6 @@ class AttendingCourseHomepageResource extends JsonResource
             'status' => $this->status,
             'latest_score' => $this->latest_score,
             'highest_score' => $this->highest_score,
-            'course_id' => $this->course_id,
         ];
     }
 }
