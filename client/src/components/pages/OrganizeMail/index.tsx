@@ -30,7 +30,8 @@ function OrganizeMail() {
   const { isConfirmed } = useConfirm();
   const { successSnackbar, errorSnackbar } = useAlerter();
   const queryClient = useQueryClient();
-  const { sorter, selector, pagination, setPagination } = useMyTable();
+  const { sorter, selector, pagination, setPagination, resetTable } =
+    useMyTable();
   const [hasReordered, setHasReordered] = useState(false);
 
   const [dragData, setDragData] = useState<MailRowAttribute[]>([]);
@@ -71,7 +72,13 @@ function OrganizeMail() {
 
   const deleteMutation = useMutation(
     (ids: number[]) => destroyOrganizeMail(ids),
-    resolver
+    {
+      ...resolver,
+      onSuccess: (res: any) => {
+        resolver.onSuccess(res);
+        resetTable();
+      },
+    }
   );
 
   const priorityMutation = useMutation(
@@ -219,6 +226,7 @@ function OrganizeMail() {
 
 export default OrganizeMail;
 
+// included sort for future updates
 const getTableData = ({
   sort,
   setSort,

@@ -1,96 +1,70 @@
 import { Box, Paper, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import Button from "@/components/atoms/Button";
-import {
-  initPaginationFilter,
-  initReactQueryPagination,
-  OptionAttribute,
-  OrderType,
-  PaginationFilterInterface,
-  ReactQueryPaginationInterface,
-} from "@/interfaces/CommonInterface";
-import AccountManagementSearch, {
-  useOptions,
-} from "@/components/organisms/AccountManagementFragments/AccountManagementSearchAccordion";
-import Table from "@/components/atoms/Table";
+import { TableStateProps } from "@/interfaces/CommonInterface";
+import AccountManagementSearch from "@/components/organisms/AccountManagementFragments/AccountManagementSearchAccordion";
 import useAlerter from "@/hooks/useAlerter";
 import useConfirm from "@/hooks/useConfirm";
-import { TABLE_ROWS_PER_PAGE } from "@/settings/appconfig";
 import { destroyAccount } from "@/services/AccountService";
 import { UserAttributes } from "@/interfaces/AuthAttributes";
-import accountColumns from "@/columns/accountColumns";
+import { accountColumns } from "@/columns";
 import { AccountManagementSearchAttributes } from "@/validations/SearchFormValidation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { get } from "@/services/ApiService";
-
-const init = initReactQueryPagination<UserAttributes>();
-
-const tableResult = (
-  filters: PaginationFilterInterface & { [k: string]: any }
-) =>
-  useQuery(
-    ["accounts", filters],
-    async () => {
-      const params = Object.entries(filters)
-        .reduce(
-          (acc: string[], [key, value]) =>
-            !value || ["last_page", "total"].includes(key)
-              ? acc
-              : [...acc, `${key === "current_page" ? "page" : key}=${value}`],
-          []
-        )
-        .join("&");
-
-      const res = await get("/api/account?" + params);
-      return res.data as ReactQueryPaginationInterface<UserAttributes>;
-    },
-    {
-      staleTime: 5_000,
-      keepPreviousData: true,
-      refetchOnWindowFocus: false,
-    }
-  );
+import {
+  OnChangeFn,
+  PaginationState,
+  SortingState,
+} from "@tanstack/react-table";
+import { useMyTable } from "@/hooks/useMyTable";
+import MyTable from "@/components/atoms/MyTable";
+import { getCacheableOptions } from "@/services/CommonService";
+import generateLookup from "@/mixins/generateLookup";
 
 function AccountManagement() {
   const queryClient = useQueryClient();
-  const { successSnackbar, errorSnackbar } = useAlerter();
   const { isConfirmed } = useConfirm();
-  const [lookups, setLookups] = useState({
-    affiliation_lookup: {} as { [k: number]: string },
-    department_lookup: {} as { [k: number]: string },
-    child_department_lookup: {} as { [k: number]: string },
-  });
-  const { data: resOptions, isLoading: resIsLoading } = useOptions();
-  const [pagination, setPagination] = useState(initPaginationFilter);
+  const { successSnackbar, errorSnackbar } = useAlerter();
+  const { options, fetchingOptions } = getCacheableOptions(
+    "affiliations",
+    "departments",
+    "child_departments"
+  );
+
+  const lookups = useMemo(() => {
+    if (!fetchingOptions) {
+      return {
+        affiliations: generateLookup(options.affiliations),
+        departments: generateLookup(options.departments),
+        child_departments: generateLookup(options.child_departments),
+      };
+    }
+  }, [fetchingOptions, options]);
+
   const [filters, setFilters] = useState<{ [k: string]: any }>({});
-  const { data, isFetching } = tableResult({
-    ...pagination,
-    ...filters,
+  const { selector, sorter, pagination, setPagination, resetTable } = useMyTable();
+  const { tableData, fetchingData } = getData({
+    sort: sorter.sort,
+    setSort: sorter.setSort,
+    pagination,
+    setPagination,
+    filters,
   });
-  const [stateSelected, setStateSelected] = useState<UserAttributes[]>([]);
+
   const deleteMutation = useMutation((ids: number[]) => destroyAccount(ids), {
     onSuccess: (res: any) => {
       successSnackbar(res.data.message);
-      queryClient.invalidateQueries(["accounts", filters]);
+      resetTable();
+      queryClient.invalidateQueries([
+        "accounts-table",
+        pagination,
+        sorter.sort,
+        filters,
+      ]);
     },
     onError: (e: any) => errorSnackbar(e.message),
   });
-
-  const updateFilter = (
-    page: number = 1,
-    pageSize: number = TABLE_ROWS_PER_PAGE[0],
-    sort: keyof UserAttributes = "id",
-    order: OrderType = "desc"
-  ) => {
-    setPagination({
-      ...pagination,
-      current_page: page,
-      per_page: pageSize,
-      sort,
-      order,
-    });
-  };
 
   const handleSearch = async (raw: AccountManagementSearchAttributes) => {
     const temp: { [k: string]: any } = {};
@@ -102,7 +76,7 @@ function AccountManagement() {
     }
 
     setFilters(temp);
-    updateFilter();
+    resetTable();
   };
 
   const handleDelete = async () => {
@@ -112,37 +86,14 @@ function AccountManagement() {
     });
 
     if (confirmed) {
-      deleteMutation.mutate(stateSelected.map((a) => a.id!));
+      const indexes = Object.keys(selector.selected).map(Number);
+      deleteMutation.mutate(
+        indexes.map((index) => (tableData?.data ?? [])[index].id!)
+      );
     }
   };
 
-  useEffect(() => {
-    if (!resIsLoading && resOptions) {
-      setLookups({
-        affiliation_lookup: resOptions.affiliations.reduce(
-          (acc: { [k: number]: string }, b: OptionAttribute) => ({
-            ...acc,
-            [b.id]: b.name,
-          }),
-          {}
-        ),
-        department_lookup: resOptions.departments.reduce(
-          (acc: { [k: number]: string }, b: OptionAttribute) => ({
-            ...acc,
-            [b.id]: b.name,
-          }),
-          {}
-        ),
-        child_department_lookup: resOptions.child_departments.reduce(
-          (acc: { [k: number]: string }, b: OptionAttribute) => ({
-            ...acc,
-            [b.id]: b.name,
-          }),
-          {}
-        ),
-      });
-    }
-  }, [resOptions, resIsLoading]);
+  const columns = accountColumns(lookups);
 
   return (
     <>
@@ -183,23 +134,19 @@ function AccountManagement() {
               rounded
               sx={{ maxWidth: 150 }}
               onClick={handleDelete}
-              disabled={stateSelected.length === 0}
+              disabled={Object.keys(selector.selected).length === 0}
             >
               削除
             </Button>
             <Box>
               <Typography fontStyle="italic">
-                検索結果: {data?.meta.total ?? 0}人
+                検索結果: {tableData?.meta.total ?? 0}人
               </Typography>
-              <Table
-                columns={accountColumns(lookups)}
-                state={data || init}
-                fetchData={updateFilter}
-                isLoading={isFetching || deleteMutation.isLoading}
-                onSelectionChange={(rows) => setStateSelected(rows)}
-                options={{
-                  selection: true,
-                }}
+              <MyTable
+                loading={fetchingData || deleteMutation.isLoading}
+                state={tableData}
+                columns={columns}
+                selector={selector}
               />
             </Box>
           </Stack>
@@ -308,3 +255,55 @@ function AccountManagement() {
 }
 
 export default AccountManagement;
+
+const getData = ({
+  sort,
+  setSort,
+  pagination,
+  setPagination,
+  filters,
+}: {
+  sort: SortingState;
+  setSort: OnChangeFn<SortingState>;
+  pagination: PaginationState;
+  setPagination: OnChangeFn<PaginationState>;
+  filters: { [k: string]: any };
+}) => {
+  const { data, isFetching } = useQuery(
+    ["accounts-table", pagination, sort, filters],
+    async () => {
+      const sortKey = sort[0]?.id ?? "id";
+      const orderDir = sort[0] ? (sort[0].desc ? "desc" : "asc") : "desc";
+
+      const params = Object.entries(filters)
+        .reduce(
+          (acc: string[], [key, value]) =>
+            !value || ["last_page", "total"].includes(key)
+              ? acc
+              : [...acc, `${key === "current_page" ? "page" : key}=${value}`],
+          []
+        )
+        .join("&");
+
+      const res = await get(
+        `/api/account?page=${pagination.pageIndex + 1}&per_page=${
+          pagination.pageSize
+        }&sort=${sortKey}&order=${orderDir}` + (params ? "&" + params : "")
+      );
+
+      return {
+        sorter: setSort,
+        paginator: setPagination,
+        data: res.data.data,
+        meta: res.data.meta,
+      } as TableStateProps<UserAttributes>;
+    },
+    {
+      staleTime: 5_000,
+      keepPreviousData: true,
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  return { tableData: data, fetchingData: isFetching };
+};

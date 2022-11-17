@@ -80,7 +80,7 @@ class DevAccountSeeder extends Seeder
     private function pushDepartmentUser(mixed $affiliation, mixed $user)
     {
         if ($affiliation->departments->count()) {
-            $parent_department = $affiliation->departments->random();
+            $parent_department = $affiliation->departments->whereNull('parent_id')->random();
             $department_users = [];
 
             $department_users[$parent_department->id] = [

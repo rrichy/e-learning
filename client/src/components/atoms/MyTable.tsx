@@ -53,6 +53,8 @@ interface MyTableProps<T> {
   };
   onDragEnd?: (r: DropResult) => void;
   debug?: boolean;
+  renderSubComponent?: (props: { row: Row<T> }) => React.ReactNode;
+  bodyMinHeight?: number;
 }
 
 function MyTable<T extends unknown>({
@@ -63,6 +65,8 @@ function MyTable<T extends unknown>({
   expander,
   onDragEnd,
   debug,
+  renderSubComponent,
+  bodyMinHeight,
 }: MyTableProps<T>) {
   const table = useReactTable({
     data: state.data,
@@ -124,7 +128,7 @@ function MyTable<T extends unknown>({
         }}
       >
         <Table
-          sx={{ width: 1, tableLayout: "fixed", minHeight: 300 }}
+          sx={{ width: 1, tableLayout: "fixed", minHeight: bodyMinHeight ?? 300 }}
           size="small"
         >
           <TableHead
@@ -208,7 +212,7 @@ function MyTable<T extends unknown>({
           {onDragEnd ? (
             <DraggableTableBodyComponent table={table} onDragEnd={onDragEnd} />
           ) : (
-            <TableBodyComponent table={table} />
+            <TableBodyComponent table={table} renderSubComponent={renderSubComponent} />
           )}
         </Table>
       </TableContainer>
@@ -279,33 +283,44 @@ function appendSelectColumn<T extends unknown>(
 
 function TableBodyComponent<T extends unknown>({
   table,
+  renderSubComponent,
 }: {
   table: TableProps<T>;
+  renderSubComponent?: (props: { row: Row<T> }) => React.ReactNode;
 }) {
   return (
     <TableBody>
       {table.getRowModel().rows.map((row) => (
-        <TableRow key={row.id}>
-          {row.getVisibleCells().map((cell) => (
-            <TableCell
-              key={cell.id}
-              sx={
-                cell.column.getSize() > 40
-                  ? {
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }
-                  : {
-                      p: 0,
-                      textAlign: "center",
-                    }
-              }
-            >
-              {flexRender(cell.column.columnDef.cell, cell.getContext())}
-            </TableCell>
-          ))}
-        </TableRow>
+        <>
+          <TableRow key={row.id}>
+            {row.getVisibleCells().map((cell) => (
+              <TableCell
+                key={cell.id}
+                sx={
+                  cell.column.getSize() > 40
+                    ? {
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }
+                    : {
+                        p: 0,
+                        textAlign: "center",
+                      }
+                }
+              >
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </TableCell>
+            ))}
+          </TableRow>
+          {row.getIsExpanded() && Boolean(renderSubComponent) && (
+            <TableRow key={row.id + "-subcomponent"}>
+              <TableCell colSpan={row.getVisibleCells().length}>
+                {renderSubComponent!({ row })}
+              </TableCell>
+            </TableRow>
+          )}
+        </>
       ))}
     </TableBody>
   );

@@ -15,35 +15,35 @@ use Illuminate\Support\Facades\Storage;
 
 class AccountService
 {
-    public function list(Request $request, $auth)
+    public function index(array $filters, $auth)
     {
-        $filters = $request->validate([
-            'membership_type_id' => 'numeric',
-            'affiliation_id' => 'numeric',
-            'department_1' => 'numeric',
-            'department_2' => 'numeric',
-            'name' => 'string',
-            'email' => 'string',
-            'remarks' => 'string',
-            'registered_min_date' => 'required_with:registered_min_date',
-            'registered_max_date' => 'required_with:registered_max_date',
-            'never_logged_in' => 'boolean',
-            'logged_in_min_date' => 'required_with:logged_in_max_date',
-            'logged_in_max_date' => 'required_with:logged_in_min_date',
-            'order' => 'string|in:asc,desc',
-            'per_page' => 'numeric',
-            'sort' => 'string|in:id,email,name,affiliation_id,created_at,last_login_date'
-        ]);
-
-        $order = $request->input('order', 'asc');
-        $per_page = $request->input('per_page', '10');
-        $sort = $request->input('sort', 'id');
+        $order = $filters['order'] ?? 'asc';
+        $per_page = $filters['per_page'] ?? 10;
+        $sort = $filters['sort'] ?? 'id';
 
         return AccountIndexResource::collection(
-            User::whereNot('id', $auth->id)
-                ->when($auth->isCorporate(), fn ($q) => $q->where('affiliation_id', $auth->affiliation_id))
+            User::query()
+                ->select(
+                    'users.id',
+                    'users.affiliation_id',
+                    'users.created_at',
+                    'users.email',
+                    'users.last_login_date',
+                    'users.name',
+                    'parent_departments.name as department_1',
+                    'child_departments.name as department_2',
+                )->leftJoin('department_users as department_users_1', function ($join) {
+                    $join->on('department_users_1.user_id', '=', 'users.id')
+                        ->where('department_users_1.order', 1);
+                })->leftJoin('department_users as department_users_2', function ($join) {
+                    $join->on('department_users_2.user_id', '=', 'users.id')
+                        ->where('department_users_2.order', 2);
+                })->leftJoin('departments as parent_departments', 'parent_departments.id', '=', 'department_users_1.department_id')
+                ->leftJoin('departments as child_departments', 'child_departments.id', '=', 'department_users_2.department_id')
+                ->leftJoin('affiliations', 'affiliations.id', '=', 'users.affiliation_id')
+                ->when($auth->isCorporate(), fn ($q) => $q->where('users.affiliation_id', $auth->affiliation_id))
                 ->when(!empty($filters), fn ($query) => $this->filterUsers($query, $filters))
-                ->orderBy($sort, $order)
+                ->orderBy($sort === 'affiliation_id' ? 'affiliations.name' : $sort, $order)
                 ->paginate($per_page)
         )->additional([
             'message' => 'Users successfully fetched!',
@@ -151,22 +151,22 @@ class AccountService
     // Helper functions
     private function filterUsers($query, $filters)
     {
-        $query->when(isset($filters['membership_type_id']), fn ($q) => $q->where('membership_type_id', $filters['membership_type_id']))
-            ->when(isset($filters['affiliation_id']), fn ($q) => $q->where('affiliation_id', $filters['affiliation_id']))
-            ->when(isset($filters['department_1']), fn ($q) => $q->whereHas('departments', fn ($w) => $w->where('departments.id', $filters['department_1'])))
-            ->when(isset($filters['department_2']), fn ($q) => $q->whereHas('departments', fn ($w) => $w->where('departments.id', $filters['department_2'])))
-            ->when(isset($filters['name']), fn ($q) => $q->where('name', 'like', '%' . $filters['name'] . '%'))
-            ->when(isset($filters['email']), fn ($q) => $q->where('email', 'like', '%' . $filters['email'] . '%'))
-            ->when(isset($filters['remarks']), fn ($q) => $q->where('remarks', 'like', '%' . $filters['remarks'] . '%'))
+        $query->when(isset($filters['membership_type_id']), fn ($q) => $q->where('users.membership_type_id', $filters['membership_type_id']))
+            ->when(isset($filters['affiliation_id']), fn ($q) => $q->where('users.affiliation_id', $filters['affiliation_id']))
+            ->when(isset($filters['department_1']), fn ($q) => $q->where('parent_departments.id', $filters['department_1']))
+            ->when(isset($filters['department_2']), fn ($q) => $q->where('child_departments.id', $filters['department_2']))
+            ->when(isset($filters['name']), fn ($q) => $q->where('users.name', 'like', '%' . $filters['name'] . '%'))
+            ->when(isset($filters['email']), fn ($q) => $q->where('users.email', 'like', '%' . $filters['email'] . '%'))
+            ->when(isset($filters['remarks']), fn ($q) => $q->where('users.remarks', 'like', '%' . $filters['remarks'] . '%'))
             ->when(
                 isset($filters['registered_min_date']) && isset($filters['registered_max_date']),
-                fn ($q) => $q->whereDate('created_at', '>=', $filters['registered_min_date'])
-                    ->whereDate('created_at', '<=', $filters['registered_max_date'])
-            )->when(isset($filters['never_logged_in']), fn ($q) => $q->whereNull('last_login_date'))
+                fn ($q) => $q->whereDate('users.created_at', '>=', $filters['registered_min_date'])
+                    ->whereDate('users.created_at', '<=', $filters['registered_max_date'])
+            )->when(isset($filters['never_logged_in']), fn ($q) => $q->whereNull('users.last_login_date'))
             ->when(
                 isset($filters['logged_in_min_date']) && isset($filters['logged_in_max_date']),
-                fn ($q) => $q->whereDate('last_login_date', '>=', $filters['logged_in_min_date'])
-                    ->whereDate('last_login_date', '<=', $filters['logged_in_max_date'])
+                fn ($q) => $q->whereDate('users.last_login_date', '>=', $filters['logged_in_min_date'])
+                    ->whereDate('users.last_login_date', '<=', $filters['logged_in_max_date'])
             );
     }
 }

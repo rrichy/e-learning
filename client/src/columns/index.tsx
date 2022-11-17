@@ -1,7 +1,9 @@
 import Link from "@/components/atoms/Link";
+import { UserAttributes } from "@/interfaces/AuthAttributes";
 import { jpDate } from "@/mixins/jpFormatter";
 import { AffiliationFormAttributeWithId } from "@/validations/AffiliationFormValidation";
 import { CategoryFormAttribute } from "@/validations/CategoryFormValidation";
+import { CourseFormAttributeWithId } from "@/validations/CourseFormValidation";
 import { DepartmentFormAttributeWithId } from "@/validations/DepartmentFormValidation";
 import { SignatureFormAttributeWithId } from "@/validations/SignatureFormValidation";
 import {
@@ -430,6 +432,107 @@ export function categoryColumns(
           </Tooltip>
         </div>
       ),
+    }),
+  ];
+
+  return columns;
+}
+
+const accountHelper = createColumnHelper<UserAttributes>();
+
+export function accountColumns(lookups?: {
+  [k: string]: { [l: number]: string };
+}) {
+  const columns: ColumnDef<UserAttributes, any>[] = [
+    accountHelper.accessor("email", {
+      header: () => "メールアドレス",
+      cell: ({ row, getValue }) => (
+        <Link
+          to={`/account-management/${row.original.id}/details`}
+          sx={{ textAlign: "center", width: 1 }}
+        >
+          {getValue()}
+        </Link>
+      ),
+      size: 200,
+    }),
+    accountHelper.accessor("name", {
+      header: () => "氏名",
+      cell: ({ getValue }) => (
+        <div style={{ textAlign: "center" }}>{getValue()}</div>
+      ),
+    }),
+    accountHelper.accessor("affiliation_id", {
+      header: () => "所属",
+      cell: ({ getValue }) => (
+        <div style={{ textAlign: "center" }}>
+          {lookups ? lookups["affiliations"][getValue()] : getValue()}
+        </div>
+      ),
+    }),
+    accountHelper.accessor("department_1", {
+      header: () => "部署１",
+      cell: ({ getValue }) => (
+        <div style={{ textAlign: "center" }}>
+          {lookups ? lookups["departments"][getValue()] : getValue()}
+        </div>
+      ),
+    }),
+    accountHelper.accessor("department_2", {
+      header: () => "部署２",
+      cell: ({ getValue }) => (
+        <div style={{ textAlign: "center" }}>
+          {lookups ? lookups["child_departments"][getValue()] : getValue()}
+        </div>
+      ),
+    }),
+    accountHelper.accessor("created_at", {
+      header: () => "登録日",
+      cell: ({ getValue }) => (
+        <div style={{ textAlign: "center" }}>{jpDate(getValue())}</div>
+      ),
+    }),
+    accountHelper.accessor("last_login_date", {
+      header: () => "最終ログイン日",
+      cell: ({ getValue }) => (
+        <div style={{ textAlign: "center" }}>{jpDate(getValue())}</div>
+      ),
+      size: 200,
+    }),
+  ];
+
+  return columns;
+}
+
+const courseHelper = createColumnHelper<CourseFormAttributeWithId>();
+
+export function courseColumns() {
+  const columns: ColumnDef<CourseFormAttributeWithId, any>[] = [
+    courseHelper.accessor("title", {
+      header: () => "コース名",
+      cell: ({ row, getValue }) => (
+        <Link to={`/course-management/details/${row.original.id}`}>
+          {getValue()}
+        </Link>
+      ),
+      enableSorting: false,
+    }),
+    // {field: "user_count", title: "コース名"},
+    // {field: "active_count", title: "コース名"},
+    // {field: "completed_count", title: "コース名"},
+    courseHelper.accessor("start_period", {
+      header: () => "開発日",
+      cell: ({ getValue }) => (
+        <div style={{ textAlign: "center" }}>{jpDate(getValue())}</div>
+      ),
+      enableSorting: false,
+    }),
+    courseHelper.accessor("end_period", {
+      header: () => "終了日",
+      cell: ({ getValue }) => (
+        <div style={{ textAlign: "center" }}>{jpDate(getValue())}</div>
+      ),
+      enableSorting: false,
     }),
   ];
 

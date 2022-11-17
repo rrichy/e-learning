@@ -28,7 +28,11 @@ class AccountStoreUpdateRequest extends FormRequest
     {
         $auth = auth()->user();
 
-        $merge = [
+        $merge = request()->membership_type_id == MembershipType::TRIAL ? [
+            'affiliation_id' => null,
+            'department_1' => null,
+            'department_2' => null,
+        ] : [
             'affiliation_id' => request()->affiliation_id ?: null,
             'department_1' => request()->department_1 ?: null,
             'department_2' => request()->department_2 ?: null,

@@ -27,7 +27,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        if (config('debug')) {
+        if (config('app.debug')) {
             DB::listen(function ($query) {
                 Log::info(
                     $query->sql,

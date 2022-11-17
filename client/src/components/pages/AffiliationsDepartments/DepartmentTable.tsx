@@ -29,7 +29,7 @@ function DepartmentTable() {
   const [dialog, setDialog] =
     useState<PageDialogProps<DepartmentFormAttributeWithId>>(null);
   const [expanded, setExpanded] = useState<ExpandedState>({});
-  const { sorter, selector, pagination, setPagination } = useMyTable();
+  const { sorter, selector, pagination, setPagination, resetTable } = useMyTable();
   const { tableData, fetchingData } = getData({
     sort: sorter.sort,
     setSort: sorter.setSort,
@@ -55,7 +55,7 @@ function DepartmentTable() {
     {
       onSuccess: (res: any) => {
         successSnackbar(res.data.message);
-        selector.setSelected({});
+        resetTable();
         queryClient.invalidateQueries([
           "departments-table",
           pagination,
