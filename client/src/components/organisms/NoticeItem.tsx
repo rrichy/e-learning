@@ -1,6 +1,6 @@
 import { Link, Stack, Typography } from "@mui/material";
 import { NoticeItemAttribute } from "@/validations/NoticeFormValidation";
-import { jpDate } from "@/mixins/jpFormatter";
+import { jpDate } from "@/utils/jpFormatter";
 import NoticeDetails from "../molecules/NoticeDetails";
 import { useState } from "react";
 

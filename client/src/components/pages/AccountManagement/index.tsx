@@ -20,7 +20,7 @@ import {
 import { useMyTable } from "@/hooks/useMyTable";
 import MyTable from "@/components/atoms/MyTable";
 import { getCacheableOptions } from "@/services/CommonService";
-import generateLookup from "@/mixins/generateLookup";
+import generateLookup from "@/utils/generateLookup";
 
 function AccountManagement() {
   const queryClient = useQueryClient();

@@ -1,6 +1,6 @@
 import Link from "@/components/atoms/Link";
 import { UserAttributes } from "@/interfaces/AuthAttributes";
-import { jpDate } from "@/mixins/jpFormatter";
+import { jpDate } from "@/utils/jpFormatter";
 import { AffiliationFormAttributeWithId } from "@/validations/AffiliationFormValidation";
 import { CategoryFormAttribute } from "@/validations/CategoryFormValidation";
 import { CourseFormAttributeWithId } from "@/validations/CourseFormValidation";
@@ -16,6 +16,7 @@ import {
 import { Box, IconButton, Link as MuiLink, Tooltip } from "@mui/material";
 import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import {
+  AttendeeRowAttribute,
   InquiryRowAttribute,
   MailRowAttribute,
   NoticeTableRowAttribute,
@@ -533,6 +534,44 @@ export function courseColumns() {
         <div style={{ textAlign: "center" }}>{jpDate(getValue())}</div>
       ),
       enableSorting: false,
+    }),
+  ];
+
+  return columns;
+}
+
+const attendeeHelper = createColumnHelper<AttendeeRowAttribute>();
+
+export function attendeeColumns() {
+  const columns: ColumnDef<AttendeeRowAttribute, any>[] = [
+    attendeeHelper.accessor("name", {
+      header: () => "氏名",
+      cell: ({ getValue }) => <div style={{ textAlign: "center" }}>{getValue()}</div>,
+    }),
+    attendeeHelper.accessor("email", {
+      header: () => "メールアドレス",
+      cell: ({ getValue }) => <div style={{ textAlign: "center" }}>{getValue()}</div>,
+      size: 200,
+    }),
+    attendeeHelper.accessor("start_date", {
+      header: () => "受講開発日",
+      cell: ({ getValue }) => <div style={{ textAlign: "center" }}>{jpDate(getValue())}</div>,
+    }),
+    attendeeHelper.accessor("progress_rate", {
+      header: () => "進捗率",
+      cell: ({ getValue }) => <div style={{ textAlign: "center" }}>{getValue()}</div>,
+    }),
+    attendeeHelper.accessor("highest_score", {
+      header: () => "最高点",
+      cell: ({ getValue }) => <div style={{ textAlign: "center" }}>{getValue()}</div>,
+    }),
+    attendeeHelper.accessor("latest_score", {
+      header: () => "最新点",
+      cell: ({ getValue }) => <div style={{ textAlign: "center" }}>{getValue()}</div>,
+    }),
+    attendeeHelper.accessor("completion_date", {
+      header: () => "受講完了日",
+      cell: ({ getValue }) => <div style={{ textAlign: "center" }}>{jpDate(getValue()) ?? "-"}</div>,
     }),
   ];
 
