@@ -44,7 +44,7 @@ class AuthenticatedSessionController extends Controller
 
     public function updatePlayback(Request $request, ExplainerVideo $video, AuthenticatedService $service)
     {
-        Gate::authorize('check-membership', [['admin']]);
+        Gate::authorize('check-membership', [['individual']]);
 
         return $service->updatePlayback($request, $video);
     }
