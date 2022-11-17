@@ -27,15 +27,17 @@ class AttendingCourseSeeder extends Seeder
             $courses_attending = $public_courses->random(rand(floor($course_count * .8), $course_count));
 
             $courses_attending->each(function ($course) use ($student, &$attending_courses) {
+                $status = fake()->boolean(80) ? AttendingCourse::ATTENDING : AttendingCourse::COMPLETE;
+
                 $attending_courses[] = [
                     'user_id' => $student->id,
                     'course_id' => $course->id,
-                    'status' => fake()->boolean(80) ? AttendingCourse::ATTENDING : AttendingCourse::COMPLETE,
+                    'status' => $status,
                     // inaccurate seeders;
                     // progress_rate, highest_score, latest_score, start_date, and completion_date are dependent on
                     // students tests. 
                     // TO BE UPDATED WHEN user_answers TABLE HAS BEEN CREATED
-                    'progress_rate' => 0,
+                    'progress_rate' => $status === AttendingCourse::COMPLETE ? 1.00 : 0.00,
                     'highest_score' => 0,
                     'latest_score' => 0,
                     'start_date' => now(),

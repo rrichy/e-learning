@@ -1,4 +1,4 @@
-import { jpDate } from "@/mixins/jpFormatter";
+import { jpDate } from "@/utils/jpFormatter";
 import DisabledComponentContextProvider from "@/providers/DisabledComponentContextProvider";
 import { showNotice } from "@/services/NoticeService";
 import {

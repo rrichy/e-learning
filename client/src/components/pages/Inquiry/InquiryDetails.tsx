@@ -1,4 +1,4 @@
-import { jpDate } from "@/mixins/jpFormatter";
+import { jpDate } from "@/utils/jpFormatter";
 import { get } from "@/services/ApiService";
 import { Close } from "@mui/icons-material";
 import {

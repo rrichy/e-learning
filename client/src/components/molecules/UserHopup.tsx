@@ -2,7 +2,7 @@ import { MembershipType } from "@/enums/membershipTypes";
 import useAlerter from "@/hooks/useAlerter";
 import useAuth from "@/hooks/useAuth";
 import { userInit } from "@/interfaces/AuthAttributes";
-import { logout } from "@/services/AuthService";
+import { post } from "@/services/ApiService";
 import {
   Avatar,
   Divider,
@@ -12,6 +12,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import {
@@ -22,9 +23,20 @@ import {
 } from "../atoms/Icons";
 
 function UserHopup() {
+  const queryClient = useQueryClient();
   const { isAuthenticated, setUnauthorized, authData } = useAuth();
   const { errorSnackbar, successSnackbar } = useAlerter();
   const navigate = useNavigate();
+
+  const { mutate } = useMutation(() => post("/api/logout"), {
+    onSuccess: (res: any) => successSnackbar(res.data.message),
+    onError: (e: any) => errorSnackbar(e.message),
+    onSettled: () => {
+      setUnauthorized();
+      navigate("/login");
+      queryClient.clear();
+    }
+  })
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -36,18 +48,6 @@ function UserHopup() {
 
   const handleClose = () => {
     setAnchorEl(null);
-  };
-
-  const handleLogout = async () => {
-    try {
-      const res = await logout();
-      successSnackbar(res.data.message);
-    } catch (e: any) {
-      errorSnackbar(e.message);
-    } finally {
-      setUnauthorized();
-      navigate("/login");
-    }
   };
 
   if (!isAuthenticated) return null;
@@ -141,7 +141,7 @@ function UserHopup() {
           </MenuItem>
         )}
         {user.membership_type_id !== MembershipType.admin && <Divider />}
-        <MenuItem onClick={handleLogout}>
+        <MenuItem onClick={() => mutate()}>
           <LogoutIcon />
           ログアウト
         </MenuItem>

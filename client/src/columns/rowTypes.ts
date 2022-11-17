@@ -1,4 +1,3 @@
-
 export interface NoticeTableRowAttribute {
   id: number;
   author: string;
@@ -25,4 +24,14 @@ export type MailRowAttribute = {
   priority: number;
   signature_id: number;
   reordered?: boolean;
+};
+
+export type AttendeeRowAttribute = {
+  name: string;
+  email: string;
+  start_date: string;
+  progress_rate: number;
+  highest_score: number | null;
+  latest_score: number | null;
+  completion_date: string | null;
 };

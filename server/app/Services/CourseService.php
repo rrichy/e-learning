@@ -13,6 +13,7 @@ use App\Models\Category;
 use App\Models\Chapter;
 use App\Models\Course;
 use App\Models\ExplainerVideo;
+use App\Models\MembershipType;
 use App\Models\Question;
 use App\Models\QuestionOption;
 use App\Models\Test;
@@ -259,26 +260,15 @@ class CourseService
     }
 
 
-    public function listAttendees(Request $request, Course $course, $auth)
+    public function listAttendees(array $filters, Course $course, $auth)
     {
         if ($auth->isCorporate() && $auth->affiliation_id !== $course->category->affiliation_id) {
             throw new Exception('You do not own this course!');
         }
 
-        $order = $request->input('order', 'asc');
-        $per_page = $request->input('per_page', '10');
-        $sort = $request->input('sort', 'id');
-
-        $filters = $request->validate([
-            'affiliation_id' => 'numeric',
-            'name' => 'string',
-            'email' => 'string',
-            'remarks' => 'string',
-            'never_logged_in' => 'boolean',
-            'logged_in_min_date' => 'required_with:logged_in_max_date',
-            'logged_in_max_date' => 'required_with:logged_in_min_date',
-            'narrowed_by' => 'numeric|in:1,2,3',
-        ]);
+        $order = $filters['order'] ?? 'asc';
+        $per_page = $filters['per_page'] ?? 10;
+        $sort = $filters['sort'] ?? 'id';
 
         return AttendeeResource::collection(
             $course->attendingCourses()
@@ -293,6 +283,7 @@ class CourseService
                     'attending_courses.completion_date'
                 ])
                 ->join('users', 'users.id', '=', 'attending_courses.user_id')
+                ->where('users.membership_type_id', MembershipType::INDIVIDUAL)
                 ->when(!empty($filters), fn ($query) => $this->filterAttendees($query, $filters))
                 ->orderBy($sort, $order)
                 ->paginate($per_page)

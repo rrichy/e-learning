@@ -27,6 +27,20 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+/* 
+TODO: how attending course is populated, updated
+TODO: course management searching functionalities
+TODO: fix double requests due to React18 strict mode
+    known pages: [individual]: homepage, course, test, lecture
+        [admin]: course, account-management/{id}/details, account-management/{id}/edit, notice-management/{id}/edit,
+    all: fetching logged in data
+
+TODO: unnecessary option request on [admin] my-page
+TODO: account-management/{id}/detail tables
+
+TODO: comprehension test details ???
+ */
+
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
     Route::post('/upload', [AuthenticatedSessionController::class, 'upload']);

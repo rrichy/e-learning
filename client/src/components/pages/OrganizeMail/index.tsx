@@ -24,7 +24,7 @@ import { DropResult } from "@hello-pangea/dnd";
 import { useMyTable } from "@/hooks/useMyTable";
 import { organizedMailColumns } from "@/columns";
 import { MailRowAttribute } from "@/columns/rowTypes";
-import generateLookup from "@/mixins/generateLookup";
+import generateLookup from "@/utils/generateLookup";
 
 function OrganizeMail() {
   const { isConfirmed } = useConfirm();

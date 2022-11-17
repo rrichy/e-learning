@@ -16,7 +16,7 @@ class AttendingCourseHomepageResource extends JsonResource
     {
         // return parent::toArray($request);
         return [
-            'progress_rate' => $this->progress_rate,
+            'progress_rate' => $this->progress_rate * 100,
             'completion_date' => $this->completion_date,
             'start_date' => $this->start_date,
             'status' => $this->status,

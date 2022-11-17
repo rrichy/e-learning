@@ -14,7 +14,7 @@ import {
 import MaterialTable from "material-table";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Button from "@/components/atoms/Button";
-import { jpDate } from "@/mixins/jpFormatter";
+import { jpDate } from "@/utils/jpFormatter";
 import Link from "@/components/atoms/Link";
 
 interface CourseManagementAccordionProps {

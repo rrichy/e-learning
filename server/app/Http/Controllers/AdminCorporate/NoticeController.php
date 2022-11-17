@@ -19,7 +19,7 @@ class NoticeController extends Controller
         $valid = $request->validate([
             'order' => 'string|in:asc,desc',
             'per_page' => 'numeric',
-            'sort' => 'string|in:id,author,subject,priority'
+            'sort' => 'string|in:id,author,subject,priority,created_at'
         ]);
 
         try {

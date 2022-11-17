@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\AdminCorporate;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AttendeeListRequest;
 use App\Http\Requests\CourseRequest;
 use App\Http\Resources\AttendeeResource;
 use App\Models\Course;
@@ -84,12 +85,12 @@ class CourseController extends Controller
         ]);
     }
 
-    public function attendees(Request $request, Course $course, CourseService $service)
+    public function attendees(AttendeeListRequest $request, Course $course, CourseService $service)
     {
         Gate::authorize('check-membership', [['admin', 'corporate']]);
 
         try {
-            $attendees = $service->listAttendees($request, $course, auth()->user());
+            $attendees = $service->listAttendees($request->validated(), $course, auth()->user());
         } catch (Exception $ex) {
             abort(500, $ex->getMessage());
         }
