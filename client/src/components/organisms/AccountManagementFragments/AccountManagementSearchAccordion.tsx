@@ -16,67 +16,40 @@ import {
   initAccountManagementDefault,
 } from "@/validations/SearchFormValidation";
 import { FormContainer, useForm } from "react-hook-form-mui";
-import { useQuery } from "@tanstack/react-query";
-import { getOptions } from "@/services/CommonService";
+import { getCacheableOptions } from "@/services/CommonService";
 import { OptionAttribute } from "@/interfaces/CommonInterface";
 import { MembershipType, MembershipTypeJp } from "@/enums/membershipTypes";
 
-const buttonStyle = (open: boolean) => {
-  if (open)
-    return {
-      height: "60px !important",
-      "& svg": {
-        transition: "200ms transform",
-        transform: "rotate(180deg)",
-      },
-      borderBottomLeftRadius: 0,
-      borderBottomRightRadius: 0,
-    };
-
-  return {
-    height: "60px !important",
-    "& svg": {
-      transition: "200ms transform",
-    },
-  };
-};
-
 const { corporate, individual, trial } = MembershipType;
 
-export const useOptions = () =>
-  useQuery(
-    ["affiliations", "departments", "child_departments"],
-    async () => {
-      const res = await getOptions([
-        "affiliations",
-        "departments",
-        "child_departments",
-      ]);
-      return res.data;
-    },
-    {
-      staleTime: 10_000,
-      refetchOnWindowFocus: false,
-    }
-  );
+type DepartmentOptionsType = (OptionAttribute & { affiliation_id: number })[];
+type ChildDepartmentOptionsType = (OptionAttribute & {
+  affiliation_id: number;
+  parent_id: number;
+})[];
 
 function AccountManagementSearchAccordion({
   onSubmit,
 }: {
   onSubmit: (r: AccountManagementSearchAttributes) => void;
 }) {
-  const { data, isLoading } = useOptions();
+  const [open, setOpen] = useState(false);
+  const { options, fetchingOptions } = getCacheableOptions(
+    "affiliations",
+    "departments",
+    "child_departments"
+  );
+
   const form = useForm<AccountManagementSearchAttributes>({
     mode: "onChange",
     defaultValues: initAccountManagementDefault,
     resolver: yupResolver(accountManagementSearchSchema),
   });
-  const [open, setOpen] = useState(false);
 
   const memberships = useMemo(
     () =>
       [
-        { id: 0, name: "未選択", selectionType: "disabled" },
+        { id: 0, name: "未選択" },
         { id: corporate, name: MembershipTypeJp[corporate] },
         { id: individual, name: MembershipTypeJp[individual] },
         { id: trial, name: MembershipTypeJp[trial] },
@@ -90,76 +63,70 @@ function AccountManagementSearchAccordion({
   ]);
 
   const affiliations = useMemo(() => {
-    if (isLoading)
-      return [{ id: 0, name: "未選択", selectionType: "disabled" }];
+    if (fetchingOptions || !options?.affiliations)
+      return [{ id: 0, name: "未選択" }];
     return [
-      { id: 0, name: "未選択", selectionType: "disabled" },
-      ...(data ? data.affiliations : []),
+      { id: 0, name: "未選択" },
+      ...options.affiliations,
     ] as OptionAttribute[];
-  }, [data, isLoading]);
+  }, [options?.affilations, fetchingOptions]);
 
   const departments = useMemo(() => {
-    const depts: (OptionAttribute & { affiliation_id: number })[] = [];
+    const depts: DepartmentOptionsType = [];
 
-    if (isLoading) {
+    if (fetchingOptions || !options?.departments) {
       depts.push({
         id: 0,
         name: "未選択",
-        selectionType: "disabled",
         affiliation_id: 0,
       });
     } else {
+      const departments = options.departments as DepartmentOptionsType;
       depts.push(
-        { id: 0, name: "未選択", selectionType: "disabled", affiliation_id: 0 },
-        ...(data
-          ? !affiliation_id
-            ? data.departments
-            : data.departments.filter(
-                (a: any) => a.affiliation_id === affiliation_id
-              )
-          : [])
+        { id: 0, name: "未選択", affiliation_id: 0 },
+        ...(!affiliation_id
+          ? departments
+          : departments.filter((a: any) => a.affiliation_id === affiliation_id))
       );
     }
 
     return depts;
-  }, [data, isLoading, affiliation_id]);
+  }, [options?.departments, fetchingOptions, affiliation_id]);
 
   const child_departments = useMemo(() => {
-    const depts: (OptionAttribute & {
-      affiliation_id: number;
-      parent_id: number;
-    })[] = [];
+    const depts: ChildDepartmentOptionsType = [];
 
-    if (isLoading) {
+    if (fetchingOptions || !options?.child_departments) {
       depts.push({
         id: 0,
         name: "未選択",
-        selectionType: "disabled",
         affiliation_id: 0,
         parent_id: 0,
       });
     } else {
+      const child_departments =
+        options?.child_departments as ChildDepartmentOptionsType;
       depts.push(
         {
           id: 0,
           name: "未選択",
-          selectionType: "disabled",
           affiliation_id: 0,
           parent_id: 0,
         },
 
-        ...(data
-          ? !(department_1 || affiliation_id)
-            ? data.child_departments
-            : data.child_departments.filter(
-                (a: any) => a.parent_id === department_1
-              )
-          : [])
+        ...(!(department_1 || affiliation_id)
+          ? child_departments
+          : child_departments.filter((a: any) => a.parent_id === department_1))
       );
     }
 
     return depts;
-  }, [data, isLoading, affiliation_id, department_1]);
+  }, [
+    options?.child_departments,
+    fetchingOptions,
+    affiliation_id,
+    department_1,
+  ]);
 
   const { isDirty, isValid } = form.formState;
 
@@ -284,3 +251,23 @@ function AccountManagementSearchAccordion({
 }
 
 export default AccountManagementSearchAccordion;
+
+const buttonStyle = (open: boolean) => {
+  if (open)
+    return {
+      height: "60px !important",
+      "& svg": {
+        transition: "200ms transform",
+        transform: "rotate(180deg)",
+      },
+      borderBottomLeftRadius: 0,
+      borderBottomRightRadius: 0,
+    };
+
+  return {
+    height: "60px !important",
+    "& svg": {
+      transition: "200ms transform",
+    },
+  };
+};

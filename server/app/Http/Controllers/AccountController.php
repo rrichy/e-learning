@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AccountIndexRequest;
 use App\Http\Requests\AccountStoreUpdateRequest;
 use App\Models\User;
 use App\Services\AccountService;
@@ -11,12 +12,12 @@ use Illuminate\Support\Facades\Gate;
 
 class AccountController extends Controller
 {
-    public function index(Request $request, AccountService $service)
+    public function index(AccountIndexRequest $request, AccountService $service)
     {
         Gate::authorize('check-membership', [['admin', 'corporate']]);
 
         try {
-            $list = $service->list($request, auth()->user());
+            $list = $service->index($request->validated(), auth()->user());
         } catch (Exception $ex) {
             abort(500, $ex->getMessage());
         }
