@@ -1,6 +1,6 @@
 import { Box, Collapse, Paper, Stack } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Button from "@/components/atoms/Button";
 import {
   ConditionalDateRange,
@@ -10,8 +10,7 @@ import {
 } from "@/components/molecules/LabeledHookForms";
 import { OptionAttribute } from "@/interfaces/CommonInterface";
 import { FormContainer, useForm } from "react-hook-form-mui";
-import { useQuery } from "@tanstack/react-query";
-import { getOptions } from "@/services/CommonService";
+import { getCacheableOptions } from "@/services/CommonService";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
   CourseAttendeeSearchAttributes,
@@ -24,27 +23,23 @@ function CourseAttendeeSearch({
 }: {
   onSubmit: (r: CourseAttendeeSearchAttributes) => void;
 }) {
-  const { data: affiliations } = useQuery(
-    ["affiliations"],
-    async () => {
-      const res = await getOptions(["affiliations"]);
-      return [
-        { id: 0, name: "未選択", selectionType: "disabled" },
-        ...res.data.affiliations,
-      ] as OptionAttribute[];
-    },
-    {
-      staleTime: 10_000,
-      refetchOnWindowFocus: false,
-      placeholderData: [{ id: 0, name: "未選択", selectionType: "disabled" }],
-    }
-  );
+  const [open, setOpen] = useState(false);
+  const { options, fetchingOptions } = getCacheableOptions("affiliations");
+
+  const affiliations = useMemo(() => {
+    if (fetchingOptions || !options?.affiliations)
+      return [{ id: 0, name: "未選択" }];
+    return [
+      { id: 0, name: "未選択" },
+      ...options.affiliations,
+    ] as OptionAttribute[];
+  }, [options?.affilations, fetchingOptions]);
+
   const form = useForm({
     mode: "onChange",
     defaultValues: initCourseAttendeeDefault,
     resolver: yupResolver(courseAttendeeSearchSchema),
   });
-  const [open, setOpen] = useState(false);
 
   const { isDirty, isValid } = form.formState;
 
@@ -52,20 +47,11 @@ function CourseAttendeeSearch({
     <Box>
       <Button
         variant="contained"
-        sx={{
-          height: "60px !important",
-          "& svg": {
-            transition: "200ms transform",
-            ...(open ? { transform: "rotate(180deg)" } : {}),
-          },
-          ...(open
-            ? { borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }
-            : {}),
-        }}
+        sx={buttonStyle(open)}
         onClick={() => setOpen(!open)}
         endIcon={<ExpandMoreIcon fontSize="large" />}
       >
-        Search Accounts
+        受講者を検索
       </Button>
       <Collapse in={open}>
         <Paper
@@ -80,7 +66,7 @@ function CourseAttendeeSearch({
               <Selection
                 name="affiliation_id"
                 label="所属"
-                options={affiliations ?? []}
+                options={affiliations}
               />
               <TextField name="name" label="氏名" />
               <TextField name="email" label="メールアドレス" />
@@ -139,3 +125,23 @@ function CourseAttendeeSearch({
 }
 
 export default CourseAttendeeSearch;
+
+const buttonStyle = (open: boolean) => {
+  if (open)
+    return {
+      height: "60px !important",
+      "& svg": {
+        transition: "200ms transform",
+        transform: "rotate(180deg)",
+      },
+      borderBottomLeftRadius: 0,
+      borderBottomRightRadius: 0,
+    };
+
+  return {
+    height: "60px !important",
+    "& svg": {
+      transition: "200ms transform",
+    },
+  };
+};
