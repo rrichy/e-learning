@@ -35,7 +35,7 @@ TODO: fix double requests due to React18 strict mode
         [admin]: course, account-management/{id}/details, account-management/{id}/edit, notice-management/{id}/edit,
     all: fetching logged in data
 
-TODO: unnecessary option request on [admin] my-page
+TODO: #2322 unnecessary option request on [admin] my-page
 TODO: account-management/{id}/detail tables
 
 TODO: comprehension test details ???
