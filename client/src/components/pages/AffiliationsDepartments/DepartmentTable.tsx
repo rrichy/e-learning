@@ -29,7 +29,8 @@ function DepartmentTable() {
   const [dialog, setDialog] =
     useState<PageDialogProps<DepartmentFormAttributeWithId>>(null);
   const [expanded, setExpanded] = useState<ExpandedState>({});
-  const { sorter, selector, pagination, setPagination, resetTable } = useMyTable();
+  const { sorter, selector, pagination, setPagination, resetTable } =
+    useMyTable();
   const { tableData, fetchingData } = getData({
     sort: sorter.sort,
     setSort: sorter.setSort,
@@ -126,7 +127,12 @@ function DepartmentTable() {
         </Stack>
       </Paper>
       <OptionsContextProvider
-        options={{ affiliation_id: options.affiliations ?? [] }}
+        options={{
+          affiliation_id: [
+            { id: 0, name: "未選択", selectionType: "disabled" },
+            ...(options.affiliations ?? []),
+          ],
+        }}
       >
         <DepartmentAddEdit
           state={dialog}

@@ -217,7 +217,10 @@ function OrganizeMail() {
               sorter.sort,
             ])
           }
-          signatures={options.signatures ?? []}
+          signatures={[
+            { id: 0, name: "未選択", selectionType: "disabled" },
+            ...(options.signatures ?? []),
+          ]}
         />
       </Paper>
     </Stack>
