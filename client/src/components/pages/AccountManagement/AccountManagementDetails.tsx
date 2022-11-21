@@ -6,6 +6,7 @@ import { UserAttributes } from "@/interfaces/AuthAttributes";
 import { showAccount } from "@/services/AccountService";
 import { MembershipType, MembershipTypeJp } from "@/enums/membershipTypes";
 import { useQuery } from "@tanstack/react-query";
+import { jpDate } from "@/utils/jpFormatter";
 
 function AccountManagementDetails() {
   const navigate = useNavigate();
@@ -48,7 +49,7 @@ function AccountManagementDetails() {
             <Informer label="氏名" value={data?.name} />
             <Informer label="メールアドレス" value={data?.email} />
             <Informer label="性別" value={["", "男性", "女性"][data?.sex!]} />
-            <Informer label="生年月日" value={data?.birthday} />
+            <Informer label="生年月日" value={jpDate(data?.birthday)} />
             <Informer
               label="権限"
               value={
