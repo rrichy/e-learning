@@ -39,6 +39,9 @@ TODO: #2322 unnecessary option request on [admin] my-page
 TODO: account-management/{id}/detail tables
 
 TODO: comprehension test details ???
+TODO: targets on notice and course info
+
+TODO: supply only what is required on course/{id}?tabulated=true
  */
 
 Route::middleware(['auth:sanctum'])->group(function () {
