@@ -46,6 +46,7 @@ function CommonProfile ({name, image, plan, registered_date}: CommonProfileProps
           variant="contained"
           type="button"
           rounded
+          to="/profile/application"
         >
           オプション申込み
         </Button>

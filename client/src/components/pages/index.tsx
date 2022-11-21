@@ -14,7 +14,7 @@ import Public from "./Public";
 import { MembershipType } from "@/enums/membershipTypes";
 import Register from "./Register";
 import MyPage from "./MyPage";
-import ChangePlan from "./ChangePlan";
+import ChangePlan from "./Profile/ChangePlan";
 import ChangePassword from "./ChangePassword";
 import Header from "../organisms/Header";
 import CourseManagement from "./CourseManagement";
@@ -45,10 +45,11 @@ import StudentChapterDisplay from "./Student/StudentChapterDisplay";
 import TestDetailsDisplay from "../organisms/Student/TestDetailsDisplay";
 import TestAnswerScreen from "../organisms/Student/TestAnswerScreen";
 import TestResult from "../organisms/Student/TestResult";
-import StudentProfile from "./StudentProfile";
+import StudentProfile from "./Profile";
 import StudentLecture from "./Student/StudentLecture";
 import Inquiries from "./Inquiry";
 import InquiryAdd from "./Inquiry/InquiryAdd";
+import OptionApplication from "./Profile/OptionApplication";
 import CourseManagementEdit from "./CourseManagement/CourseManagementEdit";
 
 const { trial, individual, corporate, admin, guest } = MembershipType;
@@ -332,6 +333,10 @@ export default function Pages() {
         {
           path: "plan",
           element: <ChangePlan />,
+        },
+        {
+          path: "application",
+          element: <OptionApplication />,
         },
       ],
     },
