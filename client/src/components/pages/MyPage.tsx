@@ -1,6 +1,7 @@
 import { Paper, Stack, Typography } from "@mui/material";
 import { FormContainer, useForm } from "react-hook-form-mui";
 import AccountManagementForm from "@/components/organisms/AccountManagementFragments/AccountManagementForm";
+import AccountManagementAdminForm from "@/components/organisms/AccountManagementFragments/AccountManagementAdminForm";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { adminRegistrationFormSchema } from "@/validations/RegistrationFormValidation";
 import useConfirm from "@/hooks/useConfirm";
@@ -196,11 +197,15 @@ function MyPage() {
               formContext={formContext}
               handleSubmit={handleSubmit}
             >
+              {authData && membershipTypeId === admin ? <AccountManagementAdminForm
+                mode="edit"
+                personal
+              /> : 
               <AccountManagementForm
                 mode="edit"
                 personal
                 optionUpdateFn={updateOptions}
-              />
+              />}
               <Stack direction="row" spacing={2} justifyContent="center" mt={3}>
                 <Button
                   color="dull"
