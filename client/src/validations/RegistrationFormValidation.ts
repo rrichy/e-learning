@@ -1,4 +1,5 @@
 import { MembershipType } from "@/enums/membershipTypes";
+import { OptionAttribute } from "@/interfaces/CommonInterface";
 import { InferType } from "yup";
 import Yup from "./localizedYup";
 
@@ -55,3 +56,9 @@ export const adminRegistrationFormInit: AdminRegistrationFormAttribute = {
   department_2: 0,
   remarks: "",
 };
+
+export type DepartmentOptionsType = (OptionAttribute & { affiliation_id: number })[];
+export type ChildDepartmentOptionsType = (OptionAttribute & {
+  affiliation_id: number;
+  parent_id: number;
+})[];

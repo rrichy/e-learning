@@ -7,6 +7,5 @@ export default function generateLookup(options?: OptionAttribute[]) {
     lookup[id as number] = name;
   });
 
-console.log(lookup);
   return lookup;
 }

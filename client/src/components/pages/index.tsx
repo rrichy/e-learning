@@ -24,7 +24,7 @@ import CourseDetail from "./CourseManagement/CourseDetail";
 import ConditionalMail from "./CourseManagement/ConditionalMail";
 import CourseDetailCorrection from "./CourseManagement/CourseDetailCorrection";
 import AccountManagement from "./AccountManagement";
-import AccountManagementAddEdit from "./AccountManagement/AccountManagementAddEdit";
+import AccountManagementAdd from "./AccountManagement/AccountManagementAdd";
 import AccountManagementDetails from "./AccountManagement/AccountManagementDetails";
 import CategoryManagement from "./CategoryManagement";
 import AffiliationsDepartments from "./AffiliationsDepartments";
@@ -51,6 +51,7 @@ import Inquiries from "./Inquiry";
 import InquiryAdd from "./Inquiry/InquiryAdd";
 import OptionApplication from "./Profile/OptionApplication";
 import CourseManagementEdit from "./CourseManagement/CourseManagementEdit";
+import AccountManagementEdit from "./AccountManagement/AccountManagementEdit";
 
 const { trial, individual, corporate, admin, guest } = MembershipType;
 const registered = [trial, individual, corporate, admin];
@@ -174,11 +175,11 @@ export default function Pages() {
         },
         {
           path: "create",
-          element: <AccountManagementAddEdit />,
+          element: <AccountManagementAdd />,
         },
         {
           path: ":accountId/edit",
-          element: <AccountManagementAddEdit />,
+          element: <AccountManagementEdit />,
         },
         {
           path: ":accountId/details",

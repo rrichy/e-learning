@@ -42,6 +42,9 @@ TODO: comprehension test details ???
 TODO: targets on notice and course info
 
 TODO: supply only what is required on course/{id}?tabulated=true
+TODO: supply only what is required on account-management/{id}/details?parsed=true
+TODO: change option updates of /account-management/(create|{id}/edit) similar to account-management's search component
+TODO: account search, edit, create: affiliation_id, department_1 and department_2 should have no options
  */
 
 Route::middleware(['auth:sanctum'])->group(function () {

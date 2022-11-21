@@ -19,14 +19,9 @@ import { FormContainer, useForm } from "react-hook-form-mui";
 import { getCacheableOptions } from "@/services/CommonService";
 import { OptionAttribute } from "@/interfaces/CommonInterface";
 import { MembershipType, MembershipTypeJp } from "@/enums/membershipTypes";
+import { ChildDepartmentOptionsType, DepartmentOptionsType } from "@/validations/RegistrationFormValidation";
 
 const { corporate, individual, trial } = MembershipType;
-
-type DepartmentOptionsType = (OptionAttribute & { affiliation_id: number })[];
-type ChildDepartmentOptionsType = (OptionAttribute & {
-  affiliation_id: number;
-  parent_id: number;
-})[];
 
 function AccountManagementSearchAccordion({
   onSubmit,
