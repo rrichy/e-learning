@@ -18,7 +18,7 @@ import ChangePlan from "./ChangePlan";
 import ChangePassword from "./ChangePassword";
 import Header from "../organisms/Header";
 import CourseManagement from "./CourseManagement";
-import CourseManagementAddEdit from "./CourseManagement/CourseManagementAddEdit";
+import CourseManagementAdd from "./CourseManagement/CourseManagementAdd";
 import ComprehensionTestAdd from "./CourseManagement/ComprehensionTestAdd";
 import CourseDetail from "./CourseManagement/CourseDetail";
 import ConditionalMail from "./CourseManagement/ConditionalMail";
@@ -49,6 +49,7 @@ import StudentProfile from "./StudentProfile";
 import StudentLecture from "./Student/StudentLecture";
 import Inquiries from "./Inquiry";
 import InquiryAdd from "./Inquiry/InquiryAdd";
+import CourseManagementEdit from "./CourseManagement/CourseManagementEdit";
 
 const { trial, individual, corporate, admin, guest } = MembershipType;
 const registered = [trial, individual, corporate, admin];
@@ -118,11 +119,11 @@ export default function Pages() {
         },
         {
           path: "create",
-          element: <CourseManagementAddEdit />,
+          element: <CourseManagementAdd />,
         },
         {
           path: ":courseId/edit",
-          element: <CourseManagementAddEdit />,
+          element: <CourseManagementEdit />,
         },
       ],
     },

@@ -261,13 +261,13 @@ const getData = ({
 
 const courseResult = (courseId: number) => {
   const { data, isFetching } = useQuery(
-    ["course-detail", courseId],
+    ["course-details-view", courseId],
     async () => {
       const res = await showCourse(courseId, true);
       return res.data.data as CourseFormAttributeWithId;
     },
     {
-      staleTime: 3_000,
+      staleTime: 5_000,
       refetchOnWindowFocus: false,
       enabled: !!courseId,
     }
