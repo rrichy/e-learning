@@ -1,76 +1,66 @@
 import { Avatar, Grid, Paper, Stack, Typography } from "@mui/material";
 import Button from "@/components/atoms/Button";
 import DisabledComponentContextProvider from "@/providers/DisabledComponentContextProvider";
-import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { userInit } from "@/interfaces/AuthAttributes";
-import useAlerter from "@/hooks/useAlerter";
+import { UserAttributes } from "@/interfaces/AuthAttributes";
 import { showAccount } from "@/services/AccountService";
-import { MembershipTypeJp } from "@/enums/membershipTypes";
+import { MembershipType, MembershipTypeJp } from "@/enums/membershipTypes";
+import { useQuery } from "@tanstack/react-query";
 
 function AccountManagementDetails() {
-  const mounted = useRef(true);
   const navigate = useNavigate();
   const { accountId } = useParams();
-  const [user, setUser] = useState(userInit);
-  const [initialized, setInitialized] = useState(false);
-  const { errorSnackbar } = useAlerter();
 
-  useEffect(() => {
-    mounted.current = true;
+  const { data, isFetching } = useQuery(
+    ["account-details-view", +accountId!],
+    async () => {
+      const res = await showAccount(+accountId!, true);
+      const { affiliation_id, department_1, department_2, ...data } =
+        res.data.data;
 
-    if (accountId) {
-      (async () => {
-        try {
-          const res = await showAccount(+accountId, true);
-          const { affiliation_id, department_1, department_2, ...data } =
-            res.data.data;
-
-          setUser({
-            ...data,
-            affiliation_id: affiliation_id ?? 0,
-            department_1: department_1 ?? 0,
-            department_2: department_2 ?? 0,
-          });
-        } catch (e: any) {
-          errorSnackbar(e.message);
-        } finally {
-          setInitialized(true);
-        }
-      })();
+      return {
+        ...data,
+        affiliation_id: affiliation_id ?? 0,
+        department_1: department_1 ?? 0,
+        department_2: department_2 ?? 0,
+      } as UserAttributes;
+    },
+    {
+      refetchOnWindowFocus: false,
+      enabled: !!accountId,
     }
-
-    return () => {
-      mounted.current = false;
-    };
-  }, [accountId]);
+  );
 
   return (
     <Paper variant="outlined">
-      <DisabledComponentContextProvider showLoading value={!initialized}>
+      <DisabledComponentContextProvider showLoading value={isFetching}>
         <Stack spacing={3}>
           <Typography variant="sectiontitle2">アカウント情報</Typography>
           <Grid container item spacing={2} xs={12}>
             <Grid item xs={0} sm={5} />
             <Grid item xs={12} sm={7}>
               <Avatar
-                src={user.image ?? undefined}
-                alt={user.name}
+                src={data?.image ?? undefined}
+                alt={data?.name}
                 sx={{ m: "auto", height: 100, width: 100 }}
               />
             </Grid>
-            <Informer label="氏名" value={user.name} />
-            <Informer label="メールアドレス" value={user.email} />
-            <Informer label="性別" value={["", "男性", "女性"][user.sex!]} />
-            <Informer label="生年月日" value={user.birthday} />
+            <Informer label="氏名" value={data?.name} />
+            <Informer label="メールアドレス" value={data?.email} />
+            <Informer label="性別" value={["", "男性", "女性"][data?.sex!]} />
+            <Informer label="生年月日" value={data?.birthday} />
             <Informer
               label="権限"
-              value={MembershipTypeJp[user.membership_type_id]}
+              value={
+                MembershipTypeJp[
+                  data?.membership_type_id ?? MembershipType.trial
+                ]
+              }
             />
-            <Informer label="所属" value={user.affiliation_id_parsed} />
-            <Informer label="部署１" value={user.department_1_parsed} />
-            <Informer label="部署２" value={user.department_2_parsed} />
-            <Informer label="備考" value={user.remarks} />
+            <Informer label="所属" value={data?.affiliation_id_parsed} />
+            <Informer label="部署１" value={data?.department_1_parsed} />
+            <Informer label="部署２" value={data?.department_2_parsed} />
+            <Informer label="備考" value={data?.remarks} />
           </Grid>
           <Stack direction="row" spacing={2} justifyContent="center">
             <Button
@@ -79,11 +69,7 @@ function AccountManagementDetails() {
               rounded
               large
               type="button"
-              onClick={() =>
-                navigate(`/account-management/${accountId}/edit`, {
-                  state: user,
-                })
-              }
+              onClick={() => navigate(`/account-management/${accountId}/edit`)}
             >
               編集
             </Button>

@@ -42,18 +42,12 @@ class AccountController extends Controller
         ]);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\User  $account
-     * @return \Illuminate\Http\Response
-     */
-    public function show(User $account, AccountService $service)
+    public function show(Request $request, User $account, AccountService $service)
     {
         Gate::authorize('check-membership', [['admin', 'corporate']]);
         Gate::authorize('view-account', $account);
         
-        return $service->details($account);
+        return $service->details($account, $request->boolean('parsed'));
     }
 
     /**
@@ -68,7 +62,7 @@ class AccountController extends Controller
         Gate::authorize('check-membership', [['admin', 'corporate']]);
         Gate::authorize('update-account', $account);
 
-        $service->update($request, $account);
+        $service->update($request->validated(), $account);
 
         return response()->json([
             'message' => 'Successfully updated an account!'

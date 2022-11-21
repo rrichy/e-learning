@@ -52,9 +52,9 @@ class AccountService
     }
 
 
-    public function details(User $user)
+    public function details(User $user, bool $parsed = false)
     {
-        if (request()->input('parsed') === 'true') {
+        if ($parsed) {
             return new AccountShowParsedResource($user->load([
                 'affiliation' => fn ($q) => $q->select('id', 'name'),
                 'departments',
@@ -65,12 +65,10 @@ class AccountService
     }
 
 
-    public function update(AccountStoreUpdateRequest $request, User $user)
+    public function update(array $valid, User $user)
     {
-        $valid = $request->validated();
-
         DB::transaction(function () use ($valid, $user) {
-            $s3_image_url = auth()->user()->temporaryUrls()->where('directory', 'profiles/')->first();
+            $s3_image_url = $user->temporaryUrls()->where('directory', 'profiles/')->first();
 
             if ($s3_image_url) {
                 $s3_image_url->delete();

@@ -18,7 +18,11 @@ function AccountManagementForm({
 }: {
   mode: "add" | "edit";
   optionUpdateFn?: (
-    a: "affiliation_id" | "department_1" | "department_2",
+    a:
+      | "membership_type_id"
+      | "affiliation_id"
+      | "department_1"
+      | "department_2",
     d: number
   ) => void;
 }) {
@@ -77,6 +81,11 @@ function AccountManagementForm({
               { id: corporate, name: "法人" },
               { id: admin, name: "管理者" },
             ]}
+            onChange={
+              optionUpdateFn
+                ? (e) => optionUpdateFn("membership_type_id", e as number)
+                : undefined
+            }
           />
           <Selection
             name="affiliation_id"

@@ -23,10 +23,14 @@ function useAccountFormHelper(
   ]);
 
   const updateOptions = async (
-    name: "affiliation_id" | "department_1" | "department_2",
+    name: "membership_type_id" | "affiliation_id" | "department_1" | "department_2",
     value: number
   ) => {
-    if (name === "affiliation_id") {
+    if (name === "membership_type_id" && value === trial) {
+      form.setValue("affiliation_id", 0);
+      form.setValue("department_1", 0);
+      form.setValue("department_2", 0);
+    } else if(name === "affiliation_id") {
       form.setValue("department_1", 0);
       form.setValue("department_2", 0);
     } else if (name === "department_1") {
