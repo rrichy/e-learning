@@ -197,15 +197,14 @@ function MyPage() {
               formContext={formContext}
               handleSubmit={handleSubmit}
             >
-              {authData && membershipTypeId === admin ? <AccountManagementAdminForm
-                mode="edit"
-                personal
-              /> : 
-              <AccountManagementForm
-                mode="edit"
-                personal
-                optionUpdateFn={updateOptions}
-              />}
+              {authData && membershipTypeId === admin ? 
+                <AccountManagementAdminForm /> : 
+                <AccountManagementForm
+                  mode="edit"
+                  personal
+                  optionUpdateFn={updateOptions}
+                />
+              }
               <Stack direction="row" spacing={2} justifyContent="center" mt={3}>
                 <Button
                   color="dull"
