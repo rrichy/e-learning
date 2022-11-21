@@ -37,7 +37,7 @@ function useAccountFormHelper(
       const department = departments.find(({ id }) => id === value);
       form.setValue("affiliation_id", department?.affiliation_id ?? 0);
       form.setValue("department_2", 0);
-    } else {
+    } else if (name === "department_2") {
       const department = child_departments.find(({ id }) => id === value);
       form.setValue("affiliation_id", department?.affiliation_id ?? 0);
       form.setValue("department_1", department?.parent_id ?? 0);
