@@ -2,55 +2,46 @@ import { Grid, Paper, Typography } from "@mui/material";
 import CourseDetail from "@/components/organisms/Student/CourseFragments/CourseDetail";
 import CourseTimeSpent from "@/components/organisms/Student/CourseFragments/CourseTimeSpent";
 import CourseChapterList from "@/components/organisms/Student/CourseFragments/CourseChapterList";
-import { useEffect, useRef, useState } from "react";
 import {
   CourseFormAttributeWithId,
-  courseFormInit,
 } from "@/validations/CourseFormValidation";
-import useAlerter from "@/hooks/useAlerter";
 import { showCourse } from "@/services/CourseService";
 import { useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 
 function StudentCourseDetail() {
-  const mounted = useRef(true);
   const { courseId } = useParams();
-  const { errorSnackbar } = useAlerter();
-  const [course, setCourse] = useState<CourseFormAttributeWithId>({
-    ...courseFormInit,
-    id: 0,
-    study_time: "0",
-    chapters: [],
-  });
 
-  useEffect(() => {
-    mounted.current = true;
+  const { data } = useQuery(
+    ["student-course-detail", +courseId!],
+    async () => {
+      const res = await showCourse(+courseId!);
+      const { id, study_time, chapters, ...data } =
+        res.data.data;
 
-    if (courseId) {
-      (async () => {
-        try {
-          const res = await showCourse(+courseId);
-          setCourse(res.data.data);
-        } catch (e: any) {
-          errorSnackbar(e.message);
-        }
-      })();
+      return {
+        ...data,
+        id: id ?? 0,
+        study_time: study_time,
+        chapters: chapters,
+      } as CourseFormAttributeWithId;
+    },
+    {
+      refetchOnWindowFocus: false,
+      enabled: !!courseId,
     }
-
-    return () => {
-      mounted.current = false;
-    };
-  }, [courseId, errorSnackbar]);
+  );
 
   return (
     <Grid container spacing={2}>
       <CourseDetail
-        image={course.image}
-        title={course.title}
-        content={course.content}
-        studyTime={+course.study_time!}
+        image={data?.image}
+        title={data?.title}
+        content={data?.content}
+        studyTime={+data?.study_time!}
       />
-      <CourseTimeSpent attendingCourse={course.attending_course} />
-      <CourseChapterList chapters={course.chapters} />
+      <CourseTimeSpent attendingCourse={data?.attending_course} />
+      <CourseChapterList chapters={data?.chapters} />
       <Grid item xs={12}>
         <Paper variant="softoutline" sx={{ width: 1, height: 1 }}>
           <Typography variant="sectiontitle1" component="h3">
