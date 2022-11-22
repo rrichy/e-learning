@@ -1,35 +1,28 @@
 import CourseCard from "@/components/molecules/CourseCard";
-import useAlerter from "@/hooks/useAlerter";
 import { indexCourse } from "@/services/CourseService";
 import { CourseListAttribute } from "@/validations/CourseFormValidation";
 import { Grid, Typography } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 function Courses() {
-  const mounted = useRef(true);
-  const { errorSnackbar } = useAlerter();
-  const [categories, setCategories] = useState<CourseListAttribute[]>([]);
+  const { data } = useQuery(
+    ["courses"],
+    async () => {
+      const res = await indexCourse("public");
+      const data = res.data.data;
 
-  useEffect(() => {
-    mounted.current = true;
-
-    (async () => {
-      try {
-        const res = await indexCourse("public");
-        setCategories(res.data.data);
-      } catch (e: any) {
-        errorSnackbar(e.message);
-      }
-    })();
-
-    return () => {
-      mounted.current = false;
-    };
-  }, []);
+      return data as CourseListAttribute[]
+    },
+    {
+      staleTime: 5_000,
+      keepPreviousData: true,
+      refetchOnWindowFocus: false,
+    }
+  );
 
   return (
     <Grid container spacing={6}>
-      {categories.map(({ name, courses, id }) => (
+      {data?.map(({ name, courses, id }) => (
         <Grid item xs={12} key={id}>
           <Typography variant="h2" fontSize={28} fontWeight="bold" gutterBottom>
             {name}

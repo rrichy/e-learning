@@ -17,7 +17,7 @@ import { ChapterAttributes } from "@/validations/CourseFormValidation";
 import { CourseScreenType } from "@/interfaces/CommonInterface";
 
 interface CourseChapterListProps {
-  chapters: (ChapterAttributes & {
+  chapters?: (ChapterAttributes & {
     item_number: number;
     has_passed?: boolean;
     completed_lecture?: boolean;
@@ -71,7 +71,7 @@ function CourseChapterList({ chapters, screenFn }: CourseChapterListProps) {
               },
             }}
           >
-            {chapters.map(
+            {chapters?.map(
               ({ id, item_number, title, latest_score, has_passed, completed_lecture }, index) => (
                 <Chapter
                   key={id}
