@@ -1,6 +1,6 @@
 import NoticeItem from "@/components/organisms/NoticeItem";
 import useAlerter from "@/hooks/useAlerter";
-import { initPaginatedData, OrderType } from "@/interfaces/CommonInterface";
+import { initPaginatedData, OrderType, PaginationFilterInterface } from "@/interfaces/CommonInterface";
 import { indexNotice } from "@/services/NoticeService";
 import { TABLE_ROWS_PER_PAGE } from "@/settings/appconfig";
 import { NoticeItemAttribute } from "@/validations/NoticeFormValidation";
@@ -13,7 +13,8 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useCallback, useRef, useState } from "react";
 
 function Notice() {
   const mounted = useRef(true);
@@ -21,6 +22,22 @@ function Notice() {
   const [showPagination, setShowPagination] = useState(false);
   const [notices, setNotices] = useState(
     initPaginatedData<NoticeItemAttribute>()
+  );
+  const [pagination, setPagination] = useState(1);
+
+  const { data } = useQuery(
+    ["notices", pagination],
+    async () => {
+      const res = await indexNotice(pagination, 10, "created_at", "desc");
+      const { data, meta } = res.data;
+
+      return { data, meta } as { data: NoticeItemAttribute[], meta: PaginationFilterInterface };
+    },
+    {
+      staleTime: 5_000,
+      keepPreviousData: true,
+      refetchOnWindowFocus: false,
+    }
   );
 
   const fetchData = useCallback(
@@ -74,17 +91,8 @@ function Notice() {
     setShowPagination(newState);
   };
 
-  useEffect(() => {
-    mounted.current = true;
-
-    fetchData();
-
-    return () => {
-      mounted.current = false;
-    };
-  }, []);
   return (
-    <Paper variant="outlined" sx={{ mb: 8}}>
+    <Paper variant="outlined" sx={{ mb: 8 }}>
       <Grid container>
         <Grid item xs={12} md={3}>
           <Stack
@@ -119,16 +127,16 @@ function Notice() {
           md={9}
           sx={{ "div:not(:nth-last-of-type(1))": { mb: 1 } }}
         >
-          {notices.data.length > 0
-            ? notices.data
-                .slice(0, showPagination ? 10 : 5)
-                .map((d) => <NoticeItem key={d.id} {...d} />)
+          {(data?.data?.length ?? 0) > 0
+            ? data?.data
+              .slice(0, showPagination ? 10 : 5)
+              .map((d) => <NoticeItem key={d.id} {...d} />)
             : "No notices"}
           {showPagination && (
             <Pagination
-              page={notices.page}
-              count={notices.last_page}
-              onChange={(_e, page) => fetchData(page)}
+              page={data?.meta?.current_page}
+              count={data?.meta?.last_page}
+              onChange={(_e, page) => setPagination(page)}
               size="small"
               sx={{
                 mt: 2,
