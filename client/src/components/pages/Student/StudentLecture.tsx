@@ -1,5 +1,6 @@
 import Button from "@/components/atoms/Button";
 import useChapter from "@/hooks/pages/Students/useChapter";
+import useAlerter from "@/hooks/useAlerter";
 import { getTemporaryVideoUrl } from "@/services/AuthService";
 import {
   getLectures,
@@ -17,23 +18,54 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { useQuery } from "@tanstack/react-query";
 import MUIRichTextEditor from "mui-rte";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import ReactPlayer from "react-player";
 import { OnProgressProps } from "react-player/base";
 
 interface StudentLectureProps {}
 
 function StudentLecture({}: StudentLectureProps) {
-  const mounted = useRef(true);
   const playerRef = useRef<any>(null);
-  const [initialized, setInitialized] = useState(false);
+  const { errorSnackbar } = useAlerter();
   const [initializedPlayer, setInitializedPlayer] = useState(false);
   const [lectures, setLectures] = useState<VideoAttributes[]>([]);
   const [url, setUrl] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
   const { chapterId } = useChapter();
   const [chapterNumber, setChapterNumber] = useState(1);
+
+  const { isFetching: lectureIsFetching } = useQuery(
+    ["lecture-details", chapterId],
+    () => getLectures(chapterId!),
+    {
+      refetchOnWindowFocus: false,
+      onSuccess: (res) => {
+        setLectures(res.data.data);
+        setChapterNumber(res.data.chapterNumber);
+      },
+      onError: (e: any) => errorSnackbar(e.message),
+    }
+  );
+
+  const { isFetching: urlIsFetching } = useQuery(
+    ["temporary-url", lectures[0]?.video_file_path],
+    () => getTemporaryVideoUrl(lectures[0].video_file_path),
+    {
+      enabled: !!lectures[0]?.video_file_path,
+      refetchOnWindowFocus: false,
+      onSuccess: (res) => {
+        setUrl(res.data.url);
+        if (!lectures[0].is_complete) setInitializedPlayer(true);
+        else {
+          setInitializedPlayer(
+            !!lectures[0].is_complete || lectures[0].playback_position === 0
+          );
+        }
+      },
+    }
+  );
 
   const lecture = lectures[currentIndex];
 
@@ -77,35 +109,6 @@ function StudentLecture({}: StudentLectureProps) {
     })();
   };
 
-  useEffect(() => {
-    mounted.current = true;
-
-    (async () => {
-      try {
-        const res = await getLectures(chapterId!);
-        setLectures(res.data.data);
-        setChapterNumber(res.data.chapterNumber);
-
-        const vidRes = await getTemporaryVideoUrl(
-          res.data.data[0].video_file_path
-        );
-        setUrl(vidRes.data.url);
-        if (res.data.data[0].is_complete === null) setInitializedPlayer(true);
-        else {
-          setInitializedPlayer(
-            !!res.data.data[0].is_complete ||
-              res.data.data[0].playback_position === 0
-          );
-        }
-        setInitialized(true);
-      } catch (e: any) {}
-    })();
-
-    return () => {
-      mounted.current = false;
-    };
-  }, [chapterId, initialized]);
-
   return (
     <>
       <Grid item xs={12} md={8}>
@@ -128,7 +131,7 @@ function StudentLecture({}: StudentLectureProps) {
               progressInterval={10_000}
               ref={playerRef}
             />
-            {initialized && !initializedPlayer && (
+            {(lectureIsFetching && urlIsFetching) && !initializedPlayer && (
               <Stack
                 height={1}
                 width={1}
