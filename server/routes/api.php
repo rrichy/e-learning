@@ -30,8 +30,6 @@ use Illuminate\Support\Facades\Route;
 /*
 TODO: how attending course is populated, updated
 TODO: course management searching functionalities
-TODO: fix double requests due to React18 strict mode
-    known pages: [individual]: homepage, course, test, lecture
 
 TODO: account-management/{id}/detail tables
 
