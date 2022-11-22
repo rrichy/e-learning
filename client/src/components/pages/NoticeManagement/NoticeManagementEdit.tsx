@@ -1,7 +1,7 @@
 import { Paper, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
 import Button from "@/components/atoms/Button";
-import { FormContainer } from "react-hook-form-mui";
+import { FormContainer, useForm } from "react-hook-form-mui";
 import {
   Selection,
   TextField,
@@ -10,11 +10,62 @@ import {
 import DateRange from "@/components/atoms/HookForms/DateRange";
 import Labeler from "@/components/molecules/Labeler";
 import DisabledComponentContextProvider from "@/providers/DisabledComponentContextProvider";
-import useNoticeAddEdit from "@/hooks/pages/useNoticeAddEdit";
+import { useNavigate, useParams } from "react-router-dom";
+import useConfirm from "@/hooks/useConfirm";
+import useAlerter from "@/hooks/useAlerter";
+import { getCacheableOptions } from "@/services/CommonService";
+import {
+  NoticeFormAttribute,
+  noticeFormInit,
+  noticeFormSchema,
+} from "@/validations/NoticeFormValidation";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { showNotice, updateNotice } from "@/services/NoticeService";
+import { useQuery } from "@tanstack/react-query";
 
-function NoticeManagementAdd() {
-  const { initialized, signatures, isCreate, form, handleSubmit } =
-    useNoticeAddEdit();
+function NoticeManagementEdit() {
+  const navigate = useNavigate();
+  const { isConfirmed } = useConfirm();
+  const { successSnackbar, errorSnackbar, handleError } = useAlerter();
+  const { noticeId } = useParams();
+
+  const form = useForm<NoticeFormAttribute>({
+    mode: "onChange",
+    defaultValues: noticeFormInit,
+    resolver: yupResolver(noticeFormSchema),
+  });
+
+  const { options, fetchingOptions } = getCacheableOptions("signatures");
+  const { isLoading, isFetching } = useQuery(
+    ["notice-details", +noticeId!],
+    () => showNotice(+noticeId!),
+    {
+      enabled: !!noticeId,
+      refetchOnWindowFocus: false,
+      onSuccess: (res) => form.reset(res.data.data),
+      onError: (e: any) => errorSnackbar(e.message),
+    }
+  );
+
+  const handleSubmit = form.handleSubmit(
+    async (raw: NoticeFormAttribute) => {
+      const confirmed = await isConfirmed({
+        title: "confirm notice",
+        content: "confirm notice",
+      });
+
+      if (confirmed) {
+        try {
+          const res = await updateNotice(+noticeId!, raw);
+          successSnackbar(res.data.message);
+          navigate("/notice-management");
+        } catch (e: any) {
+          handleError(e, form);
+        }
+      }
+    },
+    (a, b) => console.log({ a, b, data: form.getValues() })
+  );
 
   const {
     formState: { isSubmitting, isValid, isDirty },
@@ -23,12 +74,10 @@ function NoticeManagementAdd() {
   return (
     <Paper variant="outlined">
       <Stack spacing={3}>
-        <Typography variant="sectiontitle2">
-          お知らせを{isCreate ? "登録" : "編集"}
-        </Typography>
+        <Typography variant="sectiontitle2">お知らせを編集</Typography>
         <DisabledComponentContextProvider
           showLoading
-          value={!initialized || isSubmitting}
+          value={fetchingOptions || isLoading || isFetching || isSubmitting}
         >
           <FormContainer formContext={form} handleSubmit={handleSubmit}>
             <Stack spacing={2} p={2} alignItems="center">
@@ -52,7 +101,10 @@ function NoticeManagementAdd() {
               <Selection
                 name="signature_id"
                 label="署名"
-                options={signatures}
+                options={[
+                  { id: 0, name: "未選択", selectionType: "disabled" },
+                  ...(options?.signatures ?? []),
+                ]}
               />
             </Stack>
             <Stack direction="row" spacing={2} justifyContent="center" mt={3}>
@@ -74,7 +126,7 @@ function NoticeManagementAdd() {
                 type="submit"
                 disabled={!(isValid && isDirty)}
               >
-                {isCreate ? "登録" : "編集"}
+                編集
               </Button>
             </Stack>
           </FormContainer>
@@ -84,4 +136,4 @@ function NoticeManagementAdd() {
   );
 }
 
-export default NoticeManagementAdd;
+export default NoticeManagementEdit;

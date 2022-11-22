@@ -30,7 +30,6 @@ import CategoryManagement from "./CategoryManagement";
 import AffiliationsDepartments from "./AffiliationsDepartments";
 import Signature from "./Signature";
 import NoticeManagement from "./NoticeManagement";
-import NoticeManagementAddEdit from "./NoticeManagement/NoticeManagementAddEdit";
 import OrganizeMail from "./OrganizeMail";
 import Unsubscribe from "./Unsubscribe";
 import UnsubscribeReason from "./Unsubscribe/UnsubscribeReason";
@@ -52,6 +51,8 @@ import InquiryAdd from "./Inquiry/InquiryAdd";
 import OptionApplication from "./Profile/OptionApplication";
 import CourseManagementEdit from "./CourseManagement/CourseManagementEdit";
 import AccountManagementEdit from "./AccountManagement/AccountManagementEdit";
+import NoticeManagementAdd from "./NoticeManagement/NoticeManagementAdd";
+import NoticeManagementEdit from "./NoticeManagement/NoticeManagementEdit";
 
 const { trial, individual, corporate, admin, guest } = MembershipType;
 const registered = [trial, individual, corporate, admin];
@@ -241,11 +242,11 @@ export default function Pages() {
         },
         {
           path: "create",
-          element: <NoticeManagementAddEdit />,
+          element: <NoticeManagementAdd />,
         },
         {
           path: ":noticeId/edit",
-          element: <NoticeManagementAddEdit />,
+          element: <NoticeManagementEdit />,
         },
       ],
     },
