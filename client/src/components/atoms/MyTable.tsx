@@ -35,6 +35,7 @@ import {
   DropResult,
 } from "@hello-pangea/dnd";
 import { DragIndicator } from "@mui/icons-material";
+import React from "react";
 
 interface MyTableProps<T> {
   state?: TableStateProps<T>;
@@ -128,7 +129,11 @@ function MyTable<T extends unknown>({
         }}
       >
         <Table
-          sx={{ width: 1, tableLayout: "fixed", minHeight: bodyMinHeight ?? 300 }}
+          sx={{
+            width: 1,
+            tableLayout: "fixed",
+            minHeight: bodyMinHeight ?? 300,
+          }}
           size="small"
         >
           <TableHead
@@ -212,7 +217,10 @@ function MyTable<T extends unknown>({
           {onDragEnd ? (
             <DraggableTableBodyComponent table={table} onDragEnd={onDragEnd} />
           ) : (
-            <TableBodyComponent table={table} renderSubComponent={renderSubComponent} />
+            <TableBodyComponent
+              table={table}
+              renderSubComponent={renderSubComponent}
+            />
           )}
         </Table>
       </TableContainer>
@@ -291,7 +299,7 @@ function TableBodyComponent<T extends unknown>({
   return (
     <TableBody>
       {table.getRowModel().rows.map((row) => (
-        <>
+        <React.Fragment key={row.id}>
           <TableRow key={row.id}>
             {row.getVisibleCells().map((cell) => (
               <TableCell
@@ -320,7 +328,7 @@ function TableBodyComponent<T extends unknown>({
               </TableCell>
             </TableRow>
           )}
-        </>
+        </React.Fragment>
       ))}
     </TableBody>
   );

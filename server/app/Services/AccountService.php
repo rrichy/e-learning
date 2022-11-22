@@ -65,10 +65,10 @@ class AccountService
     }
 
 
-    public function update(array $valid, User $user)
+    public function update(array $valid, User $user, User $auth)
     {
-        DB::transaction(function () use ($valid, $user) {
-            $s3_image_url = $user->temporaryUrls()->where('directory', 'profiles/')->first();
+        DB::transaction(function () use ($valid, $user, $auth) {
+            $s3_image_url = $auth->temporaryUrls()->where('directory', 'profiles/')->first();
 
             if ($s3_image_url) {
                 $s3_image_url->delete();
