@@ -4,8 +4,8 @@ import CommonHeader from "../CommonHeader";
 
 interface CourseDetailProps {
   image: string | null;
-  title: string;
-  content: string;
+  title?: string;
+  content?: string;
   studyTime: number;
 }
 
