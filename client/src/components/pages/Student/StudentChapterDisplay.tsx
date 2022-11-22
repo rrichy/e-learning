@@ -9,7 +9,8 @@ import {
   testInit,
 } from "@/validations/CourseFormValidation";
 import { Grid } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Outlet, useNavigate, useParams } from "react-router-dom";
 
@@ -123,32 +124,21 @@ function StudentChapterDisplay({}: StudentChapterDisplayProps) {
     }
   });
 
-  useEffect(() => {
-    mounted.current = true;
-
-    if (chapterId) {
-      (async () => {
-        try {
-          const res = await showTest(
-            +chapterId!,
-            testType === "chapter-test" ? 1 : 2
-          );
-          if (mounted.current) {
-            setTest(res.data.data);
-          }
-        } catch (e: any) {
-          errorSnackbar(e.message);
-        }
-      })();
+  useQuery(
+    ["student-chapter-display", +chapterId!],
+    () => showTest(
+        +chapterId!,
+        testType === "chapter-test" ? 1 : 2
+      ),
+    {
+      refetchOnWindowFocus: false,
+      enabled: !!chapterId,
+      onSuccess: (res) => setTest(res.data.data)
     }
-
-    return () => {
-      mounted.current = false;
-    };
-  }, [chapterId, testType]);
+  );
 
   const headerTitle =
-    test.chapter_title +
+    test?.chapter_title +
     (hasSubmitted
       ? "章末テスト結果"
       : testType === "chapter-test"
@@ -157,7 +147,7 @@ function StudentChapterDisplay({}: StudentChapterDisplayProps) {
 
   return (
     <Grid container spacing={2}>
-      <CommonHeader image={test.image || null} title={headerTitle} />
+      <CommonHeader image={test?.image || null} title={headerTitle} />
       <Outlet
         context={{
           test,
