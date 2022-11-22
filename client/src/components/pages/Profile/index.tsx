@@ -78,7 +78,7 @@ function StudentProfile() {
         registered_date={authData?.created_at}
       />
       
-      <Stack spacing={3}>
+      <Stack spacing={3} flex={1}>
         <Paper variant="softoutline" sx={{ p: 7 }}>
           <Typography variant="sectiontitle2">アカウント情報</Typography>
           <Stack spacing={2} pt={5}>

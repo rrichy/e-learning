@@ -18,7 +18,7 @@ function OptionApplication() {
         registered_date={authData?.created_at}
       />
       
-      <Stack spacing={3}>
+      <Stack spacing={3} flex={1}>
         <Paper variant="softoutline" sx={{ p: 7 }}>
           <Typography variant="sectiontitle2">現在のオプション</Typography>
           <Stack spacing={3} pt={5}>
