@@ -31,7 +31,7 @@ function Notice() {
       const res = await indexNotice(pagination, 10, "created_at", "desc");
       const { data, meta } = res.data;
 
-      return {data, meta} as { data: NoticeItemAttribute[], meta:PaginationFilterInterface};
+      return { data, meta } as { data: NoticeItemAttribute[], meta: PaginationFilterInterface };
     },
     {
       staleTime: 5_000,
@@ -39,8 +39,6 @@ function Notice() {
       refetchOnWindowFocus: false,
     }
   );
-
-  console.log(data);
 
   const fetchData = useCallback(
     async (
@@ -94,7 +92,7 @@ function Notice() {
   };
 
   return (
-    <Paper variant="outlined" sx={{ mb: 8}}>
+    <Paper variant="outlined" sx={{ mb: 8 }}>
       <Grid container>
         <Grid item xs={12} md={3}>
           <Stack
@@ -129,10 +127,10 @@ function Notice() {
           md={9}
           sx={{ "div:not(:nth-last-of-type(1))": { mb: 1 } }}
         >
-          {(data?.data?.length ??0) > 0
+          {(data?.data?.length ?? 0) > 0
             ? data?.data
-                .slice(0, showPagination ? 10 : 5)
-                .map((d) => <NoticeItem key={d.id} {...d} />)
+              .slice(0, showPagination ? 10 : 5)
+              .map((d) => <NoticeItem key={d.id} {...d} />)
             : "No notices"}
           {showPagination && (
             <Pagination
