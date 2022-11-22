@@ -24,8 +24,10 @@ class DatabaseSeeder extends Seeder
             ChapterSeeder::class,
             TestSeeder::class,
             ExplainerVideoSeeder::class,
-            QuestionSeeder::class,
-            QuestionOptionSeeder::class,
+            // Switch between ReadableQuestionSeeder and (QuestionSeeder + QuestionOptionSeeder)
+            ReadableQuestionSeeder::class,
+            // QuestionSeeder::class,
+            // QuestionOptionSeeder::class,
             NoticeSeeder::class,
             AttendingCourseSeeder::class,
             InquirySeeder::class,

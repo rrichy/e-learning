@@ -1,0 +1,315 @@
+[
+    {
+        "format": 1,
+        "score": 15,
+        "statement": "The main system board of the computer is called ____.",
+        "explanation": "motherboard",
+        "options": [
+            {
+                "description": "motherboard",
+                "correction_order": 1
+            },
+            {
+                "description": "processor"
+            },
+            {
+                "description": "microchip"
+            },
+            {
+                "description": "none of these"
+            }
+        ]
+    },
+    {
+        "format": 1,
+        "score": 15,
+        "statement": "Which of the following system components is the brain of a computer?",
+        "explanation": "cpu",
+        "options": [
+            {
+                "description": "circuit board"
+            },
+            {
+                "description": "cpu",
+                "correction_order": 1
+            },
+            {
+                "description": "memory"
+            },
+            {
+                "description": "network card"
+            }
+        ]
+    },
+    {
+        "format": 1,
+        "score": 15,
+        "statement": "What is the built-in permanent memory in a computer called?",
+        "explanation": "rom",
+        "options": [
+            {
+                "description": "ram"
+            },
+            {
+                "description": "rom",
+                "correction_order": 1
+            },
+            {
+                "description": "cpu"
+            },
+            {
+                "description": "cd-rom"
+            }
+        ]
+    },
+    {
+        "format": 1,
+        "score": 15,
+        "statement": "Which of the following is the full form of NTFS?",
+        "explanation": "new technology file system",
+        "options": [
+            {
+                "description": "new tree file system"
+            },
+            {
+                "description": "new technology file system",
+                "correction_order": 1
+            },
+            {
+                "description": "new table file system"
+            }
+        ]
+    },
+    {
+        "format": 1,
+        "score": 15,
+        "statement": "Which of the following is not a hardware processing chip?",
+        "explanation": "java",
+        "options": [
+            {
+                "description": "processing chip"
+            },
+            {
+                "description": "printer"
+            },
+            {
+                "description": "mouse"
+            },
+            {
+                "description": "java",
+                "correction_order": 1
+            }
+        ]
+    },
+    {
+        "format": 2,
+        "score": 25,
+        "statement": "The monitor of a computer is -A-. -B- is the protocol Ping use.",
+        "explanation": "A- output device, B- BootP",
+        "options": [
+            {
+                "description": "storage device"
+            },
+            {
+                "description": "output device",
+                "correction_order": 1
+            },
+            {
+                "description": "bootP",
+                "correction_order": 2
+            },
+            {
+                "description": "icmp"
+            },
+            {
+                "description": "tcp"
+            }
+        ]
+    },
+    {
+        "format": 2,
+        "score": 25,
+        "statement": "If you wish to extend the length of the network without having the signal degrade, you would use a -A-.  A series of instructions that tells a computer what to do and how to do it is called a -B-.",
+        "explanation": "A- Resonator. B- program",
+        "options": [
+            {
+                "description": "repeater"
+            },
+            {
+                "description": "modem"
+            },
+            {
+                "description": "program",
+                "correction_order": 2
+            },
+            {
+                "description": "user response"
+            },
+            {
+                "description": "resonator",
+                "correction_order": 1
+            },
+            {
+                "description": "command"
+            }
+        ]
+    },
+    {
+        "format": 2,
+        "score": 25,
+        "statement": "Verification of a login name and password is known as_____.",
+        "explanation": "authentication",
+        "options": [
+            {
+                "description": "configuration"
+            },
+            {
+                "description": "accessibility"
+            },
+            {
+                "description": "logging in"
+            },
+            {
+                "description": "user response"
+            },
+            {
+                "description": "authentication",
+                "correction_order": 1
+            },
+            {
+                "description": "none of these"
+            }
+        ]
+    },
+    {
+        "format": 2,
+        "score": 25,
+        "statement": "If you add a recipient email address to the box of an email message, a copy of the message is sent to that recipient, and the recipient's name is not visible to other recipients of the message.",
+        "explanation": "Bcc",
+        "options": [
+            {
+                "description": "To"
+            },
+            {
+                "description": "Cc"
+            },
+            {
+                "description": "Bcc",
+                "correction_order": 1
+            },
+            {
+                "description": "subject"
+            },
+            {
+                "description": "none of these"
+            }
+        ]
+    },
+    {
+        "format": 2,
+        "score": 35,
+        "statement": "What happens if you edit an image inserted on a power point? -A- ; What is the use of Paste With Live Preview in MS Excel 2010? -B- ; Which of the following is an example of a web browser? -C- ",
+        "explanation": "A- The source file inserted does not change. B- It avoids repeated hits and trails and you can easily re-use the content preview. C- Mozilla Firefox",
+        "options": [
+            {
+                "description": "The source file that was inserted is changed."
+            },
+            {
+                "description": "It avoids repeated hits and trails and you can easily re-use the content preview.",
+                "correction_order": 2
+            },
+            {
+                "description": "When you save the presentation, the source file gets changed."
+            },
+            {
+                "description": "It can repair all files and folders."
+            },
+            {
+                "description": "Google"
+            },
+            {
+                "description": "Apple"
+            },
+            {
+                "description": "Mozilla Firefox",
+                "correction_order": 2
+            },
+            {
+                "description": "The source file inserted does not change.",
+                "correction_order": 1
+            }
+        ]
+    },
+    {
+        "format": 3,
+        "score": 20,
+        "statement": "Database If users want to share MS-Access 2010 or are using MS Access 2003 or earlier and are using other users together then the user should use the following file format?",
+        "explanation": ".mdb",
+        "options": [
+            {
+                "description": ".mdb",
+                "correction_order": 1
+            }
+        ]
+    },
+    {
+        "format": 3,
+        "score": 30,
+        "statement": "Ribbon in MS Word 2010 is a series of -A-? MS word 2010 has horizontal bar at the bottom, which has many options like page number, word count etc? -B-",
+        "explanation": "A- tabs. B- Status bar",
+        "options": [
+            {
+                "description": "tabs",
+                "correction_order": 1
+            },
+            {
+                "description": "status bar",
+                "correction_order": 2
+            }
+        ]
+    },
+    {
+        "format": 3,
+        "score": 20,
+        "statement": "Which folder provides temporary storage for the files and folders you want to delete?",
+        "explanation": "recycle bin",
+        "options": [
+            {
+                "description": "recycle bin",
+                "correction_order": 1
+            }
+        ]
+    },
+    {
+        "format": 3,
+        "score": 20,
+        "statement": "The process of copying a file to a CD/DVD is often called?",
+        "explanation": "burning",
+        "options": [
+            {
+                "description": "burning",
+                "correction_order": 1
+            }
+        ]
+    },
+    {
+        "format": 3,
+        "score": 35,
+        "statement": "Which key enables you to delete characters to the right of the cursor? -A-; -B- is used to create a web page?  In MS-Power Point, the shortcut key to start slide show from the current slide is used. shift+-C-",
+        "explanation": "A- Delete ; B- HTML ; C- shift+f5",
+        "options": [
+            {
+                "description": "delete",
+                "correction_order": 1
+            },
+            {
+                "description": "html",
+                "correction_order": 2
+            },
+            {
+                "description": "f5",
+                "correction_order": 3
+            }
+        ]
+    }
+]

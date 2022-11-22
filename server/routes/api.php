@@ -42,6 +42,8 @@ TODO: supply only what is required on course/{id}?tabulated=true
 TODO: account search: affiliation_id, department_1 and department_2 should have no options
 
 TODO: change password page and functionality
+
+TODO: student lecture page, onEnded video function
  */
 
 Route::middleware(['auth:sanctum'])->group(function () {
