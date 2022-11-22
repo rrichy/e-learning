@@ -29,6 +29,7 @@ class AccountShowResource extends JsonResource
             'department_2' => $departments[1] ?? null,
             'remarks' => $this->remarks,
             'created_at' => $this->created_at,
+            'email_verified_at' => $this->email_verified_at,
         ];
     }
 }
