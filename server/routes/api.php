@@ -32,7 +32,6 @@ TODO: how attending course is populated, updated
 TODO: course management searching functionalities
 TODO: fix double requests due to React18 strict mode
     known pages: [individual]: homepage, course, test, lecture
-    all: fetching logged in data
 
 TODO: #2322 unnecessary option request on [admin] my-page
 TODO: account-management/{id}/detail tables
@@ -42,6 +41,8 @@ TODO: targets on notice and course info
 
 TODO: supply only what is required on course/{id}?tabulated=true
 TODO: account search: affiliation_id, department_1 and department_2 should have no options
+
+TODO: change password page and functionality
  */
 
 Route::middleware(['auth:sanctum'])->group(function () {
