@@ -62,7 +62,7 @@ class AccountController extends Controller
         Gate::authorize('check-membership', [['admin', 'corporate']]);
         Gate::authorize('update-account', $account);
 
-        $service->update($request->validated(), $account);
+        $service->update($request->validated(), $account, auth()->user());
 
         return response()->json([
             'message' => 'Successfully updated an account!'

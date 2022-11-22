@@ -33,7 +33,6 @@ TODO: course management searching functionalities
 TODO: fix double requests due to React18 strict mode
     known pages: [individual]: homepage, course, test, lecture
 
-TODO: #2322 unnecessary option request on [admin] my-page
 TODO: account-management/{id}/detail tables
 
 TODO: comprehension test details ???

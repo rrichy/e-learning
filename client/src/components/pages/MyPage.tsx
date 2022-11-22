@@ -1,238 +1,156 @@
-import { Paper, Stack, Typography } from "@mui/material";
-import { FormContainer, useForm } from "react-hook-form-mui";
-import AccountManagementForm from "@/components/organisms/AccountManagementFragments/AccountManagementForm";
-import AccountManagementAdminForm from "@/components/organisms/AccountManagementFragments/AccountManagementAdminForm";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { adminRegistrationFormSchema } from "@/validations/RegistrationFormValidation";
-import useConfirm from "@/hooks/useConfirm";
-import useAlerter from "@/hooks/useAlerter";
-import { updateAuthData, uploadImage } from "@/services/AuthService";
-import { useCallback, useEffect, useRef, useState } from "react";
-import useAuth from "@/hooks/useAuth";
-import { UserAttributes, userInit } from "@/interfaces/AuthAttributes";
-import { useNavigate } from "react-router-dom";
-import DisabledComponentContextProvider from "@/providers/DisabledComponentContextProvider";
-import Button from "../atoms/Button";
-import OptionsContextProvider from "@/providers/OptionsContextProvider";
-import { OptionsAttribute } from "@/interfaces/CommonInterface";
+import Button from "@/components/atoms/Button";
+import MyPageAdmin from "@/components/organisms/MyPageForms/MyPageAdmin";
+import MyPageCorporateIndividual from "@/components/organisms/MyPageForms/MyPageCorporateIndividual";
+import MyPageTrial from "@/components/organisms/MyPageForms/MyPageTrial";
 import { MembershipType } from "@/enums/membershipTypes";
-import {
-  getOptions,
-  getOptionsWithBelongsToId,
-} from "@/services/CommonService";
+import useAlerter from "@/hooks/useAlerter";
+import useAuth from "@/hooks/useAuth";
+import useConfirm from "@/hooks/useConfirm";
+import { UserAttributes, userInit } from "@/interfaces/AuthAttributes";
+import DisabledComponentContextProvider from "@/providers/DisabledComponentContextProvider";
+import { updateAuthData, uploadImage } from "@/services/AuthService";
+import { adminRegistrationFormSchema } from "@/validations/RegistrationFormValidation";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { Paper, Stack, Typography } from "@mui/material";
+import { useMutation } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useForm, UseFormReturn } from "react-hook-form";
+import { FormContainer } from "react-hook-form-mui";
+import { useNavigate } from "react-router-dom";
 
-const { trial, individual, corporate, admin } = MembershipType;
-
-const adminSchema = adminRegistrationFormSchema.pick([
-  "name",
-  "email",
-  "image",
-]);
-
-const corporateSchema = adminRegistrationFormSchema.pick([
-  "name",
-  "email",
-  "image",
-  "sex",
-  "birthday",
-  "department_1",
-  "department_2",
-  "remarks",
-]);
-
-const individualSchema = adminRegistrationFormSchema.pick([
-  "name",
-  "email",
-  "image",
-  "sex",
-  "birthday",
-  "department_1",
-  "department_2",
-  "remarks",
-]);
-
-const trialSchema = adminRegistrationFormSchema.pick([
-  "name",
-  "email",
-  "image",
-  "sex",
-  "birthday",
-]);
-
-const schemaGenerator = (type: MembershipType) => {
-  if (type === admin) return adminSchema;
-  if (type === corporate) return corporateSchema;
-  if (type === individual) return individualSchema;
-  if (type === trial) return trialSchema;
-};
+const { admin, corporate, individual, trial } = MembershipType;
 
 function MyPage() {
-  const mounted = useRef(true);
   const navigate = useNavigate();
-  const { isConfirmed } = useConfirm();
-  const { successSnackbar, errorSnackbar, handleError } = useAlerter();
   const { authData, membershipTypeId, setAuthData } = useAuth();
-  const [options, setOptions] = useState<OptionsAttribute>({});
-  const formContext = useForm<UserAttributes>({
+  const { isConfirmed } = useConfirm();
+  const { successSnackbar, handleError } = useAlerter();
+  const fields = fieldsGenerator(membershipTypeId);
+
+  const form = useForm<UserAttributes>({
     mode: "onChange",
-    defaultValues: authData ?? userInit,
-    resolver: yupResolver(schemaGenerator(membershipTypeId || trial)),
+    defaultValues: userInit,
+    resolver: yupResolver(adminRegistrationFormSchema.pick(fields)),
   });
 
-  const {
-    formState: { isDirty, isValid, isSubmitting },
-  } = formContext;
+  const [filled, setFilled] = useState(false);
+  const saveMutation = useMutation(
+    async (raw: UserAttributes) => {
+      const image = await uploadImage(raw.image);
+      return updateAuthData({ ...raw, image });
+    },
+    {
+      onSuccess: (res) => {
+        successSnackbar(res.data.message);
+        setAuthData(res.data.user);
+        navigate("/home");
+      },
+      onError: (e: any) => handleError(e, form),
+    }
+  );
 
-  const handleSubmit = formContext.handleSubmit(async (raw) => {
+  const handleSubmit = form.handleSubmit(async (raw: UserAttributes) => {
     const confirmed = await isConfirmed({
       title: "update",
       content: "update?",
     });
-
-    if (confirmed) {
-      try {
-        const image = await uploadImage(raw.image);
-        const res = await updateAuthData({...raw, image });
-
-        successSnackbar(res.data.message);
-        setAuthData(res.data.user);
-        navigate("/home");
-      } catch (e: any) {
-        console.log(e.response);
-        handleError(e, formContext);
-      }
-    }
+    if (confirmed) saveMutation.mutate(raw);
   });
 
-  const updateOptions = useCallback(
-    async (
-      optionFor: "parent_departments" | "child_departments",
-      belongsToId: number
-    ) => {
-      formContext.setValue("department_2", 0);
-
-      if (!belongsToId) {
-        setOptions((o) => ({
-          ...o,
-          department_2: [{ id: 0, name: "部署１未選択" }],
-        }));
-        return;
-      }
-
-      const res = await getOptionsWithBelongsToId([
-        {
-          belongsTo: "department_id",
-          id: belongsToId,
-        },
-      ]);
-
-      setOptions((o) => ({
-        ...o,
-        department_2: [
-          { id: 0, name: "未選択" },
-          ...res.data.child_departments,
-        ],
-      }));
-    },
-    []
-  );
-
   useEffect(() => {
-    mounted.current = true;
-
-    if (authData && membershipTypeId) {
-      (async () => {
-        try {
-          const promise = [getOptions(["departments"])];
-
-          if (authData.department_1)
-            promise.push(
-              getOptionsWithBelongsToId([
-                {
-                  belongsTo: "department_id",
-                  id: authData.department_1,
-                },
-              ])
-            );
-
-          const res = await Promise.all(promise);
-
-          setOptions({
-            department_1: [
-              { id: 0, name: "未選択" },
-              ...res[0].data.departments,
-            ],
-            department_2: authData.department_1
-              ? [{ id: 0, name: "未選択" }, ...res[1].data.child_departments]
-              : [{ id: 0, name: "部署１未選択", selectionType: "disabled" }],
-          });
-
-          formContext.reset({
-            name: authData?.name,
-            image: authData?.image || null,
-            email: authData?.email,
-            sex: authData?.sex ?? 0,
-            birthday: authData?.birthday,
-            department_1: authData?.department_1 ?? 0,
-            department_2: authData?.department_2 ?? 0,
-            remarks: authData?.remarks,
-          });
-        } catch (e: any) {
-          errorSnackbar(e.message);
-        }
-      })();
+    if (authData && !filled) {
+      form.reset(
+        fields.reduce(
+          (acc: object, k) => ({
+            ...acc,
+            [k]:
+              ["department_1", "department_2"].includes(k) &&
+              authData[k] === null
+                ? 0
+                : authData[k],
+          }),
+          {}
+        )
+      );
+      setFilled(true);
     }
-    return () => {
-      mounted.current = false;
-    };
-  }, [errorSnackbar, membershipTypeId, authData]);
+  }, [filled, authData, fields, form]);
+
+  const {
+    formState: { isDirty, isValid, isSubmitting },
+  } = form;
 
   return (
     <Paper variant="outlined">
       <Stack spacing={3}>
-        <Typography variant="sectiontitle2">アカウントを編集</Typography>
-        <OptionsContextProvider options={options}>
-          <DisabledComponentContextProvider value={isSubmitting} showLoading>
-            <FormContainer
-              formContext={formContext}
-              handleSubmit={handleSubmit}
-            >
-              {authData && membershipTypeId === admin ? 
-                <AccountManagementAdminForm /> : 
-                <AccountManagementForm
-                  mode="edit"
-                  personal
-                  optionUpdateFn={updateOptions}
-                />
-              }
-              <Stack direction="row" spacing={2} justifyContent="center" mt={3}>
-                <Button
-                  color="dull"
-                  variant="outlined"
-                  rounded
-                  large
-                  type="button"
-                  to="/account-management"
-                >
-                  キャンセル
-                </Button>
-                <Button
-                  color="secondary"
-                  variant="contained"
-                  rounded
-                  large
-                  type="submit"
-                  disabled={!(isDirty && isValid)}
-                >
-                  編集
-                </Button>
-              </Stack>
-            </FormContainer>
-          </DisabledComponentContextProvider>
-        </OptionsContextProvider>
+        <DisabledComponentContextProvider
+          value={isSubmitting || saveMutation.isLoading}
+          showLoading
+        >
+          <Typography variant="sectiontitle2">アカウントを編集</Typography>
+          <FormContainer formContext={form} handleSubmit={handleSubmit}>
+            {renderForm(membershipTypeId, form)}
+            <Stack direction="row" spacing={2} justifyContent="center" mt={3}>
+              <Button
+                color="dull"
+                variant="outlined"
+                rounded
+                large
+                type="button"
+                to="/account-management"
+              >
+                キャンセル
+              </Button>
+              <Button
+                color="secondary"
+                variant="contained"
+                rounded
+                large
+                type="submit"
+                disabled={!(isDirty && isValid)}
+              >
+                編集
+              </Button>
+            </Stack>
+          </FormContainer>
+        </DisabledComponentContextProvider>
       </Stack>
     </Paper>
   );
 }
 
 export default MyPage;
+
+function renderForm(
+  membershipTypeId: MembershipType,
+  form: UseFormReturn<any, any>
+) {
+  switch (membershipTypeId) {
+    case admin:
+      return <MyPageAdmin />;
+    case corporate:
+    case individual:
+      return <MyPageCorporateIndividual form={form} />;
+    case trial:
+      return <MyPageTrial />;
+    default:
+      return null;
+  }
+}
+
+function fieldsGenerator(type: MembershipType) {
+  const fields: (keyof UserAttributes)[] = ["name", "email", "image"];
+  switch (type) {
+    case corporate:
+    case individual: {
+      fields.push("sex", "birthday", "department_1", "department_2", "remarks");
+      break;
+    }
+    case trial: {
+      fields.push("sex", "birthday");
+      break;
+    }
+  }
+
+  return fields;
+}

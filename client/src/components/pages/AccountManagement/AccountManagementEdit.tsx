@@ -79,7 +79,7 @@ function AccountManagementEdit() {
   return (
     <Paper variant="outlined">
       <Stack spacing={3}>
-        <Typography variant="sectiontitle2">アカウントを"編集</Typography>
+        <Typography variant="sectiontitle2">アカウントを編集</Typography>
         <OptionsContextProvider options={options}>
           <DisabledComponentContextProvider
             showLoading
