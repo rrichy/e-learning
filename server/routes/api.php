@@ -34,11 +34,10 @@ TODO: account-management/{id}/detail tables
 TODO: comprehension test details ???
 TODO: targets on notice and course info
 
-TODO: supply only what is required on course/{id}?tabulated=true
 TODO: account search: affiliation_id, department_1 and department_2 should have no options
-TODO: change password page and functionality
-TODO: student lecture page, onEnded video function set is_complete to true
 TODO: [admin] /course-management table attending students column
+
+TODO: secure Service classes to do its role; usable in tinker (no auth() || requests() || $request->validate() should be happening inside a service class)
  */
 
 Route::middleware(['auth:sanctum'])->group(function () {
