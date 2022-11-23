@@ -2,6 +2,7 @@ import { UserAttributes } from "@/interfaces/AuthAttributes";
 import { RegistrationFormAttribute } from "@/validations/RegistrationFormValidation";
 import { get, post, BEARER_TOKEN, put } from "./ApiService";
 import axios from "axios";
+import { ChangePasswordFormAttribute } from "@/validations/ChangePasswordFormValidation";
 
 export const getBearerToken = () => localStorage.getItem(BEARER_TOKEN) || "";
 
@@ -31,6 +32,10 @@ export const updateAuthData = (payload: Partial<UserAttributes>) => {
 
 export const register = (payload: RegistrationFormAttribute) => {
   return post("/api/register", payload);
+};
+
+export const changePassword = (payload: ChangePasswordFormAttribute) => {
+  return post("/api/me/change-password", payload);
 };
 
 export const logout = () => {

@@ -47,6 +47,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/upload', [AuthenticatedSessionController::class, 'upload']);
     Route::get('/video', [AuthenticatedSessionController::class, 'video']);
     Route::put('/me', [AuthenticatedSessionController::class, 'update']);
+    Route::post('/me/change-password', [AuthenticatedSessionController::class, 'changePassword']);
     Route::put('/video/{video}/update', [AuthenticatedSessionController::class, 'updatePlayback']);
 
     Route::get('/options', [OptionsController::class, 'index']);
