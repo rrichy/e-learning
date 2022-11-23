@@ -14,7 +14,9 @@ use App\Models\User;
 use App\Models\ViewingInformation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Exception;
 
 class AuthenticatedService
 {
@@ -226,6 +228,19 @@ class AuthenticatedService
         return response()->json([
             'message' => 'Updated playback position!'
         ]);
+    }
+
+
+    public function changePassword(array $valid, User $auth)
+    {
+        if (!Hash::check($valid['old_password'], $auth->password)) {
+            throw new Exception('The inputted old password is incorrect.');
+        }
+
+        $auth->password = Hash::make($valid['new_password']);
+        $auth->save();
+
+        return $auth;
     }
 
 
