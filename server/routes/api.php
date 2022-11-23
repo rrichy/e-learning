@@ -30,18 +30,15 @@ use Illuminate\Support\Facades\Route;
 /*
 TODO: how attending course is populated, updated
 TODO: course management searching functionalities
-
 TODO: account-management/{id}/detail tables
-
 TODO: comprehension test details ???
 TODO: targets on notice and course info
 
 TODO: supply only what is required on course/{id}?tabulated=true
 TODO: account search: affiliation_id, department_1 and department_2 should have no options
-
 TODO: change password page and functionality
-
-TODO: student lecture page, onEnded video function
+TODO: student lecture page, onEnded video function set is_complete to true
+TODO: [admin] /course-management table attending students column
  */
 
 Route::middleware(['auth:sanctum'])->group(function () {
