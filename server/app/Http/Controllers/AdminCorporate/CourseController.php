@@ -34,11 +34,11 @@ class CourseController extends Controller
         ]);
     }
 
-    public function show(Course $course, CourseService $service)
+    public function show(Request $request, Course $course, CourseService $service)
     {
         Gate::authorize('check-membership', [['admin', 'corporate', 'individual']]);
 
-        return $service->details($course);
+        return $service->details($course, auth()->user(), $request->boolean('tabulated'));
     }
 
     public function update(CourseRequest $request, Course $course, CourseService $service)

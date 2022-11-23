@@ -6,6 +6,7 @@ use App\Http\Requests\CourseRequest;
 use App\Http\Resources\AttendeeResource;
 use App\Http\Resources\CourseIndexResource;
 use App\Http\Resources\CourseListResource;
+use App\Http\Resources\CourseParsedResource;
 use App\Http\Resources\CourseShowResource;
 use App\Http\Resources\Student\StudentCourseShowResource;
 use App\Models\AttendingCourse;
@@ -65,9 +66,9 @@ class CourseService
     }
 
 
-    public function details(Course $course)
+    public function details(Course $course, User $user, bool $parsed = false)
     {
-        if (auth()->user()->isIndividual()) {
+        if ($user->isIndividual()) {
             return new StudentCourseShowResource(
                 $course->load([
                     'chapters' => fn ($chapter) => $chapter->orderBy('item_number', 'asc')->orderBy('item_number', 'asc')
@@ -76,9 +77,26 @@ class CourseService
         }
 
         abort_if(
-            auth()->user()->isCorporate() && auth()->user()->affiliation_id !== $course->category->affiliation_id,
+            $user->isCorporate() && $user->affiliation_id !== $course->category->affiliation_id,
             403,
             'You have no authority of viewing this course!'
+        );
+
+        if ($parsed) return new CourseParsedResource(
+            $course->loadCount([
+                'attendingCourses as attendees',
+                'attendingCourses as current_attendees' => fn ($q) => $q->isActive()
+            ])->load([
+                'category',
+                'chapters' => fn ($chapter) => $chapter->with([
+                    'chapterTest' => fn ($q) => $q->with([
+                        'questions' => fn ($question) => $question->with([
+                            'options' => fn ($w) => $w->orderBy('item_number', 'asc')
+                        ])->orderBy('item_number', 'asc')
+                    ]),
+                    'explainerVideos'
+                ])->orderBy('item_number', 'asc')
+            ])
         );
 
         return new CourseShowResource(
