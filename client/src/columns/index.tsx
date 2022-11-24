@@ -3,7 +3,6 @@ import { UserAttributes } from "@/interfaces/AuthAttributes";
 import { jpDate } from "@/utils/jpFormatter";
 import { AffiliationFormAttributeWithId } from "@/validations/AffiliationFormValidation";
 import { CategoryFormAttribute } from "@/validations/CategoryFormValidation";
-import { CourseFormAttributeWithId } from "@/validations/CourseFormValidation";
 import { DepartmentFormAttributeWithId } from "@/validations/DepartmentFormValidation";
 import { SignatureFormAttributeWithId } from "@/validations/SignatureFormValidation";
 import {
@@ -17,6 +16,7 @@ import { Box, IconButton, Link as MuiLink, Tooltip } from "@mui/material";
 import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import {
   AttendeeRowAttribute,
+  CourseRowAttribute,
   InquiryRowAttribute,
   MailRowAttribute,
   NoticeTableRowAttribute,
@@ -505,16 +505,37 @@ export function accountColumns(lookups?: {
   return columns;
 }
 
-const courseHelper = createColumnHelper<CourseFormAttributeWithId>();
+const courseHelper = createColumnHelper<CourseRowAttribute>();
 
 export function courseColumns() {
-  const columns: ColumnDef<CourseFormAttributeWithId, any>[] = [
+  const columns: ColumnDef<CourseRowAttribute, any>[] = [
     courseHelper.accessor("title", {
       header: () => "コース名",
       cell: ({ row, getValue }) => (
         <Link to={`/course-management/details/${row.original.id}`}>
           {getValue()}
         </Link>
+      ),
+      enableSorting: false,
+    }),
+    courseHelper.accessor("attendees", {
+      header: () => "受講者数",
+      cell: ({ row, getValue }) => (
+        <div style={{ textAlign: "center" }}>{getValue()}</div>
+      ),
+      enableSorting: false,
+    }),
+    courseHelper.accessor("current_attendees", {
+      header: () => "受講中",
+      cell: ({ getValue }) => (
+        <div style={{ textAlign: "center" }}>{getValue()}</div>
+      ),
+      enableSorting: false,
+    }),
+    courseHelper.accessor("total_attendees", {
+      header: () => "受講完了",
+      cell: ({ row, getValue }) => (
+        <div style={{ textAlign: "center" }}>{row.original.attendees - row.original.current_attendees}</div>
       ),
       enableSorting: false,
     }),

@@ -1,11 +1,11 @@
 import { courseColumns } from "@/columns";
+import { CourseRowAttribute } from "@/columns/rowTypes";
 import MyTable from "@/components/atoms/MyTable";
-import { CourseFormAttributeWithId } from "@/validations/CourseFormValidation";
 import { RowSelectionState } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
 
 interface CourseTableProps {
-  data: CourseFormAttributeWithId[];
+  data: CourseRowAttribute[];
   setIds: (d: { checked: number[]; unchecked: number[] }) => void;
 }
 
