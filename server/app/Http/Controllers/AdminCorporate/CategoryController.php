@@ -35,7 +35,9 @@ class CategoryController extends Controller
     {
         Gate::authorize('check-membership', [['admin', 'corporate']]);
 
-        $service->store($request);
+        $valid = $request->validated();
+
+        $service->store($valid);
 
         return response()->json([
             'message' => 'Successfully created a category!',
@@ -46,7 +48,9 @@ class CategoryController extends Controller
     {
         Gate::authorize('check-membership', [['admin', 'corporate']]);
 
-        $service->update($request, $category);
+        $valid = $request->validated();
+
+        $service->update($valid, $category, auth()->user());
 
         return response()->json([
             'message' => 'Successfully updated a category!',
@@ -57,7 +61,7 @@ class CategoryController extends Controller
     {
         Gate::authorize('check-membership', [['admin', 'corporate']]);
 
-        $deleted_count = $service->deleteIds($ids);
+        $deleted_count = $service->deleteIds($ids, auth()->user());
 
         return response()->json([
             'message' => 'Successfully deleted ' . $deleted_count . ' categories!',
@@ -68,7 +72,7 @@ class CategoryController extends Controller
     {
         Gate::authorize('check-membership', [['admin', 'corporate']]);
 
-        $service->clone($category);
+        $service->clone($category, auth()->user());
 
         return response()->json([
             'message' => 'Successfully copied ' . $category->title . ' categories!',

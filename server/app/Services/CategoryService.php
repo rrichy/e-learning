@@ -19,7 +19,7 @@ class CategoryService
         return CategoryResource::collection(
             Category::query()
             ->when(
-                $auth->isCorporate(), 
+                $auth->isCorporate(),
                 fn ($q) => $q->where('affiliation_id', auth()->user()->affiliation_id)
             )->with([
                 'childCategories' => function ($q) use ($sort, $order) { $q->orderBy($sort, $order)->get(); }
@@ -33,15 +33,13 @@ class CategoryService
     }
 
 
-    public function update(CategoryStoreUpdateRequest $request, Category $category)
+    public function update(array $valid, Category $category, User $auth)
     {
         abort_if(
-            auth()->user()->isCorporate() && auth()->user()->affiliation_id !== $category->affiliation_id,
+            $auth->isCorporate() && $auth->affiliation_id !== $category->affiliation_id,
             403,
             "This action is unauthorized."
         );
-
-        $valid = $request->validated();
 
         DB::transaction(function () use ($valid, $category) {
             $category->update($valid);
@@ -61,10 +59,8 @@ class CategoryService
     }
 
 
-    public function store(CategoryStoreUpdateRequest $request)
+    public function store(array $valid)
     {
-        $valid = $request->validated();
-
         DB::transaction(function () use ($valid) {
             $category = Category::create($valid);
             $child_categories = collect($valid['child_categories']);
@@ -78,9 +74,8 @@ class CategoryService
     }
 
 
-    public function deleteIds(string $ids)
+    public function deleteIds(string $ids, User $auth)
     {
-        $auth = auth()->user();
         $ids = explode(',', $ids);
 
         if ($auth->isAdmin()) return Category::destroy($ids);
@@ -96,10 +91,10 @@ class CategoryService
     }
 
 
-    public function clone(Category $category)
+    public function clone(Category $category, User $auth)
     {
         abort_if(
-            auth()->user()->isCorporate() && auth()->user()->affiliation_id !== $category->affiliation_id,
+            $auth->isCorporate() && $auth->affiliation_id !== $category->affiliation_id,
             403,
             "This action is unauthorized."
         );
