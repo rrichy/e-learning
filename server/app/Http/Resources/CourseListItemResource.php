@@ -15,16 +15,18 @@ class CourseListItemResource extends JsonResource
     public function toArray($request)
     {
         $is_individual = auth()->user()->isIndividual();
-        
+
         return [
-            'id' => $this->id, 
-            'status' => $this->status, 
-            'category_id' => $this->category_id, 
-            'title' => $this->title, 
-            'is_whole_period' => $this->is_whole_period, 
-            'start_period' => $this->start_period ?? $this->category->start_period, 
+            'id' => $this->id,
+            'status' => $this->status,
+            'category_id' => $this->category_id,
+            'title' => $this->title,
+            'is_whole_period' => $this->is_whole_period,
+            'start_period' => $this->start_period ?? $this->category->start_period,
             'end_period' => $this->end_period ?? $this->category->end_period,
             'image' => $this->when($is_individual, $this->image),
+            'attendees' => $this->attendees,
+            'current_attendees' => $this->current_attendees,
             'attending_course' => $this->when($is_individual, new AttendingCourseHomepageResource($this->attendingCourses()->where('user_id', auth()->id())->first())),
         ];
     }

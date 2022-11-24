@@ -35,3 +35,13 @@ export type AttendeeRowAttribute = {
   latest_score: number | null;
   completion_date: string | null;
 };
+
+export type CourseRowAttribute = {
+  id: number;
+  title: string;
+  attendees: number;
+  current_attendees: number;
+  total_attendees: number;
+  start_period: string;
+  end_period: string;
+}

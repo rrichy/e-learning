@@ -55,13 +55,18 @@ class CourseService
 
         return CourseListResource::collection(
             Category::with(['courses' => function ($q) use ($status) {
-                $q->where('status', Course::STATUS[$status] ?? Course::STATUS['public']);
-            }])->when(
-                $user->isCorporate(),
-                function ($q) use ($user) {
-                    $q->where('affiliation_id', $user->affiliation_id);
-                }
-            )->get()
+                $q->where('status', Course::STATUS[$status] ?? Course::STATUS['public'])
+                    ->withCount([
+                        'attendingCourses as attendees',
+                        'attendingCourses as current_attendees' => fn ($q) => $q->isActive()
+                    ]);
+            }])
+                ->when(
+                    $user->isCorporate(),
+                    function ($q) use ($user) {
+                        $q->where('affiliation_id', $user->affiliation_id);
+                    }
+                )->get()
         );
     }
 
