@@ -2,43 +2,46 @@
 
 namespace App\Services;
 
-use App\Http\Requests\AccountStoreUpdateRequest;
 use App\Http\Resources\AccountIndexResource;
 use App\Http\Resources\AccountShowParsedResource;
 use App\Http\Resources\AccountShowResource;
+use App\Models\MembershipType;
 use App\Models\User;
+use Exception;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
 class AccountService
 {
-    public function index(array $filters, $auth)
+    public function index(array $filters, User $auth)
     {
+        if ($this->userIsNotAuthorized($auth)) {
+            throw new Exception("You are not authorized to view any account!");
+        }
+
         $order = $filters['order'] ?? 'asc';
         $per_page = $filters['per_page'] ?? 10;
         $sort = $filters['sort'] ?? 'id';
 
         return AccountIndexResource::collection(
-            User::query()
-                ->select(
-                    'users.id',
-                    'users.affiliation_id',
-                    'users.created_at',
-                    'users.email',
-                    'users.last_login_date',
-                    'users.name',
-                    'parent_departments.name as department_1',
-                    'child_departments.name as department_2',
-                )->leftJoin('department_users as department_users_1', function ($join) {
-                    $join->on('department_users_1.user_id', '=', 'users.id')
-                        ->where('department_users_1.order', 1);
-                })->leftJoin('department_users as department_users_2', function ($join) {
-                    $join->on('department_users_2.user_id', '=', 'users.id')
-                        ->where('department_users_2.order', 2);
-                })->leftJoin('departments as parent_departments', 'parent_departments.id', '=', 'department_users_1.department_id')
+            User::select(
+                'users.id',
+                'users.affiliation_id',
+                'users.created_at',
+                'users.email',
+                'users.last_login_date',
+                'users.name',
+                'parent_departments.name as department_1',
+                'child_departments.name as department_2',
+            )->leftJoin('department_users as department_users_1', function ($join) {
+                $join->on('department_users_1.user_id', '=', 'users.id')
+                    ->where('department_users_1.order', 1);
+            })->leftJoin('department_users as department_users_2', function ($join) {
+                $join->on('department_users_2.user_id', '=', 'users.id')
+                    ->where('department_users_2.order', 2);
+            })->leftJoin('departments as parent_departments', 'parent_departments.id', '=', 'department_users_1.department_id')
                 ->leftJoin('departments as child_departments', 'child_departments.id', '=', 'department_users_2.department_id')
                 ->leftJoin('affiliations', 'affiliations.id', '=', 'users.affiliation_id')
                 ->when($auth->isCorporate(), fn ($q) => $q->where('users.affiliation_id', $auth->affiliation_id))
@@ -52,8 +55,46 @@ class AccountService
     }
 
 
-    public function details(User $user, bool $parsed = false)
+    public function store(array $valid, User $auth)
     {
+        if ($this->userIsNotAuthorized($auth)) {
+            throw new Exception("You are not authorized to created any account!");
+        }
+
+        $s3_image_url = $auth->temporaryUrls()->where('directory', 'profiles/')->first();
+
+        if ($s3_image_url) {
+            $s3_image_url->delete();
+            abort_if($s3_image_url->url !== $valid['image'], 403, 'Image url mismatch!');
+        }
+
+        $parsed = array_merge($valid, [
+            'password' => bcrypt($valid['password']),
+        ]);
+
+        $user = User::create($parsed);
+
+        $newdepartments = [];
+        if (isset($valid['department_1'])) {
+            $newdepartments[$valid['department_1']] = ['order' => 1];
+
+            if (isset($valid['department_2'])) {
+                $newdepartments[$valid['department_2']] = ['order' => 2];
+            }
+        }
+        $user->departments()->attach($newdepartments);
+
+        // ignore but do not comment out
+        event(new Registered($user));
+    }
+
+
+    public function show(User $user, bool $parsed = false, User $auth)
+    {
+        if ($this->userIsNotAuthorized($auth)) {
+            throw new Exception("You are not authorized to view any account!");
+        }
+
         if ($parsed) {
             return new AccountShowParsedResource($user->load([
                 'affiliation' => fn ($q) => $q->select('id', 'name'),
@@ -67,6 +108,10 @@ class AccountService
 
     public function update(array $valid, User $user, User $auth)
     {
+        if ($this->userIsNotAuthorized($auth)) {
+            throw new Exception("You are not authorized to update any account!");
+        }
+
         DB::transaction(function () use ($valid, $user, $auth) {
             $s3_image_url = $auth->temporaryUrls()->where('directory', 'profiles/')->first();
 
@@ -96,53 +141,23 @@ class AccountService
     }
 
 
-    public function store(AccountStoreUpdateRequest $request)
+    public function deleteIds(Collection $ids, User $auth)
     {
-        $valid = $request->validated();
-
-        $s3_image_url = auth()->user()->temporaryUrls()->where('directory', 'profiles/')->first();
-
-        if ($s3_image_url) {
-            $s3_image_url->delete();
-            abort_if($s3_image_url->url !== $valid['image'], 403, 'Image url mismatch!');
+        if ($this->userIsNotAuthorized($auth)) {
+            throw new Exception("You are not authorized to delete accounts!");
         }
-
-        $parsed = array_merge($valid, [
-            'password' => Hash::make($request->password),
-        ]);
-
-        $user = User::create($parsed);
-
-        $newdepartments = [];
-        if (isset($valid['department_1'])) {
-            $newdepartments[$valid['department_1']] = ['order' => 1];
-
-            if (isset($valid['department_2'])) {
-                $newdepartments[$valid['department_2']] = ['order' => 2];
-            }
-        }
-        $user->departments()->attach($newdepartments);
-
-        // ignore but do not comment out
-        event(new Registered($user));
-    }
-
-
-    public function deleteIds(string $ids)
-    {
-        $auth = auth()->user();
-        $ids = explode(',', $ids);
 
         if ($auth->isAdmin()) return User::destroy($ids);
 
-        $validIdCount = User::where('affiliation_id', $auth->affiliation_id)->whereIn('id', $ids)->count();
-        abort_if(
-            count($ids) !== $validIdCount,
-            403,
-            'You have no authority of deleting some of these accounts'
-        );
+        $user_ids_under_same_affiliation = User::where('affiliation_id', $auth->affiliation_id)
+            ->whereIn('membership_type_id', [MembershipType::TRIAL, MembershipType::INDIVIDUAL])
+            ->pluck('id');
 
-        return User::destroy($ids);
+        if ($ids->every(fn ($id) => $user_ids_under_same_affiliation->contains($id))) {
+            return User::destroy($ids);
+        } else {
+            throw new Exception("You have no authority of deleting some of these accounts");
+        }
     }
 
 
@@ -166,5 +181,10 @@ class AccountService
                 fn ($q) => $q->whereDate('users.last_login_date', '>=', $filters['logged_in_min_date'])
                     ->whereDate('users.last_login_date', '<=', $filters['logged_in_max_date'])
             );
+    }
+
+    private function userIsNotAuthorized(User $auth)
+    {
+        return in_array($auth->membership_type_id, [MembershipType::TRIAL, MembershipType::INDIVIDUAL]);
     }
 }
