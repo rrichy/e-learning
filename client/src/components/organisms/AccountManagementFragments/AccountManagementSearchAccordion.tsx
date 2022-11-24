@@ -52,24 +52,25 @@ function AccountManagementSearchAccordion({
     []
   );
 
-  const [affiliation_id, department_1] = form.watch([
+  const [affiliation_id, department_1, membership_type_id] = form.watch([
     "affiliation_id",
     "department_1",
+    "membership_type_id",
   ]);
 
   const affiliations = useMemo(() => {
-    if (fetchingOptions || !options?.affiliations)
+    if (fetchingOptions || !options?.affiliations || membership_type_id === trial)
       return [{ id: 0, name: "未選択" }];
     return [
       { id: 0, name: "未選択" },
       ...options.affiliations,
     ] as OptionAttribute[];
-  }, [options?.affilations, fetchingOptions]);
+  }, [options?.affilations, fetchingOptions, membership_type_id]);
 
   const departments = useMemo(() => {
     const depts: DepartmentOptionsType = [];
 
-    if (fetchingOptions || !options?.departments) {
+    if (fetchingOptions || !options?.departments || membership_type_id === trial) {
       depts.push({
         id: 0,
         name: "未選択",
@@ -86,12 +87,12 @@ function AccountManagementSearchAccordion({
     }
 
     return depts;
-  }, [options?.departments, fetchingOptions, affiliation_id]);
+  }, [options?.departments, fetchingOptions, affiliation_id, membership_type_id]);
 
   const child_departments = useMemo(() => {
     const depts: ChildDepartmentOptionsType = [];
 
-    if (fetchingOptions || !options?.child_departments) {
+    if (fetchingOptions || !options?.child_departments || membership_type_id === trial) {
       depts.push({
         id: 0,
         name: "未選択",
@@ -121,6 +122,7 @@ function AccountManagementSearchAccordion({
     fetchingOptions,
     affiliation_id,
     department_1,
+    membership_type_id
   ]);
 
   const { isDirty, isValid } = form.formState;
@@ -149,6 +151,13 @@ function AccountManagementSearchAccordion({
                 name="membership_type_id"
                 label="権限"
                 options={memberships}
+                onChange={(v) => {
+                  if(v === trial) {
+                    form.setValue("affiliation_id", 0);
+                    form.setValue("department_1", 0);
+                    form.setValue("department_2", 0);
+                  }
+                }}
               />
               <Selection
                 name="affiliation_id"

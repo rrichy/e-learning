@@ -33,8 +33,8 @@ TODO: course management searching functionalities
 TODO: account-management/{id}/detail tables
 TODO: comprehension test details ???
 TODO: targets on notice and course info
+TODO: /account-management register multiple accounts
 
-TODO: account search: affiliation_id, department_1 and department_2 should have no options
 TODO: [admin] /course-management table attending students column
 
 TODO: secure Service classes to do its role; usable in tinker (no auth() || requests() || $request->validate() should be happening inside a service class)
