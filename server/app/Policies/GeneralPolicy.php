@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\Category;
 use App\Models\Course;
+use App\Models\Department;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Support\Collection;
@@ -103,6 +104,29 @@ class GeneralPolicy
     {
         // check if all ids exist
         $records = Category::whereIn('id', $ids)->get(['id', 'affiliation_id']);
+        if (!$ids->every(fn ($id) => $records->contains('id', $id))) {
+            return false;
+        }
+
+        if ($user->isAdmin()) return true;
+
+        // for corporate
+        return $records->every(fn ($record) => $record['affiliation_id'] === $user->affiliation_id);
+    }
+    // CategoryPolicy --end--
+
+
+    // CategoryPolicy --start--
+    public function updateDepartment(User $user, Department $model)
+    {
+        return $user->isAdmin()
+            || ($user->isCorporate() && $user->affiliation_id === $model->affiliation_id);
+    }
+
+    public function deleteDepartment(User $user, Collection $ids)
+    {
+        // check if all ids exist
+        $records = Department::whereIn('id', $ids)->get(['id', 'affiliation_id']);
         if (!$ids->every(fn ($id) => $records->contains('id', $id))) {
             return false;
         }
