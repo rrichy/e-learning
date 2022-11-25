@@ -68,8 +68,11 @@ class AccountController extends Controller
     {
         Gate::authorize('check-membership', [['admin', 'corporate']]);
 
+        $collection_id = collect(explode(',', $ids));
+        Gate::authorize('delete-account', $collection_id);
+
         try {
-            $deleted_count = $service->deleteIds(collect(explode(',', $ids)), auth()->user());
+            $deleted_count = $service->deleteIds($collection_id, auth()->user());
         } catch (Exception $ex) {
             abort(500, $ex->getMessage());
         }
