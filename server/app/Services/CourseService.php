@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Http\Requests\CourseRequest;
 use App\Http\Resources\AttendeeResource;
 use App\Http\Resources\CourseIndexResource;
 use App\Http\Resources\CourseListResource;
@@ -19,13 +18,9 @@ use App\Models\Question;
 use App\Models\QuestionOption;
 use App\Models\Test;
 use App\Models\User;
-use Exception;
-use Illuminate\Database\Query\Builder;
-use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rule;
 
 class CourseService
 {

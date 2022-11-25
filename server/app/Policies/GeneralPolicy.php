@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\Category;
 use App\Models\Course;
+use App\Models\MailTemplate;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Support\Collection;
@@ -90,6 +91,43 @@ class GeneralPolicy
         return $records->every(fn ($record) => $record->category->affiliation_id === $user->affiliation_id);
     }
     // CoursePolicy --end--
+
+
+    // MailTemplatePolicy --start--
+    public function updateMailTemplate(User $user, MailTemplate $model)
+    {
+        return $user->isAdmin()
+            || ($user->isCorporate() && $user->affiliation_id === $model->affiliation_id);
+    }
+
+    public function deleteMailTemplate(User $user, Collection $ids)
+    {
+        // check if all ids exist
+        $records = MailTemplate::whereIn('id', $ids)->get(['id', 'affiliation_id']);
+        if (!$ids->every(fn ($id) => $records->contains('id', $id))) {
+            return false;
+        }
+
+        if ($user->isAdmin()) return true;
+
+        // for corporate
+        return $records->every(fn ($record) => $record->affiliation_id === $user->affiliation_id);
+    }
+
+    public function massUpdateMailTemplate(User $user, Collection $ids)
+    {
+        // check if all ids exist
+        $records = MailTemplate::whereIn('id', $ids)->get(['id', 'affiliation_id']);
+        if (!$ids->every(fn ($id) => $records->contains('id', $id))) {
+            return false;
+        }
+
+        if ($user->isAdmin()) return true;
+
+        // for corporate
+        return $records->every(fn ($record) => $record->affiliation_id === $user->affiliation_id);
+    }
+    // MailTemplatePolicy --end--
 
 
     // CategoryPolicy --start--
