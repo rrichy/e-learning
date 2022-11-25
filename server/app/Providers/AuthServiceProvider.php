@@ -39,14 +39,7 @@ class AuthServiceProvider extends ServiceProvider
             return config('app.frontend_url')."/password-reset/$token?email={$notifiable->getEmailForPasswordReset()}";
         });
 
-        // Registering policies
-        //course
-        Gate::define('viewAny-course', [CoursePolicy::class, 'viewAny']);
-        Gate::define('view-course', [CoursePolicy::class, 'view']);
-        Gate::define('create-course', [CoursePolicy::class, 'create']);
-        Gate::define('update-course', [CoursePolicy::class, 'update']);
-        Gate::define('delete-course', [CoursePolicy::class, 'delete']);
-
+        // Defining Gates
         Gate::define('check-membership', function (User $user, array $allowed) {
             $allowed_ids = array_map(function ($str) {
                 switch($str) {
@@ -67,5 +60,9 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('view-account', [GeneralPolicy::class, 'viewAccount']);
         Gate::define('update-account', [GeneralPolicy::class, 'updateAccount']);
         Gate::define('delete-account', [GeneralPolicy::class, 'deleteAccount']);
+        Gate::define('view-course', [GeneralPolicy::class, 'viewCourse']);
+        Gate::define('update-course', [GeneralPolicy::class, 'updateCourse']);
+        Gate::define('delete-course', [GeneralPolicy::class, 'deleteCourse']);
+        Gate::define('mass-update-course', [GeneralPolicy::class, 'massUpdateCourse']);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\AdminCorporate;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AttendeeListRequest;
+use App\Http\Requests\CoursePriorityUpdateRequest;
 use App\Http\Requests\CourseRequest;
 use App\Http\Resources\AttendeeResource;
 use App\Models\Course;
@@ -21,13 +22,27 @@ class CourseController extends Controller
         $valid = $request->validate([
             'status' => 'required|string|in:both,private,public',
         ]);
-        
-        return $service->index($valid['status'], auth()->user());
+
+        try {
+            $auth = auth()->user();
+            if ($auth->isIndividual()) $list = $service->individualIndex();
+            else $list = $service->index($valid['status'], $auth->affiliation_id);
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
+
+        return $list;
     }
 
     public function store(CourseRequest $request, CourseService $service)
     {
-        $message = $service->store($request);
+        Gate::authorize('check-membership', [['admin', 'corporate']]);
+
+        try {
+            $message = $service->store($request->validated(), auth()->user());
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
 
         return response()->json([
             'message' => $message,
@@ -37,15 +52,29 @@ class CourseController extends Controller
     public function show(Request $request, Course $course, CourseService $service)
     {
         Gate::authorize('check-membership', [['admin', 'corporate', 'individual']]);
+        Gate::authorize('view-course', $course);
 
-        return $service->details($course, auth()->user(), $request->boolean('tabulated'));
+        try {
+            $auth = auth()->user();
+            if ($auth->isIndividual()) $details = $service->individualShow($course);
+            else $details = $service->show($course, $request->boolean('tabulated'));
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
+
+        return $details;
     }
 
     public function update(CourseRequest $request, Course $course, CourseService $service)
     {
         Gate::authorize('check-membership', [['admin', 'corporate']]);
+        Gate::authorize('update-course', $course);
 
-        $service->update($request, $course);
+        try {
+            $service->update($request->validated(), $course, auth()->user());
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
 
         return response()->json([
             'message' => 'Successfully updated a course!',
@@ -54,20 +83,38 @@ class CourseController extends Controller
 
     public function massDelete(string $ids, CourseService $service)
     {
+        $collection_id = collect(explode(',', $ids));
         Gate::authorize('check-membership', [['admin', 'corporate']]);
+        Gate::authorize('delete-course', $collection_id);
 
-        $deleted_count = $service->deleteIds($ids);
+        try {
+            $deleted_count = $service->deleteIds($collection_id);
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
 
         return response()->json([
             'message' => 'Successfully deleted ' . $deleted_count . ' courses!',
         ]);
     }
 
-    public function massUpdate(Request $request, CourseService $service)
+    public function massUpdate(CoursePriorityUpdateRequest $request, CourseService $service)
     {
-        Gate::authorize('check-membership', [['admin', 'corporate']]);
+        $valid = $request->validated();
+        $course_ids = [];
 
-        $count = $service->updatePriorities($request);
+        foreach ($valid['payload'] as $category) {
+            $course_ids = array_merge($course_ids, array_map(fn ($change) => $change['id'], $category['changes']));
+        }
+
+        Gate::authorize('check-membership', [['admin', 'corporate']]);
+        Gate::authorize('mass-update-course', collect($course_ids));
+
+        try {
+            $count = $service->updatePriorities($valid);
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
 
         return response()->json([
             'message' => 'Successfully updated ' . $count . ' courses!',
@@ -76,9 +123,20 @@ class CourseController extends Controller
 
     public function toggleStatus(Request $request, CourseService $service)
     {
-        Gate::authorize('check-membership', [['admin', 'corporate']]);
+        $valid = $request->validate([
+            'ids' => 'array',
+            'ids.*' => 'numeric|exists:courses,id',
+            'status' => 'required|string|in:public,private',
+        ]);
 
-        $service->updateStatus($request);
+        Gate::authorize('check-membership', [['admin', 'corporate']]);
+        Gate::authorize('mass-update-course', collect($valid['ids']));
+
+        try {
+            $service->updateStatus($valid);
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
 
         return response()->json([
             'message' => 'Successfully updated the courses!',
@@ -88,9 +146,10 @@ class CourseController extends Controller
     public function attendees(AttendeeListRequest $request, Course $course, CourseService $service)
     {
         Gate::authorize('check-membership', [['admin', 'corporate']]);
+        Gate::authorize('view-course', $course);
 
         try {
-            $attendees = $service->listAttendees($request->validated(), $course, auth()->user());
+            $attendees = $service->listAttendees($request->validated(), $course);
         } catch (Exception $ex) {
             abort(500, $ex->getMessage());
         }

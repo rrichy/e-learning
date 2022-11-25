@@ -66,9 +66,8 @@ class AccountController extends Controller
 
     public function massDelete(string $ids, AccountService $service)
     {
-        Gate::authorize('check-membership', [['admin', 'corporate']]);
-
         $collection_id = collect(explode(',', $ids));
+        Gate::authorize('check-membership', [['admin', 'corporate']]);
         Gate::authorize('delete-account', $collection_id);
 
         try {

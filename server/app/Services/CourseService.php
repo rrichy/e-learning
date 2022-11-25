@@ -22,32 +22,22 @@ use App\Models\User;
 use Exception;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class CourseService
 {
-    public function index(string $status, User $user)
+    public function index(string $status, mixed $affiliation_id)
     {
-        if ($user->isIndividual()) {
-            return CourseListResource::collection(
-                Category::whereHas('courses', fn ($q) => $q->isPublic())
-                    ->with(
-                        ['courses' => fn ($q) => $q->isPublic()]
-                    )->get()
-            );
-        }
-
         if ($status === "both") {
             return CourseIndexResource::collection(
                 Category::with(['courses' => function ($q) {
                     $q->orderBy('priority', 'asc');
                 }])->when(
-                    $user->isCorporate(),
-                    function ($q) use ($user) {
-                        $q->where('affiliation_id', $user->affiliation_id);
-                    }
+                    $affiliation_id,
+                    fn ($q) => $q->where('affiliation_id', $affiliation_id)
                 )->orderBy('priority', 'asc')
                     ->get()
             );
@@ -62,31 +52,52 @@ class CourseService
                     ]);
             }])
                 ->when(
-                    $user->isCorporate(),
-                    function ($q) use ($user) {
-                        $q->where('affiliation_id', $user->affiliation_id);
-                    }
+                    $affiliation_id,
+                    fn ($q) => $q->where('affiliation_id', $affiliation_id)
+                )->get()
+        );
+    }
+
+    public function individualIndex()
+    {
+        return CourseListResource::collection(
+            Category::whereHas('courses', fn ($q) => $q->isPublic())
+                ->with(
+                    ['courses' => fn ($q) => $q->isPublic()]
                 )->get()
         );
     }
 
 
-    public function details(Course $course, User $user, bool $parsed = false)
+    public function store(array $valid, User $auth)
     {
-        if ($user->isIndividual()) {
-            return new StudentCourseShowResource(
-                $course->load([
-                    'chapters' => fn ($chapter) => $chapter->orderBy('item_number', 'asc')->orderBy('item_number', 'asc')
-                ])
-            );
-        }
+        $message = 'Failed to create a course';
 
-        abort_if(
-            $user->isCorporate() && $user->affiliation_id !== $course->category->affiliation_id,
-            403,
-            'You have no authority of viewing this course!'
-        );
+        DB::transaction(function () use ($valid, &$message, $auth) {
+            $course = Course::create($valid);
 
+            $s3_image_url = $auth->temporaryUrls()->where('directory', 'courses/')->first();
+
+            if ($s3_image_url) {
+                $s3_image_url->delete();
+                abort_if($s3_image_url->url !== $valid['image'], 403, 'Image url mismatch!');
+            }
+
+            $s3_video_urls = $auth->temporaryUrls()->where('directory', 'chapters/')->delete();
+            // abort if some $valid['chapters.*.video_file_path'] mismatch
+            // abort_if($s3_video_urls->url !== $valid['image'], 403, 'Image url mismatch!');
+
+            $this->createChapters($course, $valid['chapters']);
+
+            $message = 'Successfully created a course!';
+        });
+
+        return $message;
+    }
+
+
+    public function show(Course $course, bool $parsed = false)
+    {
         if ($parsed) return new CourseParsedResource(
             $course->loadCount([
                 'attendingCourses as attendees',
@@ -118,26 +129,26 @@ class CourseService
         );
     }
 
-
-    public function update(CourseRequest $request, Course $course)
+    public function individualShow(Course $course)
     {
-        abort_if(
-            auth()->user()->isCorporate() && auth()->user()->affiliation_id !== $course->category->affiliation_id,
-            403,
-            'You have no authority of updating this course!'
+        return new StudentCourseShowResource(
+            $course->load([
+                'chapters' => fn ($chapter) => $chapter->orderBy('item_number', 'asc')->orderBy('item_number', 'asc')
+            ])
         );
+    }
 
-        $valid = $request->validated();
-
-        DB::transaction(function () use ($course, $valid) {
-            $s3_image_url = auth()->user()->temporaryUrls()->where('directory', 'courses/')->first();
+    public function update(array $valid, Course $course, User $auth)
+    {
+        DB::transaction(function () use ($course, $valid, $auth) {
+            $s3_image_url = $auth->temporaryUrls()->where('directory', 'courses/')->first();
 
             if ($s3_image_url) {
                 $s3_image_url->delete();
                 abort_if($s3_image_url->url !== $valid['image'], 403, 'Image url mismatch!');
             }
 
-            $s3_video_urls = auth()->user()->temporaryUrls()->where('directory', 'chapters/')->delete();
+            $s3_video_urls = $auth->temporaryUrls()->where('directory', 'chapters/')->delete();
             // abort if some $valid['chapters.*.video_file_path'] mismatch
             // abort_if($s3_video_urls->url !== $valid['image'], 403, 'Image url mismatch!');
 
@@ -155,97 +166,19 @@ class CourseService
             //     Storage::delete(str_replace(config('constants.prefixes.s3'), '', $old_image));
             // }
         });
+
+        return $course;
     }
 
 
-    public function store(CourseRequest $request)
+    public function deleteIds(Collection $ids)
     {
-        $valid = $request->validated();
-        $message = 'Failed to create a course';
-
-        DB::transaction(function () use ($valid, &$message) {
-            $course = Course::create($valid);
-
-            $s3_image_url = auth()->user()->temporaryUrls()->where('directory', 'courses/')->first();
-
-            if ($s3_image_url) {
-                $s3_image_url->delete();
-                abort_if($s3_image_url->url !== $valid['image'], 403, 'Image url mismatch!');
-            }
-
-            $s3_video_urls = auth()->user()->temporaryUrls()->where('directory', 'chapters/')->delete();
-            // abort if some $valid['chapters.*.video_file_path'] mismatch
-            // abort_if($s3_video_urls->url !== $valid['image'], 403, 'Image url mismatch!');
-
-            $this->createChapters($course, $valid['chapters']);
-
-            $message = 'Successfully created a course!';
-        });
+        return Course::destroy($ids);
     }
 
 
-    public function deleteIds(string $ids)
+    public function updatePriorities(array $valid)
     {
-        $auth = auth()->user();
-        $ids = explode(',', $ids);
-
-        if ($auth->isAdmin()) return Course::destroy($ids);
-
-        $validIdCount = Course::where('affiliation_id', $auth->affiliation_id)->whereIn('id', $ids)->count();
-        abort_if(
-            count($ids) !== $validIdCount,
-            403,
-            'You have no authority of deleting some of these courses'
-        );
-    }
-
-
-    public function updatePriorities(Request $request)
-    {
-        $auth = auth()->user();
-        $course_ids = array_map(fn ($q) => $q['category_id'], $request->payload);
-
-        $rules = [
-            'payload' => 'array',
-            'payload.*.category_id' => 'required|integer',
-            'payload.*.changes' => 'array',
-            'payload.*.changes.*.id' => 'required|integer|distinct|exists:courses,id',
-        ];
-
-        foreach ($request->payload as $index => $category) {
-            $course_ids = array_map(fn ($q) => $q['id'], $category['changes']);
-            $rules['payload.' . $index . '.changes.*.priority'] = [
-                'required',
-                'integer',
-                'distinct',
-                'min:1',
-                Rule::unique('courses', 'priority')
-                    ->where(function ($q) use ($category, $course_ids) {
-                        $q->where('category_id', $category['category_id'])
-                            ->whereNotIn('id', $course_ids);
-                    })
-            ];
-        }
-
-        $valid = $request->validate($rules);
-
-        if ($auth->isCorporate()) {
-            $ids = array_map(fn ($item) => $item['id'], $valid['payload']);
-            $validIdCount = Course::whereHas(
-                'category',
-                function ($q) use ($auth) {
-                    $q->where('affiliation_id', $auth->affiliation_id);
-                }
-            )->whereIn('id', $ids)
-                ->count();
-
-            abort_if(
-                count($ids) !== $validIdCount,
-                403,
-                'You have no authority of updating some of these courses!'
-            );
-        }
-
         $count = 0;
         foreach ($valid['payload'] as $category) {
             foreach ($category['changes'] as $course) {
@@ -253,42 +186,21 @@ class CourseService
                 $count++;
             }
         }
+
+        return $count;
     }
 
 
-    public function updateStatus(Request $request)
+    public function updateStatus(array $valid)
     {
-        $valid = $request->validate([
-            'ids' => 'array',
-            'ids.*' => 'numeric|exists:courses,id',
-            'status' => 'required|string|in:public,private',
-        ]);
-
-        if (auth()->user()->isCorporate()) {
-            $ids = array_map(fn ($item) => $item['id'], $valid['ids']);
-            $validIdCount = Course::whereHas(
-                'category',
-                fn ($q) =>  $q->where('affiliation_id', auth()->user()->affiliation_id)
-            )->whereIn('id', $ids)
-                ->count();
-
-            abort_if(
-                count($ids) !== $validIdCount,
-                403,
-                'You have no authority of updating some of these courses!'
-            );
-        }
-
         Course::whereIn('id', $valid['ids'])->update(['status' => Course::STATUS[$valid['status']]]);
+
+        return count($valid['ids']);
     }
 
 
-    public function listAttendees(array $filters, Course $course, $auth)
+    public function listAttendees(array $filters, Course $course)
     {
-        if ($auth->isCorporate() && $auth->affiliation_id !== $course->category->affiliation_id) {
-            throw new Exception('You do not own this course!');
-        }
-
         $order = $filters['order'] ?? 'asc';
         $per_page = $filters['per_page'] ?? 10;
         $sort = $filters['sort'] ?? 'id';
