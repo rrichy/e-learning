@@ -7,7 +7,6 @@ use App\Http\Resources\AccountShowParsedResource;
 use App\Http\Resources\AccountShowResource;
 use App\Models\MembershipType;
 use App\Models\User;
-use Exception;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -17,10 +16,6 @@ class AccountService
 {
     public function index(array $filters, User $auth)
     {
-        if ($this->userIsNotAuthorized($auth)) {
-            throw new Exception("You are not authorized to view any account!");
-        }
-
         $order = $filters['order'] ?? 'asc';
         $per_page = $filters['per_page'] ?? 10;
         $sort = $filters['sort'] ?? 'id';
@@ -57,10 +52,6 @@ class AccountService
 
     public function store(array $valid, User $auth)
     {
-        if ($this->userIsNotAuthorized($auth)) {
-            throw new Exception("You are not authorized to created any account!");
-        }
-
         $s3_image_url = $auth->temporaryUrls()->where('directory', 'profiles/')->first();
 
         if ($s3_image_url) {
@@ -91,10 +82,6 @@ class AccountService
 
     public function show(User $user, bool $parsed = false, User $auth)
     {
-        if ($this->userIsNotAuthorized($auth)) {
-            throw new Exception("You are not authorized to view any account!");
-        }
-
         if ($parsed) {
             return new AccountShowParsedResource($user->load([
                 'affiliation' => fn ($q) => $q->select('id', 'name'),
@@ -108,10 +95,6 @@ class AccountService
 
     public function update(array $valid, User $user, User $auth)
     {
-        if ($this->userIsNotAuthorized($auth)) {
-            throw new Exception("You are not authorized to update any account!");
-        }
-
         DB::transaction(function () use ($valid, $user, $auth) {
             $s3_image_url = $auth->temporaryUrls()->where('directory', 'profiles/')->first();
 
@@ -141,23 +124,9 @@ class AccountService
     }
 
 
-    public function deleteIds(Collection $ids, User $auth)
+    public function deleteIds(Collection $ids)
     {
-        if ($this->userIsNotAuthorized($auth)) {
-            throw new Exception("You are not authorized to delete accounts!");
-        }
-
-        if ($auth->isAdmin()) return User::destroy($ids);
-
-        $user_ids_under_same_affiliation = User::where('affiliation_id', $auth->affiliation_id)
-            ->whereIn('membership_type_id', [MembershipType::TRIAL, MembershipType::INDIVIDUAL])
-            ->pluck('id');
-
-        if ($ids->every(fn ($id) => $user_ids_under_same_affiliation->contains($id))) {
-            return User::destroy($ids);
-        } else {
-            throw new Exception("You have no authority of deleting some of these accounts");
-        }
+        return User::destroy($ids);
     }
 
 
@@ -181,10 +150,5 @@ class AccountService
                 fn ($q) => $q->whereDate('users.last_login_date', '>=', $filters['logged_in_min_date'])
                     ->whereDate('users.last_login_date', '<=', $filters['logged_in_max_date'])
             );
-    }
-
-    private function userIsNotAuthorized(User $auth)
-    {
-        return in_array($auth->membership_type_id, [MembershipType::TRIAL, MembershipType::INDIVIDUAL]);
     }
 }

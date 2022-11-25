@@ -8,6 +8,7 @@ use App\Policies\AccountPolicy;
 use App\Policies\AffiliationPolicy;
 use App\Policies\CoursePolicy;
 use App\Policies\DepartmentPolicy;
+use App\Policies\GeneralPolicy;
 use App\Policies\NoticePolicy;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\MemcachedLock;
@@ -46,13 +47,6 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('update-course', [CoursePolicy::class, 'update']);
         Gate::define('delete-course', [CoursePolicy::class, 'delete']);
 
-        //account
-        Gate::define('viewAny-account', [AccountPolicy::class, 'viewAny']);
-        Gate::define('view-account', [AccountPolicy::class, 'view']);
-        Gate::define('create-account', [AccountPolicy::class, 'create']);
-        Gate::define('update-account', [AccountPolicy::class, 'update']);
-        Gate::define('massDelete-account', [AccountPolicy::class, 'massDelete']);
-
         Gate::define('check-membership', function (User $user, array $allowed) {
             $allowed_ids = array_map(function ($str) {
                 switch($str) {
@@ -69,5 +63,9 @@ class AuthServiceProvider extends ServiceProvider
             
             return in_array($user->membership_type_id, $allowed_ids);
         });
+    
+        Gate::define('view-account', [GeneralPolicy::class, 'viewAccount']);
+        Gate::define('update-account', [GeneralPolicy::class, 'updateAccount']);
+        Gate::define('delete-account', [GeneralPolicy::class, 'deleteAccount']);
     }
 }
