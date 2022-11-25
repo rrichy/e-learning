@@ -18,6 +18,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import CourseTable from "@/components/organisms/CourseManagementFragments/CourseTable";
 import Loading from "@/components/molecules/Loading";
+import { CourseRowAttribute } from "@/columns/rowTypes";
 
 function PublicCourses() {
   const { isConfirmed } = useConfirm();
@@ -33,6 +34,7 @@ function PublicCourses() {
         successSnackbar(res.data.message);
         queryClient.invalidateQueries(["public-courses-table", {}]);
         queryClient.invalidateQueries(["private-courses-table", {}]);
+        setSelected(new Set());
       },
       onError: (e: any) => {
         errorSnackbar(e.message);
@@ -121,7 +123,9 @@ const getCourses = (filters: { [k: string]: any }) => {
       return {
         data: res.data.data,
         meta: res.data.meta,
-      } as TableStateProps<CourseListAttribute>;
+      } as TableStateProps<
+        Omit<CourseListAttribute, "courses"> & { courses: CourseRowAttribute[] }
+      >;
     },
     {
       staleTime: 5_000,

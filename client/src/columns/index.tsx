@@ -520,7 +520,7 @@ export function courseColumns() {
     }),
     courseHelper.accessor("attendees", {
       header: () => "受講者数",
-      cell: ({ row, getValue }) => (
+      cell: ({ getValue }) => (
         <div style={{ textAlign: "center" }}>{getValue()}</div>
       ),
       enableSorting: false,
@@ -534,14 +534,11 @@ export function courseColumns() {
     }),
     courseHelper.accessor("total_attendees", {
       header: () => "受講完了",
-      cell: ({ row, getValue }) => (
+      cell: ({ row }) => (
         <div style={{ textAlign: "center" }}>{row.original.attendees - row.original.current_attendees}</div>
       ),
       enableSorting: false,
     }),
-    // {field: "user_count", title: "コース名"},
-    // {field: "active_count", title: "コース名"},
-    // {field: "completed_count", title: "コース名"},
     courseHelper.accessor("start_period", {
       header: () => "開発日",
       cell: ({ getValue }) => (
