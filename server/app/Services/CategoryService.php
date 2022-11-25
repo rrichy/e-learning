@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 class CategoryService
 {
-    public function index(array $pagination, User $auth)
+    public function index(array $pagination, mixed $affiliation_id)
     {
         $order = $pagination['order'] ?? 'asc';
         $per_page = $pagination['per_page'] ?? 10;
@@ -20,8 +20,8 @@ class CategoryService
         return CategoryResource::collection(
             Category::query()
             ->when(
-                $auth->isCorporate(),
-                fn ($q) => $q->where('affiliation_id', auth()->user()->affiliation_id)
+                $affiliation_id,
+                fn ($q) => $q->where('affiliation_id', $affiliation_id)
             )->with([
                 'childCategories' => function ($q) use ($sort, $order) { $q->orderBy($sort, $order)->get(); }
             ])->whereNull('parent_id')
@@ -69,24 +69,13 @@ class CategoryService
     }
 
 
-    public function deleteIds(string $ids, User $auth)
+    public function deleteIds(string $ids)
     {
-        $ids = explode(',', $ids);
-
-        if ($auth->isAdmin()) return Category::destroy($ids);
-
-        $validIdCount = Category::where('affiliation_id', $auth->affiliation_id)->whereIn('id', $ids)->count();
-        abort_if(
-            count($ids) !== $validIdCount,
-            403,
-            'You have no authority of deleting some of these categories'
-        );
-
         return Category::destroy($ids);
     }
 
 
-    public function clone(Category $category, User $auth)
+    public function clone(Category $category)
     {
         $newCategory = $category->replicate();
         $newCategory['name'] = (function () use ($category) {

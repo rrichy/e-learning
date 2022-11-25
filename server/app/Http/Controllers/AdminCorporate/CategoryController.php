@@ -23,7 +23,7 @@ class CategoryController extends Controller
         ]);
 
         try {
-            $categories = $service->index($valid, auth()->user());
+            $categories = $service->index($valid, auth()->user()->affiliation_id);
         } catch (Exception $ex) {
             abort(500, $ex->getMessage());
         }
@@ -65,6 +65,7 @@ class CategoryController extends Controller
     public function massDelete(string $ids, CategoryService $service)
     {
         Gate::authorize('check-membership', [['admin', 'corporate']]);
+        Gate::authorize('delete-category', collect($ids));
 
         try {
             $deleted_count = $service->deleteIds($ids, auth()->user());

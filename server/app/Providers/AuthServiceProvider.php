@@ -65,5 +65,6 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('delete-course', [GeneralPolicy::class, 'deleteCourse']);
         Gate::define('mass-update-course', [GeneralPolicy::class, 'massUpdateCourse']);
         Gate::define('update-category', [GeneralPolicy::class, 'updateCategory']);
+        Gate::define('delete-category', [GeneralPolicy::class, 'deleteAccount']);
     }
 }
