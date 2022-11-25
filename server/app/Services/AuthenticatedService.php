@@ -2,8 +2,6 @@
 
 namespace App\Services;
 
-use App\Http\Requests\Auth\LoginRequest;
-use App\Http\Requests\UpdateSelfRequest;
 use App\Http\Resources\AccountShowResource;
 use App\Models\Category;
 use App\Models\Course;
@@ -12,7 +10,6 @@ use App\Models\MembershipType;
 use App\Models\TemporaryUrl;
 use App\Models\User;
 use App\Models\ViewingInformation;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -20,19 +17,25 @@ use Exception;
 
 class AuthenticatedService
 {
-    public function details()
+    public function store(User $auth)
     {
-        return $this->getAuthData('Login Successful!');
+        $token = $auth->createToken('access_token')->plainTextToken;
+        $auth->last_login_date = now();
+        $auth->save();
+
+        return $token;
     }
 
 
-    public function update(UpdateSelfRequest $request)
+    public function show(User $auth)
     {
-        $valid = $request->validated();
+        return $this->getAuthData($auth, 'Login Successful!');
+    }
 
-        DB::transaction(function () use ($valid) {
-            $auth = auth()->user();
 
+    public function update(array $valid, User $auth)
+    {
+        DB::transaction(function () use ($valid, $auth) {
             $s3_image_url = $auth->temporaryUrls()->where('directory', 'profiles/')->first();
 
             if ($s3_image_url) {
@@ -56,27 +59,22 @@ class AuthenticatedService
             }
         });
 
-        return response()->json([
+        return [
             'message' => 'Update successful!',
-            'user' => new AccountShowResource(auth()->user()->load('departments')),
-        ]);
+            'user' => new AccountShowResource($auth->load('departments')),
+        ];
     }
 
 
-    public function store(LoginRequest $request)
+    public function logout(User $auth)
     {
-        $request->authenticate();
+        $auth->currentAccessToken()->delete();
 
-        $auth = $request->user();
-        $token = $auth->createToken('access_token')->plainTextToken;
-        $auth->last_login_date = now();
-        $auth->save();
-
-        return response()->json([
-            'access_token' => $token,
-            'message' => 'Login Successful!',
-        ]);
+        return [
+            'message' => 'Logout Successful!',
+        ];
     }
+
 
     /**
      * Types of upload
@@ -85,16 +83,11 @@ class AuthenticatedService
      * - admin/corporate uploads course
      * - admin/corporate uploads video
      */
-    public function upload(Request $request)
+    public function upload(array $valid, User $auth)
     {
-        $auth = auth()->user();
-        $type = $request->input('type');
-        // $user_id = $request->input('user_id');
+        $type = $valid['type'];
 
-        abort_if(is_null($type) || !in_array($type, ['profile_image', 'course_image', 'chapter_video']), 403, 'No upload type in the request!');
         abort_if(($auth->isIndividual() || $auth->isTrial()) && $type !== 'profile_image', 403, 'You are not authorized to upload with this type!');
-        // abort_if(in_array($type, ['course_image', 'chapter_video']) && !($auth->isAdmin() || $auth->isCorporate()), 403, 'You are not authorized to upload with this type!');
-        // abort_if($type === 'profile_image' && $auth->isIndividual() && $user_id, 403, 'You cannot modify someone else\'s image');
 
         $directory = [
             'profile_image' => 'profiles/',
@@ -104,6 +97,8 @@ class AuthenticatedService
 
         $client = Storage::getClient();
         $expiry = "+3 minutes";
+
+        // Single file upload
         if ($directory === 'profiles/' || $directory === 'courses/') {
             $command = $client->getCommand('PutObject', [
                 'Bucket' => config('filesystems.disks.s3.bucket'),
@@ -115,15 +110,18 @@ class AuthenticatedService
             TemporaryUrl::create([
                 'directory' => $directory,
                 'url' => explode('?', $url)[0],
-                'user_id' => auth()->id(),
+                'user_id' => $auth->id,
             ]);
 
-            return response()->json($url);
+            return $url;
+            // Multipart file upload
         } else {
-            $upload_id = $request->input('upload_id');
-            $part_number = $request->input('part_number');
-            $filename = $request->input('filename');
+            $upload_id = $valid['upload_id'] ?? null;
+            $part_number = $valid['part_number'] ?? null;
+            $filename = $valid['filename'] ?? null;
+            $parts = $valid['parts'] ?? null;
 
+            // Generating a multipart upload temporaryurl
             if (is_null($upload_id)) {
                 $generated_key = now()->valueOf();
                 $command = $client->getCommand('CreateMultipartUpload', [
@@ -136,14 +134,15 @@ class AuthenticatedService
                 TemporaryUrl::create([
                     'directory' => $directory,
                     'url' => explode('?', $url)[0],
-                    'user_id' => auth()->id(),
+                    'user_id' => $auth->id,
                 ]);
 
-                return response()->json([
+                return [
                     'url' => $url,
                     'generated_key' => $generated_key,
-                ]);
-            } else if (!is_null($part_number) && !is_null($filename)) {
+                ];
+                // get upload part temporaryurl
+            } else if (!is_null($part_number)) {
                 $command = $client->getCommand('UploadPart', [
                     'Bucket' => config('filesystems.disks.s3.bucket'),
                     'Key'    => $directory . $filename,
@@ -156,24 +155,18 @@ class AuthenticatedService
                 TemporaryUrl::updateOrCreate([
                     'directory' => $directory,
                     'url' => explode('?', $url)[0],
-                    'user_id' => auth()->id(),
+                    'user_id' => $auth->id,
                 ]);
 
-                return response()->json($url);
+                return $url;
+                // get end multipart temporaryurl
             } else {
-                $valid = $request->validate([
-                    'parts' => 'array',
-                    'parts.*.ETag' => 'required|string',
-                    'parts.*.PartNumber' => 'required|numeric',
-                    'contentType' => 'required|string',
-                ]);
-
                 $command = $client->getCommand('CompleteMultipartUpload', [
                     'Bucket' => config('filesystems.disks.s3.bucket'),
                     'Key'    => $directory . $filename,
                     'UploadId' => $upload_id,
                     'MultipartUpload' => [
-                        'Parts' => $valid['parts'],
+                        'Parts' => $parts,
                     ],
                 ]);
 
@@ -182,52 +175,36 @@ class AuthenticatedService
                 TemporaryUrl::updateOrCreate([
                     'directory' => $directory,
                     'url' => explode('?', $url)[0],
-                    'user_id' => auth()->id(),
+                    'user_id' => $auth->id,
                 ]);
 
-                return response()->json($url);
+                return $url;
             }
         }
     }
 
 
-    public function viewVideo(Request $request)
+    public function viewVideo($url)
     {
-        $url = $request->input('url');
-
-        abort_if(is_null($url) || !str_contains($url, config('constants.prefixes.s3')), 403, 'Not a valid url');
-
-        // check if authorized
-        // here
-
-
-        return response()->json([
+        return [
             'url' => Storage::temporaryUrl(
                 str_replace(config('constants.prefixes.s3'), '', $url),
                 '+10 minutes'
             )
-        ]);
+        ];
     }
 
 
-    public function updatePlayback(Request $request, ExplainerVideo $video)
+    public function updatePlayback(array $valid, ExplainerVideo $video)
     {
-        $valid = $request->validate([
-            'playback_position' => 'required|numeric',
-            'is_complete' => 'boolean'
-        ]);
-
-        // check if authorized
-        // here
-
         ViewingInformation::updateOrCreate([
             'user_id' => auth()->id(),
             'explainer_video_id' => $video->id,
         ], $valid);
 
-        return response()->json([
+        return [
             'message' => 'Updated playback position!'
-        ]);
+        ];
     }
 
 
@@ -244,55 +221,46 @@ class AuthenticatedService
     }
 
 
-    public function logout()
+    // Helper functions
+    private function getAuthData(User $auth, string $message)
     {
-        auth()->user()->currentAccessToken()->delete();
-
-        return response()->json([
-            'message' => 'Logout Successful!',
-        ]);
-    }
-
-
-    private function getAuthData(string $message)
-    {
-        switch (auth()->user()->membership_type_id) {
+        switch ($auth->membership_type_id) {
             case MembershipType::ADMIN:
-                return response()->json([
-                    'user' => auth()->user(),
+                return [
+                    'user' => $auth,
                     'users_count' => User::where('membership_type_id', '<', MembershipType::ADMIN)
                         ->select(DB::raw('count(membership_type_id) as count, (CASE WHEN membership_type_id = 1 THEN "trial" WHEN membership_type_id = 2 THEN "individual" ELSE "corporate" END) AS membership_type'))
                         ->groupBy('membership_type_id')->get()
                         ->mapWithKeys(fn ($item) => [$item['membership_type'] => $item['count']]),
                     'message' => $message,
-                ]);
+                ];
             case MembershipType::CORPORATE:
                 // Count individuals under the same affiliation as the Corporate (UNFINISHED)
-                return response()->json([
-                    'user' => new AccountShowResource(auth()->user()->load('departments')),
+                return [
+                    'user' => new AccountShowResource($auth->load('departments')),
                     'users_count' => [
                         'individual' => User::query()
                             ->where('membership_type_id', MembershipType::INDIVIDUAL)
-                            ->where('affiliation_id', auth()->user()->affiliation_id)
+                            ->where('affiliation_id', $auth->affiliation_id)
                             ->count()
                     ],
                     'message' => $message,
-                ]);
+                ];
             case MembershipType::INDIVIDUAL:
-                return response()->json([
-                    'user' => new AccountShowResource(auth()->user()->load('departments')),
+                return [
+                    'user' => new AccountShowResource($auth->load('departments')),
                     'message' => $message,
                     'categories' => Category::query()
                         ->whereHas('courses', fn ($q) => $q->where('status', Course::STATUS['public']))
                         ->with(
                             ['courses' => fn ($q) => $q->where('status', Course::STATUS['public'])->select('id', 'title', 'category_id')]
                         )->get(['id', 'name'])
-                ]);
+                ];
             default:
-                return response()->json([
-                    'user' => auth()->user(),
+                return [
+                    'user' => $auth,
                     'message' => $message,
-                ]);
+                ];
         }
     }
 }

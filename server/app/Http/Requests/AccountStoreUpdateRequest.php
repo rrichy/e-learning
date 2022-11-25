@@ -3,7 +3,9 @@
 namespace App\Http\Requests;
 
 use App\Models\MembershipType;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 
@@ -85,4 +87,16 @@ class AccountStoreUpdateRequest extends FormRequest
 
         return $rules;
     }
+
+    // protected function failedValidation(Validator $validator)
+    // {
+    //     $s3_image_url = auth()->user()->temporaryUrls()->where('directory', 'profiles/')->first();
+
+    //     if ($s3_image_url) {
+    //         Storage::delete(str_replace(config('constants.prefixes.s3'), '', $s3_image_url->url));
+    //         $s3_image_url->delete();
+    //     }
+        
+    //     parent::failedValidation($validator);
+    // }
 }

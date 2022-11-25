@@ -25,17 +25,15 @@ class AccountController extends Controller
         return $list;
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \App\Http\Requests\AccountStoreUpdateRequest  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(AccountStoreUpdateRequest $request, AccountService $service)
     {
         Gate::authorize('check-membership', [['admin', 'corporate']]);
 
-        $service->store($request);
+        try {
+            $service->store($request->validated(), auth()->user());
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
 
         return response()->json([
             'message' => 'Successfully registered a new account!'
@@ -47,40 +45,34 @@ class AccountController extends Controller
         Gate::authorize('check-membership', [['admin', 'corporate']]);
         Gate::authorize('view-account', $account);
         
-        return $service->details($account, $request->boolean('parsed'));
+        return $service->show($account, $request->boolean('parsed'), auth()->user());
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \App\Http\Requests\AccountStoreUpdateRequest  $request
-     * @param  \App\Models\User  $account
-     * @return \Illuminate\Http\Response
-     */
     public function update(AccountStoreUpdateRequest $request, User $account, AccountService $service)
     {
         Gate::authorize('check-membership', [['admin', 'corporate']]);
         Gate::authorize('update-account', $account);
 
-        $service->update($request->validated(), $account, auth()->user());
+        try {
+            $service->update($request->validated(), $account, auth()->user());
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
 
         return response()->json([
             'message' => 'Successfully updated an account!'
         ]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  string  $ids
-     * @return \Illuminate\Http\Response
-     */
     public function massDelete(string $ids, AccountService $service)
     {
         Gate::authorize('check-membership', [['admin', 'corporate']]);
-        // TODO: when membership is corporate, check if all ids are under the same affiliation
 
-        $deleted_count = $service->deleteIds($ids);
+        try {
+            $deleted_count = $service->deleteIds(collect(explode(',', $ids)), auth()->user());
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
 
         return response()->json([
             'message' => 'Successfully deleted ' . $deleted_count . ' users!',
