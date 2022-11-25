@@ -64,11 +64,12 @@ class CategoryController extends Controller
 
     public function massDelete(string $ids, CategoryService $service)
     {
+        $collection_id = collect(explode(',', $ids));
         Gate::authorize('check-membership', [['admin', 'corporate']]);
-        Gate::authorize('delete-category', collect($ids));
+        Gate::authorize('delete-category', $collection_id);
 
         try {
-            $deleted_count = $service->deleteIds($ids, auth()->user());
+            $deleted_count = $service->deleteIds($collection_id);
         } catch (Exception $ex) {
             abort(500, $ex->getMessage());
         }

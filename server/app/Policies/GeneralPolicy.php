@@ -103,7 +103,7 @@ class GeneralPolicy
     {
         // check if all ids exist
         $records = Category::whereIn('id', $ids)->get(['id', 'affiliation_id']);
-        if(!$ids->every(fn ($id) => $records->contains('id', $id))) {
+        if (!$ids->every(fn ($id) => $records->contains('id', $id))) {
             return false;
         }
 

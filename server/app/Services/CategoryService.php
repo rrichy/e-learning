@@ -7,6 +7,7 @@ use App\Http\Resources\CategoryResource;
 use App\Models\Category;
 use App\Models\User;
 use Exception;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class CategoryService
@@ -69,7 +70,7 @@ class CategoryService
     }
 
 
-    public function deleteIds(string $ids)
+    public function deleteIds(Collection $ids)
     {
         return Category::destroy($ids);
     }
