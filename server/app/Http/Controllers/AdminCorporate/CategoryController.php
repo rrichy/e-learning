@@ -35,9 +35,11 @@ class CategoryController extends Controller
     {
         Gate::authorize('check-membership', [['admin', 'corporate']]);
 
-        $valid = $request->validated();
-
-        $service->store($valid);
+        try {
+            $service->store($request->validated());
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
 
         return response()->json([
             'message' => 'Successfully created a category!',
@@ -47,10 +49,13 @@ class CategoryController extends Controller
     public function update(CategoryStoreUpdateRequest $request, Category $category, CategoryService $service)
     {
         Gate::authorize('check-membership', [['admin', 'corporate']]);
+        Gate::authorize('update-category', $category);
 
-        $valid = $request->validated();
-
-        $service->update($valid, $category, auth()->user());
+        try {
+            $service->update($request->validated(), $category, auth()->user());
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
 
         return response()->json([
             'message' => 'Successfully updated a category!',
@@ -61,7 +66,11 @@ class CategoryController extends Controller
     {
         Gate::authorize('check-membership', [['admin', 'corporate']]);
 
-        $deleted_count = $service->deleteIds($ids, auth()->user());
+        try {
+            $deleted_count = $service->deleteIds($ids, auth()->user());
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
 
         return response()->json([
             'message' => 'Successfully deleted ' . $deleted_count . ' categories!',
@@ -71,8 +80,13 @@ class CategoryController extends Controller
     public function duplicate(Category $category, CategoryService $service)
     {
         Gate::authorize('check-membership', [['admin', 'corporate']]);
+        Gate::authorize('update-category', $category);
 
-        $service->clone($category, auth()->user());
+        try {
+            $service->clone($category, auth()->user());
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
 
         return response()->json([
             'message' => 'Successfully copied ' . $category->title . ' categories!',

@@ -53,10 +53,10 @@ class AuthServiceProvider extends ServiceProvider
                         return MembershipType::ADMIN;
                 }
             }, $allowed);
-            
+
             return in_array($user->membership_type_id, $allowed_ids);
         });
-    
+
         Gate::define('view-account', [GeneralPolicy::class, 'viewAccount']);
         Gate::define('update-account', [GeneralPolicy::class, 'updateAccount']);
         Gate::define('delete-account', [GeneralPolicy::class, 'deleteAccount']);
@@ -64,5 +64,6 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('update-course', [GeneralPolicy::class, 'updateCourse']);
         Gate::define('delete-course', [GeneralPolicy::class, 'deleteCourse']);
         Gate::define('mass-update-course', [GeneralPolicy::class, 'massUpdateCourse']);
+        Gate::define('update-category', [GeneralPolicy::class, 'updateCategory']);
     }
 }

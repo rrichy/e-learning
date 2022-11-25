@@ -6,6 +6,7 @@ use App\Http\Requests\CategoryStoreUpdateRequest;
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
 use App\Models\User;
+use Exception;
 use Illuminate\Support\Facades\DB;
 
 class CategoryService
@@ -35,12 +36,6 @@ class CategoryService
 
     public function update(array $valid, Category $category, User $auth)
     {
-        abort_if(
-            $auth->isCorporate() && $auth->affiliation_id !== $category->affiliation_id,
-            403,
-            "This action is unauthorized."
-        );
-
         DB::transaction(function () use ($valid, $category) {
             $category->update($valid);
             $child_categories = collect($valid['child_categories']);
@@ -93,12 +88,6 @@ class CategoryService
 
     public function clone(Category $category, User $auth)
     {
-        abort_if(
-            $auth->isCorporate() && $auth->affiliation_id !== $category->affiliation_id,
-            403,
-            "This action is unauthorized."
-        );
-
         $newCategory = $category->replicate();
         $newCategory['name'] = (function () use ($category) {
             $instance = 2;
