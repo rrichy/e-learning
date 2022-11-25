@@ -6,11 +6,13 @@ use App\Http\Requests\CategoryStoreUpdateRequest;
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
 use App\Models\User;
+use Exception;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class CategoryService
 {
-    public function index(array $pagination, User $auth)
+    public function index(array $pagination, mixed $affiliation_id)
     {
         $order = $pagination['order'] ?? 'asc';
         $per_page = $pagination['per_page'] ?? 10;
@@ -19,8 +21,8 @@ class CategoryService
         return CategoryResource::collection(
             Category::query()
             ->when(
-                $auth->isCorporate(), 
-                fn ($q) => $q->where('affiliation_id', auth()->user()->affiliation_id)
+                $affiliation_id,
+                fn ($q) => $q->where('affiliation_id', $affiliation_id)
             )->with([
                 'childCategories' => function ($q) use ($sort, $order) { $q->orderBy($sort, $order)->get(); }
             ])->whereNull('parent_id')
@@ -33,16 +35,8 @@ class CategoryService
     }
 
 
-    public function update(CategoryStoreUpdateRequest $request, Category $category)
+    public function update(array $valid, Category $category)
     {
-        abort_if(
-            auth()->user()->isCorporate() && auth()->user()->affiliation_id !== $category->affiliation_id,
-            403,
-            "This action is unauthorized."
-        );
-
-        $valid = $request->validated();
-
         DB::transaction(function () use ($valid, $category) {
             $category->update($valid);
             $child_categories = collect($valid['child_categories']);
@@ -61,10 +55,8 @@ class CategoryService
     }
 
 
-    public function store(CategoryStoreUpdateRequest $request)
+    public function store(array $valid)
     {
-        $valid = $request->validated();
-
         DB::transaction(function () use ($valid) {
             $category = Category::create($valid);
             $child_categories = collect($valid['child_categories']);
@@ -78,32 +70,14 @@ class CategoryService
     }
 
 
-    public function deleteIds(string $ids)
+    public function deleteIds(Collection $ids)
     {
-        $auth = auth()->user();
-        $ids = explode(',', $ids);
-
-        if ($auth->isAdmin()) return Category::destroy($ids);
-
-        $validIdCount = Category::where('affiliation_id', $auth->affiliation_id)->whereIn('id', $ids)->count();
-        abort_if(
-            count($ids) !== $validIdCount,
-            403,
-            'You have no authority of deleting some of these categories'
-        );
-
         return Category::destroy($ids);
     }
 
 
     public function clone(Category $category)
     {
-        abort_if(
-            auth()->user()->isCorporate() && auth()->user()->affiliation_id !== $category->affiliation_id,
-            403,
-            "This action is unauthorized."
-        );
-
         $newCategory = $category->replicate();
         $newCategory['name'] = (function () use ($category) {
             $instance = 2;

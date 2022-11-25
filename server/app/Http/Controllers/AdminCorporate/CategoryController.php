@@ -23,7 +23,7 @@ class CategoryController extends Controller
         ]);
 
         try {
-            $categories = $service->index($valid, auth()->user());
+            $categories = $service->index($valid, auth()->user()->affiliation_id);
         } catch (Exception $ex) {
             abort(500, $ex->getMessage());
         }
@@ -35,7 +35,11 @@ class CategoryController extends Controller
     {
         Gate::authorize('check-membership', [['admin', 'corporate']]);
 
-        $service->store($request);
+        try {
+            $service->store($request->validated());
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
 
         return response()->json([
             'message' => 'Successfully created a category!',
@@ -45,8 +49,13 @@ class CategoryController extends Controller
     public function update(CategoryStoreUpdateRequest $request, Category $category, CategoryService $service)
     {
         Gate::authorize('check-membership', [['admin', 'corporate']]);
+        Gate::authorize('update-category', $category);
 
-        $service->update($request, $category);
+        try {
+            $service->update($request->validated(), $category);
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
 
         return response()->json([
             'message' => 'Successfully updated a category!',
@@ -55,9 +64,15 @@ class CategoryController extends Controller
 
     public function massDelete(string $ids, CategoryService $service)
     {
+        $collection_id = collect(explode(',', $ids));
         Gate::authorize('check-membership', [['admin', 'corporate']]);
+        Gate::authorize('delete-category', $collection_id);
 
-        $deleted_count = $service->deleteIds($ids);
+        try {
+            $deleted_count = $service->deleteIds($collection_id);
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
 
         return response()->json([
             'message' => 'Successfully deleted ' . $deleted_count . ' categories!',
@@ -67,8 +82,13 @@ class CategoryController extends Controller
     public function duplicate(Category $category, CategoryService $service)
     {
         Gate::authorize('check-membership', [['admin', 'corporate']]);
+        Gate::authorize('update-category', $category);
 
-        $service->clone($category);
+        try {
+            $service->clone($category, auth()->user());
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
 
         return response()->json([
             'message' => 'Successfully copied ' . $category->title . ' categories!',
