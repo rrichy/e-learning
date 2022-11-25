@@ -4,12 +4,7 @@ namespace App\Providers;
 
 use App\Models\MembershipType;
 use App\Models\User;
-use App\Policies\AccountPolicy;
-use App\Policies\AffiliationPolicy;
-use App\Policies\CoursePolicy;
-use App\Policies\DepartmentPolicy;
 use App\Policies\GeneralPolicy;
-use App\Policies\NoticePolicy;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\MemcachedLock;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
@@ -68,5 +63,8 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('delete-category', [GeneralPolicy::class, 'deleteCategory']);
         Gate::define('update-department', [GeneralPolicy::class, 'updateDepartment']);
         Gate::define('delete-department', [GeneralPolicy::class, 'deleteDepartment']);
+        Gate::define('update-mailtemplate', [GeneralPolicy::class, 'updateMailTemplate']);
+        Gate::define('delete-mailtemplate', [GeneralPolicy::class, 'deleteMailTemplate']);
+        Gate::define('mass-update-mailtemplate', [GeneralPolicy::class,' massUpdateMailTemplate']);
     }
 }

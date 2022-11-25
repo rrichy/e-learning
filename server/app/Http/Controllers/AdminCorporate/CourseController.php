@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\AttendeeListRequest;
 use App\Http\Requests\CoursePriorityUpdateRequest;
 use App\Http\Requests\CourseRequest;
-use App\Http\Resources\AttendeeResource;
 use App\Models\Course;
 use App\Services\CourseService;
 use Exception;
