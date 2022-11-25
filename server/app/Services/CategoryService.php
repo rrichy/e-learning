@@ -35,7 +35,7 @@ class CategoryService
     }
 
 
-    public function update(array $valid, Category $category, User $auth)
+    public function update(array $valid, Category $category)
     {
         DB::transaction(function () use ($valid, $category) {
             $category->update($valid);

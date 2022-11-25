@@ -52,7 +52,7 @@ class CategoryController extends Controller
         Gate::authorize('update-category', $category);
 
         try {
-            $service->update($request->validated(), $category, auth()->user());
+            $service->update($request->validated(), $category);
         } catch (Exception $ex) {
             abort(500, $ex->getMessage());
         }
