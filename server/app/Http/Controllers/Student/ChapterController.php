@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Student;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SubmitTestRequest;
 use App\Models\Chapter;
+use App\Models\Test;
 use App\Services\ChapterService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -48,25 +49,43 @@ class ChapterController extends Controller
      * @param  \App\Models\Chapter  $chapter
      * @return \Illuminate\Http\Response
      */
-    public function showTest(Chapter $chapter, ChapterService $service)
+    public function showTest(Request $request, Chapter $chapter, ChapterService $service)
     {
         Gate::authorize('check-membership', [['individual']]);
 
-        return $service->testDetails($chapter);
+        $valid = $request->validate([
+            'test_type' => 'required|numeric',
+        ]);
+
+        $test_type = intval($valid) === Test::CHAPTER ? 'chapterTest' : 'comprehensionTest';
+
+        return $service->testDetails($chapter, $test_type);
     }
 
-    public function proceedTest(Chapter $chapter, ChapterService $service)
+    public function proceedTest(Request $request, Chapter $chapter, ChapterService $service)
     {
         Gate::authorize('check-membership', [['individual']]);
 
-        return $service->proceedTest($chapter);
+        $valid = $request->validate([
+            'test_type' => 'required|numeric',
+        ]);
+
+        $test_type = intval($valid) === Test::CHAPTER ? 'chapterTest' : 'comprehensionTest';
+
+        return $service->proceedTest($chapter, $test_type);
     }
 
     public function submitTest(SubmitTestRequest $request, Chapter $chapter, ChapterService $service)
     {
         Gate::authorize('check-membership', [['individual']]);
 
-        return $service->submitTest($request, $chapter);
+        $valid = $request->validate([
+            'test_type' => 'required|numeric',
+        ]);
+
+        $test_type = intval($valid) === Test::CHAPTER ? 'chapterTest' : 'comprehensionTest';
+
+        return $service->submitTest($request->validated(), $chapter, $test_type);
     }
 
     public function listVideos(Chapter $chapter, ChapterService $service)
