@@ -48,33 +48,28 @@ function ChangePassword(){
 
   return (
     <Paper variant="outlined">
-      <DisabledComponentContextProvider showLoading value={isSubmitting}>
-        <FormContainer formContext={formContext} handleSubmit={handleSubmit}>
-          <Stack spacing={3}>
-            <Typography variant="sectiontitle2">Change Password</Typography>
-            <Paper variant="sectionsubpaper">
-              <Typography variant="sectiontitle3">Change Password</Typography>
-              <Paper variant="outlined" sx={{ m: { xs: 2, md: 4 }, p: 2 }}>
-                <Stack spacing={2} justifyContent="center">
-                  <TextField
-                    name="old_password"
-                    label="Old Password"
-                    type="password"
-                  />
-                  <TextField
-                    name="new_password"
-                    label="New Password"
-                    type="password"
-                  />
-                  <TextField
-                    name="new_password_confirmation"
-                    label="New Password Confirmation"
-                    type="password"
-                  />
-                </Stack>
-              </Paper>
-            </Paper>
-            <Stack direction="row" spacing={2} justifyContent="center">
+      <Stack spacing={3}>
+        <DisabledComponentContextProvider showLoading value={isSubmitting}>
+          <Typography variant="sectiontitle2">パスワード変更</Typography>
+          <FormContainer formContext={formContext} handleSubmit={handleSubmit}>
+            <Stack spacing={2} p={2} alignItems="center">
+              <TextField
+                name="old_password"
+                label="現在のパスワード"
+                type="password"
+              />
+              <TextField
+                name="new_password"
+                label="新パスワード"
+                type="password"
+              />
+              <TextField
+                name="new_password_confirmation"
+                label="パスワード（確認用）"
+                type="password"
+              />
+            </Stack>
+            <Stack direction="row" spacing={2} justifyContent="center" mt={3}>
               <Button
                 color="dull"
                 variant="outlined"
@@ -93,12 +88,12 @@ function ChangePassword(){
                 type="submit"
                 disabled={!(isDirty && isValid)}
               >
-                Save
+                パスワードを変更
               </Button>
             </Stack>
-          </Stack>
-        </FormContainer>
-      </DisabledComponentContextProvider>
+          </FormContainer>
+        </DisabledComponentContextProvider>
+      </Stack>
     </Paper>
   );
 }
