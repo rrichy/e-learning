@@ -35,7 +35,7 @@ class ProcessExpiredTemporaryUrl implements ShouldQueue
     {
         $temp_url = TemporaryUrl::where('id', $this->temp_url_id)->first();
 
-        if($temp_url) {
+        if($temp_url !== null) {
             $temp_url->delete();
         }
     }
