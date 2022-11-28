@@ -35,7 +35,11 @@ class NoticeController extends Controller
     {
         Gate::authorize('check-membership', [['admin', 'corporate']]);
 
-        $service->store($request);
+        try {
+            $service->store($request->validated());
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
 
         return response()->json([
             'message' => 'Successfully posted a new notice!'
@@ -45,15 +49,27 @@ class NoticeController extends Controller
     public function show(Notice $notice, NoticeService $service)
     {
         Gate::authorize('check-membership', [['admin', 'corporate', 'individual']]);
+        Gate::authorize('view-notice', $notice);
 
-        return $service->details($notice);
+        try {
+            $notices = $service->details($notice);
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
+
+        return $notices;
     }
 
     public function update(NoticeStoreUpdateRequest $request, Notice $notice, NoticeService $service)
     {
         Gate::authorize('check-membership', [['admin', 'corporate']]);
+        Gate::authorize('update-notice', $notice);
 
-        $service->update($request, $notice);
+        try {
+            $service->update($request->validated(), $notice);
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
 
         return response()->json([
             'message' => 'Successfully updated notice!'
@@ -62,9 +78,15 @@ class NoticeController extends Controller
 
     public function massDelete(string $ids, NoticeService $service)
     {
+        $collection_id = collect(explode(',', $ids));
         Gate::authorize('check-membership', [['admin', 'corporate']]);
+        Gate::authorize('delete-notice', $collection_id);
 
-        $deleted_count = $service->deleteIds($ids);
+        try {
+            $deleted_count = $service->deleteIds($collection_id);
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
 
         return response()->json([
             'message' => 'Successfully deleted ' . $deleted_count . ' notices!',
