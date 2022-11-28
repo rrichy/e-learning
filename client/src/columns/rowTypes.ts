@@ -44,4 +44,13 @@ export type CourseRowAttribute = {
   total_attendees: number;
   start_period: string;
   end_period: string;
-}
+};
+
+export type AttendingRowAttribute = {
+  id: number;
+  title: string;
+  start_date: string;
+  completion_date: string;
+  progress_rate: number;
+  latest_score: number;
+};

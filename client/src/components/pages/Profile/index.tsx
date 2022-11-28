@@ -1,43 +1,38 @@
 import { Paper, Stack, Typography } from "@mui/material";
-import { useState } from "react";
 import Labeler from "../../molecules/Labeler";
 import CommonProfile from "../../organisms/Student/CommonProfile";
 import useAuth from "@/hooks/useAuth";
 import { jpDate } from "@/utils/jpFormatter";
-import Table from "@/components/atoms/Table";
-import {
-  initPaginationFilter,
-  initReactQueryPagination,
-  OrderType,
-  PaginationFilterInterface,
-  ReactQueryPaginationInterface,
-} from "@/interfaces/CommonInterface";
+import { TableStateProps } from "@/interfaces/CommonInterface";
 import { get } from "@/services/ApiService";
 import { useQuery } from "@tanstack/react-query";
-import { AttendingCourseAttributes } from "@/interfaces/AuthAttributes";
-import attendingCourseColumns from "@/columns/attendingCourseColumns";
-import { TABLE_ROWS_PER_PAGE } from "@/settings/appconfig";
+import MyTable from "@/components/atoms/MyTable";
+import { useMyTable } from "@/hooks/useMyTable";
+import { attendingColumns } from "@/columns";
+import { AttendingRowAttribute } from "@/columns/rowTypes";
 
-const init = initReactQueryPagination<AttendingCourseAttributes>();
-
-const tableResult = (
-  filters: PaginationFilterInterface & { [k: string]: any }
-) =>
-  useQuery(
-    ["attending_courses", filters],
+function StudentProfile() {
+  const { authData } = useAuth();
+  const { pagination, setPagination, sorter } = useMyTable();
+  const { data, isFetching } = useQuery(
+    ["attending-courses", pagination, sorter.sort],
     async () => {
-      const params = Object.entries(filters)
-        .reduce(
-          (acc: string[], [key, value]) =>
-            !value || ["last_page", "total"].includes(key)
-              ? acc
-              : [...acc, `${key === "current_page" ? "page" : key}=${value}`],
-          []
-        )
-        .join("&");
+      const sort = sorter.sort;
+      const sortKey = sort[0]?.id ?? "id";
+      const orderDir = sort[0] ? (sort[0].desc ? "desc" : "asc") : "asc";
 
-      const res = await get("/api/attending-course?" + params);
-      return res.data as ReactQueryPaginationInterface<AttendingCourseAttributes>;
+      const res = await get(
+        `/api/attending-course?page=${pagination.pageIndex + 1}&per_page=${
+          pagination.pageSize
+        }&sort=${sortKey}&order=${orderDir}`
+      );
+
+      return {
+        sorter: sorter.setSort,
+        paginator: setPagination,
+        data: res.data.data,
+        meta: res.data.meta,
+      } as TableStateProps<AttendingRowAttribute>;
     },
     {
       staleTime: 5_000,
@@ -46,38 +41,16 @@ const tableResult = (
     }
   );
 
-function StudentProfile() {
-  const { authData } = useAuth();
-  const [pagination, setPagination] = useState(initPaginationFilter);
-  const [filters, setFilters] = useState<{ [k: string]: any }>({});
-  const { data, isFetching } = tableResult({
-    ...pagination,
-    ...filters,
-  });
-  const updateFilter = (
-    page: number = 1,
-    pageSize: number = TABLE_ROWS_PER_PAGE[0],
-    sort: keyof AttendingCourseAttributes = "id",
-    order: OrderType = "desc"
-  ) => {
-    setPagination({
-      ...pagination,
-      current_page: page,
-      per_page: pageSize,
-      sort,
-      order,
-    });
-  };
-  
+  const columns = attendingColumns();
+
   return (
-    <Stack spacing={3} direction={{ xs: "column", lg: "row"}}>
-      <CommonProfile 
+    <Stack spacing={3} direction={{ xs: "column", lg: "row" }}>
+      <CommonProfile
         name={authData?.name}
         image={authData?.image}
         plan={authData?.created_at}
         registered_date={authData?.created_at}
       />
-      
       <Stack spacing={3} flex={1}>
         <Paper variant="softoutline" sx={{ p: 7 }}>
           <Typography variant="sectiontitle2">アカウント情報</Typography>
@@ -99,12 +72,7 @@ function StudentProfile() {
         <Paper variant="softoutline" sx={{ p: 7 }}>
           <Typography variant="sectiontitle2">受講履歴</Typography>
           <Stack pt={5}>
-            <Table
-              columns={attendingCourseColumns()}
-              state={data || init}
-              fetchData={updateFilter}
-              isLoading={isFetching}
-            />
+            <MyTable columns={columns} loading={isFetching} state={data} />
           </Stack>
         </Paper>
       </Stack>

@@ -43,7 +43,7 @@ import CourseHistory from "./Student/CourseHistory";
 import StudentChapterDisplay from "./Student/StudentChapterDisplay";
 import TestDetailsDisplay from "../organisms/Student/TestDetailsDisplay";
 import TestAnswerScreen from "../organisms/Student/TestAnswerScreen";
-import TestResult from "../organisms/Student/TestResult";
+import TestResult from "../organisms/Student/TestResultV2";
 import StudentProfile from "./Profile";
 import StudentLecture from "./Student/StudentLecture";
 import Inquiries from "./Inquiry";

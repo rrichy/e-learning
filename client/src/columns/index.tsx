@@ -1,4 +1,5 @@
 import Link from "@/components/atoms/Link";
+import { QuestionAttributes } from "@/hooks/pages/Students/useChapter";
 import { UserAttributes } from "@/interfaces/AuthAttributes";
 import { jpDate } from "@/utils/jpFormatter";
 import { AffiliationFormAttributeWithId } from "@/validations/AffiliationFormValidation";
@@ -8,14 +9,23 @@ import { SignatureFormAttributeWithId } from "@/validations/SignatureFormValidat
 import {
   ArticleOutlined,
   ChevronRight,
+  CircleOutlined,
+  CloseOutlined,
   ContentCopy,
   Delete,
   MarkunreadOutlined,
 } from "@mui/icons-material";
-import { Box, IconButton, Link as MuiLink, Tooltip } from "@mui/material";
+import {
+  Box,
+  Button,
+  IconButton,
+  Link as MuiLink,
+  Tooltip,
+} from "@mui/material";
 import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import {
   AttendeeRowAttribute,
+  AttendingRowAttribute,
   CourseRowAttribute,
   InquiryRowAttribute,
   MailRowAttribute,
@@ -535,7 +545,9 @@ export function courseColumns() {
     courseHelper.accessor("total_attendees", {
       header: () => "受講完了",
       cell: ({ row }) => (
-        <div style={{ textAlign: "center" }}>{row.original.attendees - row.original.current_attendees}</div>
+        <div style={{ textAlign: "center" }}>
+          {row.original.attendees - row.original.current_attendees}
+        </div>
       ),
       enableSorting: false,
     }),
@@ -564,32 +576,143 @@ export function attendeeColumns() {
   const columns: ColumnDef<AttendeeRowAttribute, any>[] = [
     attendeeHelper.accessor("name", {
       header: () => "氏名",
-      cell: ({ getValue }) => <div style={{ textAlign: "center" }}>{getValue()}</div>,
+      cell: ({ getValue }) => (
+        <div style={{ textAlign: "center" }}>{getValue()}</div>
+      ),
     }),
     attendeeHelper.accessor("email", {
       header: () => "メールアドレス",
-      cell: ({ getValue }) => <div style={{ textAlign: "center" }}>{getValue()}</div>,
+      cell: ({ getValue }) => (
+        <div style={{ textAlign: "center" }}>{getValue()}</div>
+      ),
       size: 200,
     }),
     attendeeHelper.accessor("start_date", {
       header: () => "受講開発日",
-      cell: ({ getValue }) => <div style={{ textAlign: "center" }}>{jpDate(getValue())}</div>,
+      cell: ({ getValue }) => (
+        <div style={{ textAlign: "center" }}>{jpDate(getValue())}</div>
+      ),
     }),
     attendeeHelper.accessor("progress_rate", {
       header: () => "進捗率",
-      cell: ({ getValue }) => <div style={{ textAlign: "center" }}>{getValue()}</div>,
+      cell: ({ getValue }) => (
+        <div style={{ textAlign: "center" }}>{getValue()}</div>
+      ),
     }),
     attendeeHelper.accessor("highest_score", {
       header: () => "最高点",
-      cell: ({ getValue }) => <div style={{ textAlign: "center" }}>{getValue()}</div>,
+      cell: ({ getValue }) => (
+        <div style={{ textAlign: "center" }}>{getValue()}</div>
+      ),
     }),
     attendeeHelper.accessor("latest_score", {
       header: () => "最新点",
-      cell: ({ getValue }) => <div style={{ textAlign: "center" }}>{getValue()}</div>,
+      cell: ({ getValue }) => (
+        <div style={{ textAlign: "center" }}>{getValue()}</div>
+      ),
     }),
     attendeeHelper.accessor("completion_date", {
       header: () => "受講完了日",
-      cell: ({ getValue }) => <div style={{ textAlign: "center" }}>{jpDate(getValue()) ?? "-"}</div>,
+      cell: ({ getValue }) => (
+        <div style={{ textAlign: "center" }}>{jpDate(getValue()) ?? "-"}</div>
+      ),
+    }),
+  ];
+
+  return columns;
+}
+
+const attendingHelper = createColumnHelper<AttendingRowAttribute>();
+
+export function attendingColumns() {
+  const columns: ColumnDef<AttendingRowAttribute, any>[] = [
+    attendingHelper.accessor("title", {
+      header: () => "コース名",
+      cell: ({ getValue }) => (
+        <div style={{ textAlign: "center" }}>{getValue()}</div>
+      ),
+    }),
+    attendingHelper.accessor("start_date", {
+      header: () => "受講開始日",
+      cell: ({ getValue }) => (
+        <div style={{ textAlign: "center" }}>{jpDate(getValue()) ?? "-"}</div>
+      ),
+    }),
+    attendingHelper.accessor("completion_date", {
+      header: () => "完了日",
+      cell: ({ getValue }) => (
+        <div style={{ textAlign: "center" }}>{jpDate(getValue()) ?? "-"}</div>
+      ),
+    }),
+    attendingHelper.accessor("progress_rate", {
+      header: () => "進捗率",
+      cell: ({ getValue }) => (
+        <div style={{ textAlign: "center" }}>{getValue()}</div>
+      ),
+    }),
+    attendingHelper.accessor("latest_score", {
+      header: () => "最新得点",
+      cell: ({ getValue }) => (
+        <div style={{ textAlign: "center" }}>{getValue()}</div>
+      ),
+    }),
+  ];
+
+  return columns;
+}
+
+const resultHelper = createColumnHelper<QuestionAttributes>();
+
+export function resultColumns(onClick: (d: QuestionAttributes) => void) {
+  const columns: ColumnDef<QuestionAttributes, any>[] = [
+    resultHelper.display({
+      id: "item_number",
+      header: () => "設問番号",
+      cell: ({ row }) => (
+        <div style={{ textAlign: "center" }}>{row.original.item_number}</div>
+      ),
+      size: 100,
+    }),
+    resultHelper.display({
+      id: "answered_correctly",
+      header: () => "解答結果",
+      cell: ({ row }) => (
+        <div style={{ textAlign: "center" }}>
+          {row.original.answered_correctly ? (
+            <CircleOutlined sx={{ color: "red" }} />
+          ) : (
+            <CloseOutlined color="primary" />
+          )}
+        </div>
+      ),
+      size: 100,
+    }),
+    resultHelper.display({
+      id: "score",
+      header: () => "配点",
+      cell: ({ row }) => (
+        <div style={{ textAlign: "center" }}>{row.original.score}</div>
+      ),
+      size: 100,
+    }),
+    resultHelper.display({
+      id: "statement",
+      header: () => "設問文題",
+      cell: ({ row }) => (
+        <div style={{ textAlign: "center", whiteSpace: "break-spaces" }}>{row.original.statement}</div>
+      ),
+    }),
+    resultHelper.display({
+      id: "actions",
+      header: () => "詳細表示",
+      cell: ({ row }) => (
+        <div style={{ textAlign: "center" }}>
+          <Button variant="contained" onClick={() => onClick(row.original)}>
+            詳細
+          </Button>
+        </div>
+      ),
+      size: 100,
     }),
   ];
 

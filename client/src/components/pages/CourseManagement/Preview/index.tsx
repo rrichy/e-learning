@@ -2,7 +2,7 @@ import Button from "@/components/atoms/Button";
 import CommonHeader from "@/components/organisms/Student/CommonHeader";
 import TestAnswerScreen from "@/components/organisms/Student/TestAnswerScreen";
 import TestDetailsDisplay from "@/components/organisms/Student/TestDetailsDisplay";
-import TestResult from "@/components/organisms/Student/TestResult";
+import TestResult from "@/components/organisms/Student/TestResultV2";
 import {
   ChapterContextAttribute,
   QuestionAttributes,
