@@ -18,6 +18,7 @@ use App\Models\Question;
 use App\Models\QuestionOption;
 use App\Models\Test;
 use App\Models\User;
+use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -69,18 +70,11 @@ class CourseService
         $message = 'Failed to create a course';
 
         DB::transaction(function () use ($valid, &$message, $auth) {
-            $course = Course::create($valid);
-
-            $s3_image_url = $auth->temporaryUrls()->where('directory', 'courses/')->first();
-
-            if ($s3_image_url) {
-                $s3_image_url->delete();
-                abort_if($s3_image_url->url !== $valid['image'], 403, 'Image url mismatch!');
+            if (isset($valid['image']) && !$auth->temporaryUrls()->where('url', $valid['image'])->exists()) {
+                throw new Exception("Temporary url does not exists!");
             }
 
-            $s3_video_urls = $auth->temporaryUrls()->where('directory', 'chapters/')->delete();
-            // abort if some $valid['chapters.*.video_file_path'] mismatch
-            // abort_if($s3_video_urls->url !== $valid['image'], 403, 'Image url mismatch!');
+            $course = Course::create($valid);
 
             $this->createChapters($course, $valid['chapters']);
 
@@ -136,16 +130,11 @@ class CourseService
     public function update(array $valid, Course $course, User $auth)
     {
         DB::transaction(function () use ($course, $valid, $auth) {
-            $s3_image_url = $auth->temporaryUrls()->where('directory', 'courses/')->first();
+            $has_new_image = isset($valid['image']) && $valid['image'] !== $course->image;
 
-            if ($s3_image_url) {
-                $s3_image_url->delete();
-                abort_if($s3_image_url->url !== $valid['image'], 403, 'Image url mismatch!');
+            if ($has_new_image && !$auth->temporaryUrls()->where('url', $valid['image'])->exists()) {
+                throw new Exception("Temporary url does not exists!");
             }
-
-            $s3_video_urls = $auth->temporaryUrls()->where('directory', 'chapters/')->delete();
-            // abort if some $valid['chapters.*.video_file_path'] mismatch
-            // abort_if($s3_video_urls->url !== $valid['image'], 403, 'Image url mismatch!');
 
             $old_image = $course->image;
 
@@ -153,13 +142,9 @@ class CourseService
 
             $this->updateChapters($course, $valid['chapters']);
 
-            if ($s3_image_url) {
+            if ($has_new_image && $old_image) {
                 Storage::delete(str_replace(config('constants.prefixes.s3'), '', $old_image));
             }
-            // delete old videos
-            // if ($s3_video_urls) {
-            //     Storage::delete(str_replace(config('constants.prefixes.s3'), '', $old_image));
-            // }
         });
 
         return $course;
