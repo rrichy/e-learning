@@ -6,7 +6,9 @@ use App\Models\Course;
 use App\Models\Question;
 use App\Models\Test;
 use Carbon\Carbon;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class CourseRequest extends FormRequest
@@ -114,7 +116,7 @@ class CourseRequest extends FormRequest
             'title' => 'required|string',
             'content' => 'required|string',
             'study_time' => 'required|integer',
-            'priority' => ['required', 'integer', Rule::unique('courses')->where(fn ($q) => $q->where('category_id', request()->category_id))->when(request()->id > 0, fn ($q) => $q->ignore(request()->id))],
+            'priority' => ['required', 'integer', Rule::unique('courses')->where(fn ($q) => $q->where('category_id', $this->category_id))->when($this->id > 0, fn ($q) => $q->ignore($this->id))],
             'is_whole_period' => 'required|boolean',
             'start_period' => 'nullable|date',
             'end_period' => 'nullable|date',
@@ -163,5 +165,22 @@ class CourseRequest extends FormRequest
         }
 
         return $rules;
+    }
+
+    protected function failedValidation(Validator $validator)
+    {
+        if (isset($this->image)) {
+            $s3_image_url = $this->auth->temporaryUrls()
+                ->where('directory', 'course/')
+                ->where('url', explode('?', $this->image)[0])
+                ->first();
+
+            if ($s3_image_url) {
+                Storage::delete(str_replace(config('constants.prefixes.s3'), '', $s3_image_url->url));
+                $s3_image_url->delete();
+            }
+        }
+
+        parent::failedValidation($validator);
     }
 }

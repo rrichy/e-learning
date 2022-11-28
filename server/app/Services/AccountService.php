@@ -7,6 +7,7 @@ use App\Http\Resources\AccountShowParsedResource;
 use App\Http\Resources\AccountShowResource;
 use App\Models\MembershipType;
 use App\Models\User;
+use Exception;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -52,11 +53,8 @@ class AccountService
 
     public function store(array $valid, User $auth)
     {
-        $s3_image_url = $auth->temporaryUrls()->where('directory', 'profiles/')->first();
-
-        if ($s3_image_url) {
-            $s3_image_url->delete();
-            abort_if($s3_image_url->url !== $valid['image'], 403, 'Image url mismatch!');
+        if (isset($valid['image']) && !$auth->temporaryUrls()->where('url', $valid['image'])->exists()) {
+            throw new Exception("Temporary url does not exists!");
         }
 
         $parsed = array_merge($valid, [
@@ -96,11 +94,10 @@ class AccountService
     public function update(array $valid, User $user, User $auth)
     {
         DB::transaction(function () use ($valid, $user, $auth) {
-            $s3_image_url = $auth->temporaryUrls()->where('directory', 'profiles/')->first();
+            $has_new_image = isset($valid['image']) && $valid['image'] !== $auth->image;
 
-            if ($s3_image_url) {
-                $s3_image_url->delete();
-                abort_if($s3_image_url->url !== $valid['image'], 403, 'Image url mismatch!');
+            if ($has_new_image && !$auth->temporaryUrls()->where('url', $valid['image'])->exists()) {
+                throw new Exception("Temporary url does not exists!");
             }
 
             $old_image = $user->image;
@@ -117,7 +114,7 @@ class AccountService
             }
             $user->departments()->sync($newdepartments);
 
-            if ($s3_image_url) {
+            if ($has_new_image && $old_image) {
                 Storage::delete(str_replace(config('constants.prefixes.s3'), '', $old_image));
             }
         });
