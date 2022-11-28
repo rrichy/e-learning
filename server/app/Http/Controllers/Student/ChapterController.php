@@ -7,6 +7,7 @@ use App\Http\Requests\SubmitTestRequest;
 use App\Models\Chapter;
 use App\Models\Test;
 use App\Services\ChapterService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
@@ -59,7 +60,13 @@ class ChapterController extends Controller
 
         $test_type = intval($valid) === Test::CHAPTER ? 'chapterTest' : 'comprehensionTest';
 
-        return $service->testDetails($chapter, $test_type);
+        try {
+            $chapters = $service->testDetails($chapter, $test_type);
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
+
+        return $chapters;
     }
 
     public function proceedTest(Request $request, Chapter $chapter, ChapterService $service)
@@ -72,7 +79,13 @@ class ChapterController extends Controller
 
         $test_type = intval($valid) === Test::CHAPTER ? 'chapterTest' : 'comprehensionTest';
 
-        return $service->proceedTest($chapter, $test_type);
+        try {
+            $chapters = $service->proceedTest($chapter, $test_type);
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
+
+        return $chapters;
     }
 
     public function submitTest(SubmitTestRequest $request, Chapter $chapter, ChapterService $service)
@@ -85,14 +98,26 @@ class ChapterController extends Controller
 
         $test_type = intval($valid) === Test::CHAPTER ? 'chapterTest' : 'comprehensionTest';
 
-        return $service->submitTest($request->validated(), $chapter, $test_type);
+        try {
+            $chapters = $service->submitTest($request->validated(), $chapter, $test_type);
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
+
+        return $chapters;
     }
 
     public function listVideos(Chapter $chapter, ChapterService $service)
     {
         Gate::authorize('check-membership', [['individual']]);
 
-        return $service->listVideos($chapter);
+        try {
+            $chapters = $service->listVideos($chapter);
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
+
+        return $chapters;
     }
 
     /**
