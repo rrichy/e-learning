@@ -16,8 +16,9 @@ class TestDetailResource extends JsonResource
     public function toArray($request)
     {
         // return parent::toArray($request);
-        $test_type = intval(request('test_type')) === Test::CHAPTER ? 'chapterTest' : 'comprehensionTest';
-        
+        // $test_type = intval(request('test_type')) === Test::CHAPTER ? 'chapterTest' : 'comprehensionTest';
+        $test_type = $this->whenLoaded('chapterTest', 'chapterTest', 'comprehensionTest');
+
         return [
             'chapter_title' => $this->item_number . "章 ",
             'image' => $this->course->image,

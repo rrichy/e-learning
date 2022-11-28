@@ -29,14 +29,12 @@ class ChapterService
                 ->with(['viewingInformations' => fn ($q) => $q->whoseUserIdIs(auth()->id())])
                 ->orderBy('item_number', 'asc')
                 ->get()
-        )->additional([ 'chapterNumber' => $chapter->item_number ]);
+        )->additional(['chapterNumber' => $chapter->item_number]);
     }
 
 
-    public function testDetails(Chapter $chapter)
+    public function testDetails(Chapter $chapter, string $test_type)
     {
-        $test_type = intval(request('test_type')) === Test::CHAPTER ? 'chapterTest' : 'comprehensionTest';
-
         $this->check_if_chapter_is_accessible($chapter);
 
         // APPEND is_not_allowed if user has reached the max tries
@@ -48,10 +46,8 @@ class ChapterService
     }
 
 
-    public function proceedTest(Chapter $chapter)
+    public function proceedTest(Chapter $chapter, string $test_type)
     {
-        $test_type = intval(request('test_type')) === Test::CHAPTER ? 'chapterTest' : 'comprehensionTest';
-
         $this->check_if_chapter_is_accessible($chapter);
 
         // check if user is allowed to take/submit test
@@ -79,19 +75,14 @@ class ChapterService
         ]);
     }
 
-    public function submitTest(SubmitTestRequest $request, Chapter $chapter)
+    public function submitTest(array $valid, Chapter $chapter, string $test_type)
     {
-        $test_type = intval(request('test_type')) === Test::CHAPTER ? 'chapterTest' : 'comprehensionTest';
-
         $this->check_if_chapter_is_accessible($chapter);
         // if test_type is comprehensionTest, check if student is eligible in taking the test
         // here
 
         // check if user is allowed to take/submit test
         //here
-
-
-        $valid = $request->validated();
 
         $test = $chapter[$test_type];
         $user_answers = [];

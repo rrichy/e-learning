@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Student;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SubmitTestRequest;
 use App\Models\Chapter;
+use App\Models\Test;
 use App\Services\ChapterService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
@@ -48,32 +50,74 @@ class ChapterController extends Controller
      * @param  \App\Models\Chapter  $chapter
      * @return \Illuminate\Http\Response
      */
-    public function showTest(Chapter $chapter, ChapterService $service)
+    public function showTest(Request $request, Chapter $chapter, ChapterService $service)
     {
         Gate::authorize('check-membership', [['individual']]);
 
-        return $service->testDetails($chapter);
+        $valid = $request->validate([
+            'test_type' => 'required|numeric',
+        ]);
+
+        $test_type = intval($valid) === Test::CHAPTER ? 'chapterTest' : 'comprehensionTest';
+
+        try {
+            $chapters = $service->testDetails($chapter, $test_type);
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
+
+        return $chapters;
     }
 
-    public function proceedTest(Chapter $chapter, ChapterService $service)
+    public function proceedTest(Request $request, Chapter $chapter, ChapterService $service)
     {
         Gate::authorize('check-membership', [['individual']]);
 
-        return $service->proceedTest($chapter);
+        $valid = $request->validate([
+            'test_type' => 'required|numeric',
+        ]);
+
+        $test_type = intval($valid) === Test::CHAPTER ? 'chapterTest' : 'comprehensionTest';
+
+        try {
+            $chapters = $service->proceedTest($chapter, $test_type);
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
+
+        return $chapters;
     }
 
     public function submitTest(SubmitTestRequest $request, Chapter $chapter, ChapterService $service)
     {
         Gate::authorize('check-membership', [['individual']]);
 
-        return $service->submitTest($request, $chapter);
+        $valid = $request->validate([
+            'test_type' => 'required|numeric',
+        ]);
+
+        $test_type = intval($valid) === Test::CHAPTER ? 'chapterTest' : 'comprehensionTest';
+
+        try {
+            $chapters = $service->submitTest($request->validated(), $chapter, $test_type);
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
+
+        return $chapters;
     }
 
     public function listVideos(Chapter $chapter, ChapterService $service)
     {
         Gate::authorize('check-membership', [['individual']]);
 
-        return $service->listVideos($chapter);
+        try {
+            $chapters = $service->listVideos($chapter);
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
+
+        return $chapters;
     }
 
     /**
