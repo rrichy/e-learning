@@ -66,5 +66,8 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('update-mailtemplate', [GeneralPolicy::class, 'updateMailTemplate']);
         Gate::define('delete-mailtemplate', [GeneralPolicy::class, 'deleteMailTemplate']);
         Gate::define('mass-update-mailtemplate', [GeneralPolicy::class,' massUpdateMailTemplate']);
+        Gate::define('view-notice', [GeneralPolicy::class, 'viewNotice']);
+        Gate::define('update-notice', [GeneralPolicy::class, 'updateNotice']);
+        Gate::define('delete-notice', [GeneralPolicy::class, 'deleteNotice']);
     }
 }

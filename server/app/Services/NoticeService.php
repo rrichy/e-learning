@@ -9,6 +9,7 @@ use App\Http\Resources\NoticeShowResource;
 use App\Models\Notice;
 use App\Models\User;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Collection;
 
 class NoticeService
 {
@@ -55,20 +56,12 @@ class NoticeService
 
     public function details(Notice $notice)
     {
-        abort_if(
-            !auth()->user()->isAdmin() && $notice->affiliation_id && auth()->user()->affiliation_id !== $notice->affiliation_id,
-            403,
-            "This action is unauthorized."
-        );
-
         return new NoticeShowResource($notice);
     }
 
 
-    public function store(NoticeStoreUpdateRequest $request)
+    public function store(array $valid)
     {
-        $valid = $request->validated();
-
         $notice = Notice::create(array_merge(
             $valid,
             [
@@ -83,16 +76,8 @@ class NoticeService
         return $notice;
     }
 
-    public function update(NoticeStoreUpdateRequest $request, Notice $notice)
+    public function update(array $valid, Notice $notice)
     {
-        abort_if(
-            auth()->user()->isCorporate() && auth()->user()->affiliation_id !== $notice->affiliation_id,
-            403,
-            "This action is unauthorized."
-        );
-
-        $valid = $request->validated();
-
         $notice->update(array_merge(
             $valid,
             [
@@ -107,20 +92,8 @@ class NoticeService
     }
 
 
-    public function deleteIds(string $ids)
+    public function deleteIds(Collection $ids)
     {
-        $auth = auth()->user();
-        $ids = explode(',', $ids);
-
-        if ($auth->isAdmin()) return Notice::destroy($ids);
-
-        $validIdCount = Notice::where('affiliation_id', $auth->affiliation_id)->whereIn('id', $ids)->count();
-        abort_if(
-            count($ids) !== $validIdCount,
-            403,
-            'You have no authority of deleting some of these notices'
-        );
-
         return Notice::destroy($ids);
     }
 }

@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Course;
 use App\Models\Department;
 use App\Models\MailTemplate;
+use App\Models\Notice;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Support\Collection;
@@ -175,4 +176,33 @@ class GeneralPolicy
         return $records->every(fn ($record) => $record['affiliation_id'] === $user->affiliation_id);
     }
     // DepartmentPolicy --end--
+
+
+    // NoticePolicy --start--
+    public function viewNotice(User $user, Notice $model)
+    {
+        return $user->isAdmin()
+            || ($user->isCorporate() && $user->affiliation_id === $model->affiliation_id);
+    }
+
+    public function updateNotice(User $user, Notice $model)
+    {
+        return $user->isAdmin()
+            || ($user->isCorporate() && $user->affiliation_id === $model->affiliation_id);
+    }
+
+    public function deleteNotice(User $user, Collection $ids)
+    {
+        // check if all ids exist
+        $records = Notice::whereIn('id', $ids)->get(['id', 'affiliation_id']);
+        if (!$ids->every(fn ($id) => $records->contains('id', $id))) {
+            return false;
+        }
+
+        if ($user->isAdmin()) return true;
+
+        // for corporate
+        return $records->every(fn ($record) => $record['affiliation_id'] === $user->affiliation_id);
+    }
+    // NoticePolicy --end--
 }
