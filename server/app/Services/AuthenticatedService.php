@@ -37,9 +37,9 @@ class AuthenticatedService
     public function update(array $valid, User $auth)
     {
         DB::transaction(function () use ($valid, $auth) {
-            if (isset($valid['image']) && !$auth->temporaryUrls()->where('url', $valid['image'])->exists()) {
-                // $s3_image_url->delete();
-                // abort_if($s3_image_url->url !== $valid['image'], 403, 'Image url mismatch!');
+            $has_new_image = isset($valid['image']) && $valid['image'] !== $auth->image;
+
+            if ($has_new_image && !$auth->temporaryUrls()->where('url', $valid['image'])->exists()) {
                 throw new Exception("Temporary url does not exists!");
             }
 
@@ -55,7 +55,7 @@ class AuthenticatedService
             $auth->departments()->sync($newdepartments);
 
             // cleanup old image from storage
-            if ($old_image) {
+            if ($has_new_image && $old_image) {
                 Storage::delete(str_replace(config('constants.prefixes.s3'), '', $old_image));
             }
         });

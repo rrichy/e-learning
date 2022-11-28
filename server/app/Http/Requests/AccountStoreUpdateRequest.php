@@ -11,6 +11,13 @@ use Illuminate\Validation\Rules;
 
 class AccountStoreUpdateRequest extends FormRequest
 {
+    public $auth;
+
+    public function __construct()
+    {
+        $this->auth = auth()->user(); 
+    }
+
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -28,21 +35,19 @@ class AccountStoreUpdateRequest extends FormRequest
      */
     protected function prepareForValidation()
     {
-        $auth = auth()->user();
-
-        $merge = request()->membership_type_id == MembershipType::TRIAL ? [
+        $merge = $this->membership_type_id == MembershipType::TRIAL ? [
             'affiliation_id' => null,
             'department_1' => null,
             'department_2' => null,
         ] : [
-            'affiliation_id' => request()->affiliation_id ?: null,
-            'department_1' => request()->department_1 ?: null,
-            'department_2' => request()->department_2 ?: null,
+            'affiliation_id' => $this->affiliation_id ?: null,
+            'department_1' => $this->department_1 ?: null,
+            'department_2' => $this->department_2 ?: null,
         ];
         
-        if($auth->isCorporate()) {
+        if($this->auth->isCorporate()) {
             $merge['membership_type_id'] = MembershipType::INDIVIDUAL;
-            $merge['affiliation_id'] = $auth->affiliation_id;
+            $merge['affiliation_id'] = $this->auth->affiliation_id;
         }
 
         $this->merge($merge);
@@ -68,12 +73,12 @@ class AccountStoreUpdateRequest extends FormRequest
                 'nullable',
                 'required_with:department_2',
                 'integer',
-                Rule::exists('departments', 'id')->where(fn ($q) => $q->where('affiliation_id', request()->affiliation_id))
+                Rule::exists('departments', 'id')->where(fn ($q) => $q->where('affiliation_id', $this->affiliation_id))
             ],
             'department_2' => [
                 'nullable',
                 'integer',
-                Rule::exists('departments', 'id')->where(fn ($q) => $q->where('parent_id', request()->department_1))
+                Rule::exists('departments', 'id')->where(fn ($q) => $q->where('parent_id', $this->department_1))
             ],
             'remarks' => ['nullable', 'string'],
         ];
@@ -82,21 +87,26 @@ class AccountStoreUpdateRequest extends FormRequest
             $rules['password'] = ['required', 'confirmed', Rules\Password::defaults()];
             $rules['email'] = ['required', 'string', 'email', 'max:255', 'unique:users'];
         } else {
-            $rules['email'] = ['required', 'string', 'email', 'max:255', 'unique:users,email,' . request()->id];
+            $rules['email'] = ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $this->id];
         }
 
         return $rules;
     }
 
-    // protected function failedValidation(Validator $validator)
-    // {
-    //     $s3_image_url = auth()->user()->temporaryUrls()->where('directory', 'profiles/')->first();
+    protected function failedValidation(Validator $validator)
+    {
+        if (isset($this->image)) {
+            $s3_image_url = $this->auth->temporaryUrls()
+                ->where('directory', 'profiles/')
+                ->where('url', explode('?', $this->image)[0])
+                ->first();
 
-    //     if ($s3_image_url) {
-    //         Storage::delete(str_replace(config('constants.prefixes.s3'), '', $s3_image_url->url));
-    //         $s3_image_url->delete();
-    //     }
-        
-    //     parent::failedValidation($validator);
-    // }
+            if ($s3_image_url) {
+                Storage::delete(str_replace(config('constants.prefixes.s3'), '', $s3_image_url->url));
+                $s3_image_url->delete();
+            }
+        }
+
+        parent::failedValidation($validator);
+    }
 }
