@@ -23,7 +23,7 @@ class DepartmentController extends Controller
         ]);
 
         try {
-            $departments = $service->index($valid);
+            $departments = $service->index($valid, auth()->user()->affiliation_id);
         } catch (Exception $ex) {
             abort(500, $ex->getMessage());
         }
@@ -35,7 +35,11 @@ class DepartmentController extends Controller
     {
         Gate::authorize('check-membership', [['admin', 'corporate']]);
 
-        $service->store($request);
+        try {
+            $service->store($request->validated());
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
 
         return response()->json([
             'message' => 'Successfully created a department!',
@@ -45,8 +49,13 @@ class DepartmentController extends Controller
     public function update(DepartmentStoreUpdateRequest $request, Department $department, DepartmentService $service)
     {
         Gate::authorize('check-membership', [['admin', 'corporate']]);
+        Gate::authorize('update-department', $department);
 
-        $service->update($request, $department);
+        try {
+            $service->update($request->validated(), $department);
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
 
         return response()->json([
             'message' => 'Successfully updated a department!',
@@ -55,9 +64,15 @@ class DepartmentController extends Controller
 
     public function destroy(string $department, DepartmentService $service)
     {
+        $collection_id = collect(explode(',', $department));
         Gate::authorize('check-membership', [['admin', 'corporate']]);
+        Gate::authorize('delete-department', $collection_id);
 
-        $deleted_count = $service->deleteIds($department);
+        try {
+            $deleted_count = $service->deleteIds($collection_id);
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
 
         return response()->json([
             'message' => 'Successfully deleted ' . $deleted_count . ' departments!',

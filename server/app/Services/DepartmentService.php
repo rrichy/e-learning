@@ -5,18 +5,20 @@ namespace App\Services;
 use App\Http\Requests\DepartmentStoreUpdateRequest;
 use App\Http\Resources\DepartmentResource;
 use App\Models\Department;
+use App\Models\User;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class DepartmentService
 {
-    public function index(array $pagination)
+    public function index(array $pagination, mixed $affiliation_id)
     {
         return DepartmentResource::collection(
             Department::with('childDepartments')
                 ->whereNull('parent_id')
                 ->when(
-                    auth()->user()->isCorporate(), 
-                    fn ($q) => $q->where('affiliation_id', auth()->user()->affiliation_id)
+                    $affiliation_id,
+                    fn ($q) => $q->where('affiliation_id', $affiliation_id)
                 )->orderBy($pagination['sort'] ?? 'id', $pagination['order'] ?? 'asc')
                 ->paginate($pagination['per_page'] ?? 10)
         )->additional([
@@ -29,10 +31,8 @@ class DepartmentService
     }
 
 
-    public function store(DepartmentStoreUpdateRequest $request)
+    public function store(array $valid)
     {
-        $valid = $request->validated();
-
         DB::transaction(function () use ($valid) {
             $department = Department::create($valid);
             $child_departments = collect($valid['child_departments']);
@@ -47,16 +47,8 @@ class DepartmentService
     }
 
 
-    public function update(DepartmentStoreUpdateRequest $request, Department $department)
+    public function update(array $valid, Department $department)
     {
-        abort_if(
-            auth()->user()->isCorporate() && auth()->user()->affiliation_id !== $department->affiliation_id,
-            403,
-            "This action is unauthorized."
-        );
-
-        $valid = $request->validated();
-
         DB::transaction(function () use ($valid, $department) {
             $department->update($valid);
             $child_departments = collect($valid['child_departments']);
@@ -78,20 +70,8 @@ class DepartmentService
     }
 
 
-    public function deleteIds(string $ids)
+    public function deleteIds(Collection $ids)
     {
-        $auth = auth()->user();
-        $ids = explode(',', $ids);
-
-        if($auth->isAdmin()) return Department::destroy($ids);
-
-        $validIdCount = Department::where('affiliation_id', $auth->affiliation_id)->whereIn('id', $ids)->count();
-        abort_if(
-            count($ids) !== $validIdCount,
-            403,
-            'You have no authority of deleting some of these departments'
-        );
-
         return Department::destroy($ids);
     }
 }
