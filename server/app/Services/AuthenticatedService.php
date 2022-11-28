@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Http\Resources\AccountShowResource;
+use App\Jobs\ProcessExpiredTemporaryUrl;
 use App\Models\Category;
 use App\Models\Course;
 use App\Models\ExplainerVideo;
@@ -36,11 +37,10 @@ class AuthenticatedService
     public function update(array $valid, User $auth)
     {
         DB::transaction(function () use ($valid, $auth) {
-            $s3_image_url = $auth->temporaryUrls()->where('directory', 'profiles/')->first();
-
-            if ($s3_image_url) {
-                $s3_image_url->delete();
-                abort_if($s3_image_url->url !== $valid['image'], 403, 'Image url mismatch!');
+            if (isset($valid['image']) && !$auth->temporaryUrls()->where('url', $valid['image'])->exists()) {
+                // $s3_image_url->delete();
+                // abort_if($s3_image_url->url !== $valid['image'], 403, 'Image url mismatch!');
+                throw new Exception("Temporary url does not exists!");
             }
 
             $old_image = $auth->image;
@@ -54,7 +54,8 @@ class AuthenticatedService
             }
             $auth->departments()->sync($newdepartments);
 
-            if ($s3_image_url) {
+            // cleanup old image from storage
+            if ($old_image) {
                 Storage::delete(str_replace(config('constants.prefixes.s3'), '', $old_image));
             }
         });
@@ -96,7 +97,6 @@ class AuthenticatedService
         ][$type];
 
         $client = Storage::getClient();
-        $expiry = "+3 minutes";
 
         // Single file upload
         if ($directory === 'profiles/' || $directory === 'courses/') {
@@ -105,13 +105,16 @@ class AuthenticatedService
                 'Key'    => $directory . now()->valueOf()
             ]);
 
-            $url = $client->createPresignedRequest($command, $expiry)->getUri();
+            $url = $client->createPresignedRequest($command, '+3 minutes')->getUri();
 
-            TemporaryUrl::create([
+            $temp_url = TemporaryUrl::create([
                 'directory' => $directory,
                 'url' => explode('?', $url)[0],
                 'user_id' => $auth->id,
             ]);
+
+            ProcessExpiredTemporaryUrl::dispatch($temp_url)
+                ->delay(now()->addMinutes(3));
 
             return $url;
             // Multipart file upload
@@ -129,13 +132,16 @@ class AuthenticatedService
                     'Key'    => $directory . $generated_key,
                 ]);
 
-                $url = $client->createPresignedRequest($command, $expiry)->getUri();
+                $url = $client->createPresignedRequest($command, '+3 minutes')->getUri();
 
-                TemporaryUrl::create([
+                $temp_url = TemporaryUrl::create([
                     'directory' => $directory,
                     'url' => explode('?', $url)[0],
                     'user_id' => $auth->id,
                 ]);
+
+                ProcessExpiredTemporaryUrl::dispatch($temp_url)
+                    ->delay(now()->addMinutes(3));
 
                 return [
                     'url' => $url,
@@ -150,13 +156,16 @@ class AuthenticatedService
                     'PartNumber' => $part_number,
                 ]);
 
-                $url = $client->createPresignedRequest($command, "+60 minutes")->getUri();
+                $url = $client->createPresignedRequest($command, '+60 minutes')->getUri();
 
-                TemporaryUrl::updateOrCreate([
+                $temp_url = TemporaryUrl::updateOrCreate([
                     'directory' => $directory,
                     'url' => explode('?', $url)[0],
                     'user_id' => $auth->id,
                 ]);
+
+                ProcessExpiredTemporaryUrl::dispatch($temp_url)
+                    ->delay(now()->addHour());
 
                 return $url;
                 // get end multipart temporaryurl
@@ -170,13 +179,16 @@ class AuthenticatedService
                     ],
                 ]);
 
-                $url = $client->createPresignedRequest($command, "+30 minutes")->getUri();
+                $url = $client->createPresignedRequest($command, '+30 minutes')->getUri();
 
-                TemporaryUrl::updateOrCreate([
+                $temp_url = TemporaryUrl::updateOrCreate([
                     'directory' => $directory,
                     'url' => explode('?', $url)[0],
                     'user_id' => $auth->id,
                 ]);
+
+                ProcessExpiredTemporaryUrl::dispatch($temp_url)
+                    ->delay(now()->addMinutes(30));
 
                 return $url;
             }
