@@ -124,7 +124,7 @@ function UserHopup() {
           </Stack>
         </MenuItem>
         <Divider />
-        <MenuItem component={Link} to="/my-page">
+        <MenuItem component={Link} to="/profile">
           <UserIcon />
           アカウントを編集
         </MenuItem>

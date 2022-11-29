@@ -84,7 +84,7 @@ export default function Pages() {
       ),
     },
     {
-      path: "/my-page",
+      path: "/profile",
       element: (
         <PrivateRoute membershipTypes={registered}>
           <MyPage />
@@ -321,7 +321,7 @@ export default function Pages() {
       ],
     },
     {
-      path: "/profile",
+      path: "/my-page",
       element: (
         <PrivateRoute membershipTypes={[individual, trial]}>
           <Outlet />

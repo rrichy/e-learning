@@ -30,7 +30,7 @@ function CommonProfile ({name, image, plan, registered_date}: CommonProfileProps
           variant="contained"
           type="button"
           rounded
-          to="/my-page"
+          to="/profile"
         >
           アカウント編集
         </Button>
@@ -38,7 +38,7 @@ function CommonProfile ({name, image, plan, registered_date}: CommonProfileProps
           variant="contained"
           type="button"
           rounded
-          to="/profile/plan"
+          to="/my-page/plan"
         >
           プラン変更
         </Button>
@@ -46,7 +46,7 @@ function CommonProfile ({name, image, plan, registered_date}: CommonProfileProps
           variant="contained"
           type="button"
           rounded
-          to="/profile/application"
+          to="/my-page/application"
         >
           オプション申込み
         </Button>
