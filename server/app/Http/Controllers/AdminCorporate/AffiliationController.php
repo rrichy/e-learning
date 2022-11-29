@@ -95,6 +95,7 @@ class AffiliationController extends Controller
     {
         $ids = collect(explode(",", $affiliation));
         Gate::authorize('check-membership', [['admin']]);
+        Gate::authorize('delete-affiliation', $ids);
 
         try {
             $deleted_count = $service->deleteIds($ids);

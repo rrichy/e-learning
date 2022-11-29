@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Models\Affiliation;
 use App\Models\Category;
 use App\Models\Course;
 use App\Models\Department;
@@ -212,8 +213,18 @@ class GeneralPolicy
     public function deleteSignature(User $user, Collection $ids)
     {
         $records = Signature::whereIn('id', $ids)->pluck('id');
-        
+
         return $ids->every(fn ($id) => $records->contains($id));
     }
     // SignaturePolicy --end--
+
+
+    // AffiliationPolicy --start--
+    public function deleteAffiliation(User $user, Collection $ids)
+    {
+        $records = Affiliation::whereIn('id', $ids)->pluck('id');
+
+        return $ids->every(fn ($id) => $records->contains($id));
+    }
+    // AffiliationPolicy --end--
 }
