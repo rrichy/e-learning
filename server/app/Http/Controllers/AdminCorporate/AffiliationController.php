@@ -5,37 +5,31 @@ namespace App\Http\Controllers\AdminCorporate;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AffiliationResource;
 use App\Models\Affiliation;
+use App\Services\AffiliationService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
 class AffiliationController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, AffiliationService $service)
     {
         Gate::authorize('check-membership', [['admin', 'corporate']]);
 
-        $pagination = $request->validate([
+        $valid = $request->validate([
             'order' => 'string|in:asc,desc',
             'per_page' => 'numeric',
             'sort' => 'string|in:id,name,from_name,from_email,content,priority'
         ]);
-        
-        // $order = request()->input('order', 'asc');
-        // $per_page = request()->input('per_page', '10');
-        // $sort = request()->input('sort', 'id');
 
-        return AffiliationResource::collection(
-            Affiliation::orderBy($pagination['sort'] ?? 'id', $pagination['order' ?? 'asc'])
-                ->when(auth()->user()->isCorporate(), fn ($q) => $q->where('id', auth()->user()->affiliation_id))
-                ->paginate($pagination['per_page'] ?? 10)
-        )->additional([
-            'message' => 'Affiliations successfully fetched!',
-            'meta' => [
-                'sort' => $pagination['sort'] ?? 'id',
-                'order' => $pagination['order'] ?? 'desc',
-            ],
-        ]);
+        try {
+            $affiliations = $service->list($valid, auth()->user()->affiliation_id);
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
+
+        return $affiliations;
     }
 
     /**
@@ -44,16 +38,20 @@ class AffiliationController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, AffiliationService $service)
     {
-        Gate::authorize('check-membership', [['corporate']]);
+        Gate::authorize('check-membership', [['admin']]);
 
         $valid = $request->validate([
             'name' => 'required|string|unique:affiliations,name',
             'priority' => 'required|numeric|min:1|unique:affiliations,priority',
         ]);
 
-        Affiliation::create($valid);
+        try {
+            $service->store($valid);
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
 
         return response()->json([
             'message' => 'Successfully created an affiliation!',
@@ -67,16 +65,20 @@ class AffiliationController extends Controller
      * @param  \App\Models\Affiliation  $affiliation
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Affiliation $affiliation)
+    public function update(Request $request, Affiliation $affiliation, AffiliationService $service)
     {
-        Gate::authorize('check-membership', [['corporate']]);
+        Gate::authorize('check-membership', [['admin']]);
 
         $valid = $request->validate([
             'name' => 'required|string|unique:affiliations,name,' . $affiliation->id,
             'priority' => 'required|numeric|min:1|unique:affiliations,priority,' . $affiliation->id,
         ]);
 
-        $affiliation->update($valid);
+        try {
+            $service->update($valid, $affiliation);
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
 
         return response()->json([
             'message' => 'Successfully updated an affiliation!',
@@ -89,12 +91,16 @@ class AffiliationController extends Controller
      * @param  string  $affiliation
      * @return \Illuminate\Http\Response
      */
-    public function destroy(string $affiliation)
+    public function destroy(string $affiliation, AffiliationService $service)
     {
-        Gate::authorize('check-membership', [['corporate']]);
+        $ids = collect(explode(",", $affiliation));
+        Gate::authorize('check-membership', [['admin']]);
 
-        $ids = explode(",", $affiliation);
-        $deleted_count = \App\Models\Affiliation::destroy($ids);
+        try {
+            $deleted_count = $service->deleteIds($ids);
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
 
         return response()->json([
             'message' => 'Successfully deleted ' . $deleted_count . ' affiliations!',
