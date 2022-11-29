@@ -7,6 +7,7 @@ use App\Models\Course;
 use App\Models\Department;
 use App\Models\MailTemplate;
 use App\Models\Notice;
+use App\Models\Signature;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Support\Collection;
@@ -205,4 +206,14 @@ class GeneralPolicy
         return $records->every(fn ($record) => $record['affiliation_id'] === $user->affiliation_id);
     }
     // NoticePolicy --end--
+
+
+    // SignaturePolicy --start--
+    public function deleteSignature(User $user, Collection $ids)
+    {
+        $records = Signature::whereIn('id', $ids)->pluck('id');
+        
+        return $ids->every(fn ($id) => $records->contains($id));
+    }
+    // SignaturePolicy --end--
 }

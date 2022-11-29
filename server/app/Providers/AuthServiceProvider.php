@@ -69,5 +69,6 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('view-notice', [GeneralPolicy::class, 'viewNotice']);
         Gate::define('update-notice', [GeneralPolicy::class, 'updateNotice']);
         Gate::define('delete-notice', [GeneralPolicy::class, 'deleteNotice']);
+        Gate::define('delete-signature', [GeneralPolicy::class, 'deleteSignature']);
     }
 }

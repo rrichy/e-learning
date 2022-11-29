@@ -3,15 +3,16 @@
 namespace App\Http\Controllers\AdminCorporate;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\SignatureIndexResource;
+use App\Http\Requests\SignatureStoreUpdateRequest;
 use App\Models\Signature;
+use App\Services\SignatureService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
-// TODO: TRANSFER ALL LOGIC INTO A SERVICE CLASS
 class SignatureController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, SignatureService $service)
     {
         Gate::authorize('check-membership', [['admin']]);
 
@@ -21,85 +22,56 @@ class SignatureController extends Controller
             'sort' => 'string|in:id,name,from_name,from_email,content,priority'
         ]);
 
-        // $order = request()->input('order', 'asc');
-        // $per_page = request()->input('per_page', '10');
-        // $sort = request()->input('sort', 'id');
+        try {
+            $list = $service->index($pagination);
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
 
-        return SignatureIndexResource::collection(
-            Signature::orderBy($pagination['sort'] ?? 'id', $pagination['order'] ?? 'desc')
-                ->paginate($pagination['per_page'] ?? 10)
-            )->additional([
-            'message' => 'Signatures successfully fetched!',
-            'meta' => [
-                'sort' => $pagination['sort'] ?? 'id',
-                'order' => $pagination['order'] ?? 'desc',
-            ],
-        ]);
+        return $list;
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+    public function store(SignatureStoreUpdateRequest $request, SignatureService $service)
     {
         Gate::authorize('check-membership', [['admin']]);
 
-        $valid = $request->validate([
-            'name' => 'required|string',
-            'from_email' => 'required|string|email',
-            'from_name' => 'required|string',
-            'content' => 'required|string',
-            'priority' => 'required|integer|min:1|unique:signatures',
-        ]);
-
-        Signature::create($valid);
+        try {
+            $service->store($request->validated());
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
 
         return response()->json([
             'message' => 'Successfully created a signature!',
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Signature
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, \App\Models\Signature $signature)
+    public function update(SignatureStoreUpdateRequest $request, Signature $signature, SignatureService $service)
     {
         Gate::authorize('check-membership', [['admin']]);
 
-        $valid = $request->validate([
-            'name' => 'required|string',
-            'from_email' => 'required|string|email',
-            'from_name' => 'required|string',
-            'content' => 'required|string',
-            'priority' => 'required|integer|min:1|unique:signatures,priority,' . $signature->id,
-        ]);
-
-        $signature->update($valid);
+        try {
+            $service->update($signature, $request->validated());
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
 
         return response()->json([
             'message' => 'Successfully updated a signature!',
         ]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  string  $ids
-     * @return \Illuminate\Http\Response
-     */
-    public function massDelete($ids)
+    public function massDelete(string $ids, SignatureService $service)
     {
+        $collection_ids = collect(explode(',', $ids));
         Gate::authorize('check-membership', [['admin']]);
+        Gate::authorize('delete-signature', $collection_ids);
 
-        $ids = explode(",", $ids);
-        $deleted_count = \App\Models\Signature::destroy($ids);
+        try {
+            $deleted_count = $service->deleteIds($collection_ids);
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
 
         return response()->json([
             'message' => 'Successfully deleted ' . $deleted_count . ' signatures!',
