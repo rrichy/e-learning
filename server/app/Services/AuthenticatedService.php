@@ -45,7 +45,9 @@ class AuthenticatedService
 
             $old_image = $auth->image;
 
-            $auth->update($valid);
+            $auth->update(array_merge($valid, [
+                'email_verified_at' => $valid['email'] !== $auth->email ? null : $auth->email_verified_at
+            ]));
 
             $newdepartments = [];
             if (isset($valid['department_1'])) {

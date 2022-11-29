@@ -102,7 +102,9 @@ class AccountService
 
             $old_image = $user->image;
 
-            $user->update($valid);
+            $user->update(array_merge($valid, [
+                'email_verified_at' => $valid['email'] !== $user->email ? null : $user->email_verified_at
+            ]));
 
             $newdepartments = [];
             if (isset($valid['department_1'])) {
