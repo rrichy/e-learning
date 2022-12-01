@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\MembershipType;
+use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -22,6 +23,13 @@ return new class extends Migration
                 ->nullOnDelete()
                 ->cascadeOnUpdate();
         });
+
+        User::factory()->create([
+            'name' => 'Sample Admin',
+            'email' => 'admin@gmail.com',
+            'password' => bcrypt('123'),
+            'membership_type_id' => MembershipType::ADMIN,
+        ]);
     }
 
     /**
