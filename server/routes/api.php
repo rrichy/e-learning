@@ -37,6 +37,7 @@ TODO: /account-management register multiple accounts
 TODO: conditional mail; [admin] コース管理 > コースクリック > 条件付きメール
 
 TODO: [admin] /course-management table attending students column
+TODO: [admin] clarification for course detail correction process
 
 TODO: [individual] prevent form submission when there are still some unanswered fields
 TODO: rewrite test simulation component
