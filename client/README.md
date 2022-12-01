@@ -1,6 +1,6 @@
 # Running the application locally
 Install the libraries
-### `npm install`
+### `npm install --force`
 
 Create the .env from .env.example
 ### `cp sample.env .env`

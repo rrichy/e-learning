@@ -5,7 +5,7 @@
 ```
 cd client
 copy sample.env .env
-npm install
+npm install --force
 cd ../server
 composer update
 copy .env.example .env
