@@ -37,12 +37,7 @@ TODO: /account-management register multiple accounts
 
 TODO: [admin] /course-management table attending students column
 
-TODO: secure Service classes to do its role; usable in tinker (no auth() || requests() || $request->validate() should be happening inside a service class)
-TODO: on email change, set email_verified to null
 TODO: [individual] prevent form submission when there are still some unanswered fields
-TODO: /my-page and /profile misnamed routes (/my-page shows an account edit and /profile shows student's info)
-TODO: SignatureService and AffiliationService
-
 TODO: rewrite test simulation component
  */
 
