@@ -8,7 +8,15 @@ import useChapter, {
 import useAlerter from "@/hooks/useAlerter";
 import { CourseScreenType } from "@/interfaces/CommonInterface";
 import { ArrowForward } from "@mui/icons-material";
-import { Box, Checkbox, Grid, Link as MUILink, Paper, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Checkbox,
+  Grid,
+  Link as MUILink,
+  Paper,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { useEffect, useState } from "react";
 import { FormContainer } from "react-hook-form-mui";
 import { useParams } from "react-router-dom";
@@ -38,20 +46,20 @@ function TestAnswerScreen({
 
   useEffect(() => {
     if (chapter && !initialized) {
-      if (chapter.questions.length) {
-        setQuestions(chapter.questions);
-        setMappedQuestions(chapter.mappedQuestions);
+      if (chapter?.questions?.length) {
+        setQuestions(chapter?.questions);
+        setMappedQuestions(chapter?.mappedQuestions!);
         setInitialized(true);
       } else {
-        chapter.fetchQuestions(+itemNumber!);
+        if (chapter?.fetchQuestions) chapter.fetchQuestions(+itemNumber!);
       }
     }
   }, [chapter, errorSnackbar, initialized]);
 
-  const currentItem = chapter.itemNumber;
+  const currentItem = chapter.itemNumber!;
   const currentQuestion = mappedQuestions.get(currentItem);
 
-  const checkboxes = chapter.form
+  const checkboxes = chapter?.form!
     .watch("answers")
     .map((a) => a.every((b) => Boolean(b.answer)));
 
@@ -128,7 +136,7 @@ function TestAnswerScreen({
             >
               <Button
                 variant="outlined"
-                onClick={() => chapter.handleNext(false, false)}
+                onClick={() => chapter?.handleNext!(false, false)}
                 disabled={currentItem === questions.length}
                 sx={{
                   width: 150,
@@ -142,7 +150,7 @@ function TestAnswerScreen({
               </Button>
               <Button
                 variant="contained"
-                onClick={() => chapter.handleNext()}
+                onClick={() => chapter?.handleNext!()}
                 endIcon={<ArrowForward />}
                 disabled={currentItem === questions.length}
                 sx={{
@@ -168,7 +176,7 @@ function TestAnswerScreen({
                 <MUILink
                   key={index}
                   component="button"
-                  onClick={() => screenFn(`${chapter?.prefix!}/${index + 1}`)}
+                  onClick={() => screenFn(`${chapter?.prefix!}/${index + 1}` as CourseScreenType)}
                   color={index + 1 === currentItem ? "secondary" : "primary"}
                   flex={1}
                   whiteSpace="nowrap"
@@ -195,7 +203,7 @@ function TestAnswerScreen({
               endIcon={<ArrowForward />}
               sx={{ mt: 3 }}
               disabled={!checkboxes.every(Boolean)}
-              onClick={() => chapter.handleSubmit()}
+              onClick={() => chapter?.handleSubmit!()}
             >
               受験を終了する
             </Button>

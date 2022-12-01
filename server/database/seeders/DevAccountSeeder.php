@@ -20,12 +20,12 @@ class DevAccountSeeder extends Seeder
         $affiliations = Affiliation::with('departments')->get();
         // $department_users = [];
         // Admin account
-        User::factory()->create([
-            'name' => 'Sample Admin',
-            'email' => 'admin@gmail.com',
-            'password' => bcrypt('123'),
-            'membership_type_id' => MembershipType::ADMIN,
-        ]);
+        // User::factory()->create([
+        //     'name' => 'Sample Admin',
+        //     'email' => 'admin@gmail.com',
+        //     'password' => bcrypt('123'),
+        //     'membership_type_id' => MembershipType::ADMIN,
+        // ]);
 
         // Corporate account
         $affiliation = $affiliations->random();

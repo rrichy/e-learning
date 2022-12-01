@@ -30,7 +30,7 @@ function TestResult({ preview }: { preview?: boolean }) {
     null
   );
 
-  if (!hasSubmitted) navigate(prefix);
+  if (!hasSubmitted) navigate(prefix!);
 
   const columns = resultColumns(setStateSelected);
 
@@ -38,7 +38,7 @@ function TestResult({ preview }: { preview?: boolean }) {
     mounted.current = true;
 
     if (!initialized) {
-      setState((s) => ({ ...s, data: result.questions }));
+      setState((s) => ({ ...s, data: result!.questions }));
       setInitialized(true);
     }
 
@@ -59,9 +59,9 @@ function TestResult({ preview }: { preview?: boolean }) {
             fontWeight="bold"
             textAlign="center"
             my={3}
-            color={result.passed ? "red" : "primary.main"}
+            color={result!.passed ? "red" : "primary.main"}
           >
-            {result.passed ? "合格" : "不合格"}
+            {result!.passed ? "合格" : "不合格"}
           </Typography>
           <Typography
             fontWeight="bold"
@@ -69,7 +69,7 @@ function TestResult({ preview }: { preview?: boolean }) {
             m={2}
             sx={{ "& strong": { fontSize: 28, color: "red", mx: 1 } }}
           >
-            あなたの得点は<strong>{result.score}点</strong>です（{result.total}
+            あなたの得点は<strong>{result!.score}点</strong>です（{result!.total}
             満点中）
           </Typography>
         </Paper>
