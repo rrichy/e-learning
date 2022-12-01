@@ -34,6 +34,7 @@ TODO: account-management/{id}/detail tables
 TODO: comprehension test details ???
 TODO: targets on notice and course info
 TODO: /account-management register multiple accounts
+TODO: conditional mail; [admin] コース管理 > コースクリック > 条件付きメール
 
 TODO: [admin] /course-management table attending students column
 
