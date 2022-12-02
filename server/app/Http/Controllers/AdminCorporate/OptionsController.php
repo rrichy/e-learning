@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Affiliation;
 use App\Models\Category;
 use App\Models\Department;
+use App\Models\MailTemplate;
 use App\Models\MembershipType;
 use App\Models\Signature;
 use Illuminate\Http\Request;
@@ -55,6 +56,12 @@ class OptionsController extends Controller
                             $value = Category::query()
                                 ->when(!auth()->user()->isAdmin(), fn ($q) => $q->where('affiliation_id', auth()->user()->affiliation_id)->whereNull('parent_id'))
                                 ->get(['id', 'name']);
+                            break;
+                        }
+                    case 'mail_templates': {
+                            $value = MailTemplate::query()
+                                ->when(!auth()->user()->isAdmin(), fn ($q) => $q->where('affiliation_id', auth()->user()->affiliation_id))
+                                ->get(['id', 'title as name']);
                             break;
                         }
                     case 'signatures': {

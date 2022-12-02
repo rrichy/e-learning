@@ -98,6 +98,12 @@ class GeneralPolicy
 
 
     // MailTemplatePolicy --start--
+    public function viewMailTemplate(User $user, MailTemplate $model)
+    {
+        return $user->isAdmin()
+            || ($user->isCorporate() && $user->affiliation_id === $model->affiliation_id);
+    }
+
     public function updateMailTemplate(User $user, MailTemplate $model)
     {
         return $user->isAdmin()

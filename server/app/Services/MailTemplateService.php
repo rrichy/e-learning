@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Http\Resources\MailTemplateIndexResource;
+use App\Http\Resources\ShowMailTemplateResource;
 use App\Models\MailTemplate;
 use Illuminate\Support\Collection;
 
@@ -30,6 +31,12 @@ class MailTemplateService
     public function store(array $valid)
     {
         return MailTemplate::create(array_merge($valid, ['priority' => MailTemplate::max('priority') + 1]));
+    }
+
+
+    public function show(MailTemplate $mail_template)
+    {
+        return new ShowMailTemplateResource($mail_template);
     }
 
 

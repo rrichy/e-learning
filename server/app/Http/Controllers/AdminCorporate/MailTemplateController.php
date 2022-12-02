@@ -47,6 +47,20 @@ class MailTemplateController extends Controller
         ]);
     }
 
+    public function show(MailTemplate $mail_template, MailTemplateService $service)
+    {
+        Gate::authorize('check-membership', [['admin', 'corporate']]);
+        Gate::authorize('view-mailtemplate', $mail_template);
+
+        try {
+            $details = $service->show($mail_template);
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
+
+        return $details;
+    }
+
     public function update(MailTemplateStoreUpdateRequest $request, MailTemplate $mail_template, MailTemplateService $service)
     {
         Gate::authorize('check-membership', [['admin', 'corporate']]);

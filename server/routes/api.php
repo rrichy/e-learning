@@ -115,6 +115,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::prefix('/mail-template')->group(function () {
         Route::post('/', [MailTemplateController::class, 'store']);
+        Route::get('/{mail_template}', [MailTemplateController::class, 'show']);
         Route::get('/', [MailTemplateController::class, 'index']);
         Route::put('/mass', [MailTemplateController::class, 'massUpdate']);
         Route::put('/{mail_template}', [MailTemplateController::class, 'update']);
