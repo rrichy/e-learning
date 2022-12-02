@@ -39,7 +39,6 @@ import { Box, Container, Stack, useMediaQuery, useTheme } from "@mui/material";
 import Footer from "../molecules/Footer";
 import pageGlobalStyle from "./indexStyle";
 import StudentCourseDetail from "./Student/StudentCourseDetail";
-import CourseHistory from "./Student/CourseHistory";
 import StudentChapterDisplay from "./Student/StudentChapterDisplay";
 import TestDetailsDisplay from "../organisms/Student/TestDetailsDisplay";
 import TestAnswerScreen from "../organisms/Student/TestAnswerScreen";
@@ -291,10 +290,6 @@ export default function Pages() {
         {
           index: true,
           element: <StudentCourseDetail />,
-        },
-        {
-          path: "course-history",
-          element: <CourseHistory />,
         },
         {
           path: "chapter/:chapterId",

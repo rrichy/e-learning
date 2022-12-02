@@ -1,4 +1,4 @@
-import { destroy, get, post, put } from "./ApiService";
+import { get, put } from "./ApiService";
 
 const url_prefix = "/api/chapter";
 

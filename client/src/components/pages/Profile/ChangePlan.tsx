@@ -1,5 +1,4 @@
-import { Divider, Grid, Paper, Stack, Typography } from "@mui/material";
-import { useState } from "react";
+import { Divider, Paper, Stack, Typography } from "@mui/material";
 import Button from "../../atoms/Button";
 import Labeler from "../../molecules/Labeler";
 import CommonProfile from "../../organisms/Student/CommonProfile";

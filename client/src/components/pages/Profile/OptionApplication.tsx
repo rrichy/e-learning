@@ -1,6 +1,4 @@
-import { Chip, Divider, Grid, Paper, Stack, Typography } from "@mui/material";
-import { useState } from "react";
-import Button from "../../atoms/Button";
+import { Chip, Divider, Paper, Stack, Typography } from "@mui/material";
 import Labeler from "../../molecules/Labeler";
 import CommonProfile from "../../organisms/Student/CommonProfile";
 import useAuth from "@/hooks/useAuth";

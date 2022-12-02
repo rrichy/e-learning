@@ -1,7 +1,7 @@
 import Button from "@/components/atoms/Button";
 import useChapter from "@/hooks/pages/Students/useChapter";
 import { CourseScreenType } from "@/interfaces/CommonInterface";
-import { TestAttributes, testInit } from "@/validations/CourseFormValidation";
+import { testInit } from "@/validations/CourseFormValidation";
 import { ArrowForward } from "@mui/icons-material";
 import Close from "@mui/icons-material/Close";
 import { Grid, List, ListItem, Stack, Paper, Typography } from "@mui/material";

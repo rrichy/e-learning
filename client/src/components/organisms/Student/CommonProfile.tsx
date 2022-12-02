@@ -1,4 +1,4 @@
-import { Avatar, Box, Grid, Paper, Stack, Typography } from "@mui/material";
+import { Avatar, Box, Paper, Stack, Typography } from "@mui/material";
 import Button from "../../atoms/Button";
 import { jpDate } from "@/utils/jpFormatter";
 

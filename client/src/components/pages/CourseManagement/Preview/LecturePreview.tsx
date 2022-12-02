@@ -1,12 +1,6 @@
-import Button from "@/components/atoms/Button";
-import useChapter from "@/hooks/pages/Students/useChapter";
 import { getTemporaryVideoUrl } from "@/services/AuthService";
-import {
-  getLectures,
-  updateViewingInformation,
-} from "@/services/LectureService";
 import { VideoAttributes } from "@/validations/CourseFormValidation";
-import { PlayCircleOutline, Redo, Replay } from "@mui/icons-material";
+import { PlayCircleOutline } from "@mui/icons-material";
 import {
   Box,
   Grid,
@@ -14,13 +8,11 @@ import {
   ListItemButton,
   ListItemText,
   Paper,
-  Stack,
   Typography,
 } from "@mui/material";
 import MUIRichTextEditor from "mui-rte";
 import { useEffect, useRef, useState } from "react";
 import ReactPlayer from "react-player";
-import { OnProgressProps } from "react-player/base";
 
 interface LecturePreviewProps {
   lectures: VideoAttributes[];
@@ -28,7 +20,6 @@ interface LecturePreviewProps {
 }
 
 function LecturePreview({ lectures, chapterNumber }: LecturePreviewProps) {
-  const mounted = useRef(true);
   const playerRef = useRef<any>(null);
   const [initialized, setInitialized] = useState(false);
   const [url, setUrl] = useState("");

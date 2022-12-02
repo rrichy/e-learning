@@ -1,6 +1,4 @@
-import { OrderType } from "@/interfaces/CommonInterface";
-import { TestAttributes } from "@/validations/CourseFormValidation";
-import { destroy, get, post, put } from "./ApiService";
+import { get, post } from "./ApiService";
 
 const url_prefix = "/api/chapter";
 

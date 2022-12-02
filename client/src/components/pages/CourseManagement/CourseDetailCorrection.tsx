@@ -1,65 +1,17 @@
 import {
-  Container,
-  Dialog,
-  DialogContent, 
-  DialogTitle,
-  DialogActions,
-  IconButton,
   Paper,
   Typography,
-  Grid,
-  Divider,
 } from "@mui/material";
 import { Stack } from "@mui/system";
-import React, { useState } from "react";
 import Button from "@/components/atoms/Button";
 import { FormContainer } from "react-hook-form-mui";
-import CloseIcon from '@mui/icons-material/Close';
 import {
   DatePicker,
-  // RadioGroup,
   Selection,
   TextField,
 } from "../../molecules/LabeledHookForms";
-import { RadioGroup } from "@/components/atoms/HookForms";
-import MaterialTable from "material-table";
-import InputOutlinedIcon from '@mui/icons-material/InputOutlined';
-import Labeler from "@/components/molecules/Labeler";
 
 function CourseDetailCorrection() {
-  const [open, setOpen] = useState(false);
-  const [openAddContent, setOpenAddContent] = useState(false);
-  const [openReplacement, setOpenReplacement] = useState(false);
-  const [dataAll, setDataAll] = useState([
-    { send_state: "開講メール" },
-    { send_state: "閉講メール" },
-  ]);
-  const [dataReminder, setDataReminder] = useState([
-    { send_state: "開講日ー1日" },
-    { send_state: "開講日ー7日" },
-    { send_state: "開講日ー30日" },
-  ]);
-
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const handleOpenAddContent = () => {
-    setOpenAddContent(true);
-  };
-  const handleCloseAddContent = () => {
-    setOpenAddContent(false);
-  };
-
-  const handleOpenReplacement = () => {
-    setOpenReplacement(true);
-  };
-  const handleCloseReplacement = () => {
-    setOpenReplacement(false);
-  };
   
   return (
     <FormContainer>

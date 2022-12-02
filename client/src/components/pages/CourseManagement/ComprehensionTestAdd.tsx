@@ -15,16 +15,11 @@ import { Stack } from "@mui/system";
 import Button from "@/components/atoms/Button";
 import { FormContainer } from "react-hook-form-mui";
 import {
-  DatePicker,
-  // RadioGroup,
   Selection,
   TextField,
 } from "../../molecules/LabeledHookForms";
-import Trash from "@/assets/icon-trash.svg";
 import { RadioGroup } from "@/components/atoms/HookForms";
-import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
-import VideocamOutlinedIcon from '@mui/icons-material/VideocamOutlined';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 
 function ComprehensionTestAdd() {
