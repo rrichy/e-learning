@@ -46,19 +46,19 @@ function Sidebar({
             <ListItem>
               <ListItemText
                 primary="法人アカウント数"
-                secondary={userCount?.corporate + "人"}
+                secondary={userCount?.corporate ? userCount?.corporate + "人" : "0人"}
               />
             </ListItem>
             <ListItem>
               <ListItemText
                 primary="個人アカウント数"
-                secondary={userCount?.individual + "人"}
+                secondary={userCount?.individual ? userCount?.individual + "人" : "0人"}
               />
             </ListItem>
             <ListItem>
               <ListItemText
                 primary="トライアルアカウント数"
-                secondary={userCount?.trial + "人"}
+                secondary={userCount?.trial ? userCount?.trial + "人" : "0人"}
               />
             </ListItem>
           </>
@@ -68,7 +68,7 @@ function Sidebar({
           <ListItem>
             <ListItemText
               primary="アカウント数"
-              secondary={userCount?.individual + "人"}
+              secondary={userCount?.individual ? userCount?.individual + "人" : "0人"}
             />
           </ListItem>
         );
