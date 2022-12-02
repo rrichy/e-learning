@@ -1,15 +1,16 @@
 import { MembershipType } from "@/enums/membershipTypes";
 import { OptionAttribute } from "@/interfaces/CommonInterface";
 import { getCacheableOptions } from "@/services/CommonService";
-import { ChildDepartmentOptionsType, DepartmentOptionsType } from "@/validations/RegistrationFormValidation";
+import {
+  ChildDepartmentOptionsType,
+  DepartmentOptionsType,
+} from "@/validations/RegistrationFormValidation";
 import { useMemo } from "react";
 import { UseFormReturn } from "react-hook-form";
 
 const { trial } = MembershipType;
 
-function useAccountFormHelper(
-  form: UseFormReturn<any, any>,
-) {
+function useAccountFormHelper(form: UseFormReturn<any, any>) {
   const { options, fetchingOptions } = getCacheableOptions(
     "affiliations",
     "departments",
@@ -23,29 +24,41 @@ function useAccountFormHelper(
   ]);
 
   const updateOptions = async (
-    name: "membership_type_id" | "affiliation_id" | "department_1" | "department_2",
+    name:
+      | "membership_type_id"
+      | "affiliation_id"
+      | "department_1"
+      | "department_2",
     value: number
   ) => {
-    if (name === "membership_type_id" && value === trial) {
+    if (name === "membership_type_id" && membership_type_id === trial) {
       form.setValue("affiliation_id", 0);
       form.setValue("department_1", 0);
       form.setValue("department_2", 0);
-    } else if(name === "affiliation_id") {
+    } else if (name === "affiliation_id") {
       form.setValue("department_1", 0);
       form.setValue("department_2", 0);
     } else if (name === "department_1") {
-      const department = departments.find(({ id }) => id === value);
-      form.setValue("affiliation_id", department?.affiliation_id ?? 0);
+      if (value !== 0) {
+        const department = departments.find(({ id }) => id === value);
+        form.setValue("affiliation_id", department?.affiliation_id ?? 0);
+      }
       form.setValue("department_2", 0);
     } else if (name === "department_2") {
-      const department = child_departments.find(({ id }) => id === value);
-      form.setValue("affiliation_id", department?.affiliation_id ?? 0);
-      form.setValue("department_1", department?.parent_id ?? 0);
+      if (value !== 0) {
+        const department = child_departments.find(({ id }) => id === value);
+        form.setValue("affiliation_id", department?.affiliation_id ?? 0);
+        form.setValue("department_1", department?.parent_id ?? 0);
+      }
     }
   };
 
   const affiliations = useMemo(() => {
-    if (fetchingOptions || !options?.affiliations || membership_type_id === trial)
+    if (
+      fetchingOptions ||
+      !options?.affiliations ||
+      membership_type_id === trial
+    )
       return [{ id: 0, name: "未選択" }];
     return [
       { id: 0, name: "未選択" },
@@ -56,7 +69,11 @@ function useAccountFormHelper(
   const departments = useMemo(() => {
     const depts: DepartmentOptionsType = [];
 
-    if (fetchingOptions || !options?.departments || membership_type_id === trial) {
+    if (
+      fetchingOptions ||
+      !options?.departments ||
+      membership_type_id === trial
+    ) {
       depts.push({
         id: 0,
         name: "未選択",
@@ -73,12 +90,21 @@ function useAccountFormHelper(
     }
 
     return depts;
-  }, [membership_type_id, options?.departments, fetchingOptions, affiliation_id]);
+  }, [
+    membership_type_id,
+    options?.departments,
+    fetchingOptions,
+    affiliation_id,
+  ]);
 
   const child_departments = useMemo(() => {
     const depts: ChildDepartmentOptionsType = [];
 
-    if (fetchingOptions || !options?.child_departments || membership_type_id === trial) {
+    if (
+      fetchingOptions ||
+      !options?.child_departments ||
+      membership_type_id === trial
+    ) {
       depts.push({
         id: 0,
         name: "未選択",
