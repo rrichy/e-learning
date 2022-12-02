@@ -42,6 +42,8 @@ class AccountService
                 ->leftJoin('affiliations', 'affiliations.id', '=', 'users.affiliation_id')
                 ->when($auth->isCorporate(), fn ($q) => $q->where('users.affiliation_id', $auth->affiliation_id))
                 ->when(!empty($filters), fn ($query) => $this->filterUsers($query, $filters))
+                ->where('users.id', '!=', $auth->id)
+                ->where('users.membership_type_id', '<', MembershipType::ADMIN)
                 ->orderBy($sort === 'affiliation_id' ? 'affiliations.name' : $sort, $order)
                 ->paginate($per_page)
         )->additional([
