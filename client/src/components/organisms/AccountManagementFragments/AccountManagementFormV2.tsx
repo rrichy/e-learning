@@ -9,6 +9,9 @@ import Button from "@/components/atoms/Button";
 import Labeler from "@/components/molecules/Labeler";
 import useAuth from "@/hooks/useAuth";
 import { MembershipType } from "@/enums/membershipTypes";
+import { useFormContext } from "react-hook-form";
+import { AdminRegistrationFormAttribute } from "@/validations/RegistrationFormValidation";
+import { useMemo } from "react";
 
 const { trial, individual, corporate, admin } = MembershipType;
 
@@ -26,7 +29,23 @@ function AccountManagementForm({
     d: number
   ) => void;
 }) {
+  const { watch } = useFormContext<AdminRegistrationFormAttribute>();
   const { membershipTypeId } = useAuth();
+
+  const selected_membership = watch("membership_type_id");
+
+  const showSelections = useMemo(
+    () =>
+      [MembershipType.individual, MembershipType.corporate].includes(
+        selected_membership ?? MembershipType.guest
+      ),
+    [selected_membership]
+  );
+
+  const showRemarks = useMemo(
+    () => (selected_membership ?? MembershipType.guest) < MembershipType.admin,
+    [selected_membership]
+  );
 
   return (
     <Stack spacing={2} p={2} alignItems="center">
@@ -87,36 +106,44 @@ function AccountManagementForm({
                 : undefined
             }
           />
+          {showSelections && (
+            <Selection
+              name="affiliation_id"
+              label="所属"
+              onChange={
+                optionUpdateFn
+                  ? (e) => optionUpdateFn("affiliation_id", e as number)
+                  : undefined
+              }
+            />
+          )}
+        </>
+      )}
+      {showSelections && (
+        <>
           <Selection
-            name="affiliation_id"
-            label="所属"
+            name="department_1"
+            label="部署１"
             onChange={
               optionUpdateFn
-                ? (e) => optionUpdateFn("affiliation_id", e as number)
+                ? (e) => optionUpdateFn("department_1", e as number)
+                : undefined
+            }
+          />
+          <Selection
+            name="department_2"
+            label="部署２"
+            onChange={
+              optionUpdateFn
+                ? (e) => optionUpdateFn("department_2", e as number)
                 : undefined
             }
           />
         </>
       )}
-      <Selection
-        name="department_1"
-        label="部署１"
-        onChange={
-          optionUpdateFn
-            ? (e) => optionUpdateFn("department_1", e as number)
-            : undefined
-        }
-      />
-      <Selection
-        name="department_2"
-        label="部署２"
-        onChange={
-          optionUpdateFn
-            ? (e) => optionUpdateFn("department_2", e as number)
-            : undefined
-        }
-      />
-      <TextField name="remarks" label="備考" multiline rows={4} />
+      {showRemarks && (
+        <TextField name="remarks" label="備考" multiline rows={4} />
+      )}
     </Stack>
   );
 }
