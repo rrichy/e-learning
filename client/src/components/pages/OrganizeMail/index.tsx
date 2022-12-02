@@ -176,7 +176,7 @@ function OrganizeMail() {
               削除
             </Button>
             <Button variant="contained" onClick={() => setDialog("add")}>
-              新規追加
+              署名の登録
             </Button>
             <Box flex={1} />
             <Button
