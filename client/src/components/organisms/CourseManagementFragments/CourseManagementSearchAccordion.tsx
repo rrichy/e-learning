@@ -92,7 +92,7 @@ function CourseManagementSearchAccordion({
           </Stack>
           <Stack direction="row" spacing={2} p={3} justifyContent="center">
             <Button large rounded color="dull" variant="outlined" type="button">
-              コース名
+              キャンセル
             </Button>
             <Button large rounded color="secondary" variant="contained">
               検索
