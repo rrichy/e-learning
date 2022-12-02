@@ -235,7 +235,7 @@ function AccountManagementSearchAccordion({
                   form.handleSubmit(onSubmit)();
                 }}
               >
-                コース名
+                キャンセル
               </Button>
               <Button
                 large
