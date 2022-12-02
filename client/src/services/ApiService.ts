@@ -1,4 +1,4 @@
-import axios, { Axios, AxiosRequestConfig } from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 import { getBearerToken } from "./AuthService";
 
 export const BEARER_TOKEN = "bearer_token";

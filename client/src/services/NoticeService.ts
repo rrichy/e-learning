@@ -1,6 +1,5 @@
 import { OrderType } from "@/interfaces/CommonInterface";
 import { NoticeFormAttribute } from "@/validations/NoticeFormValidation";
-// import { NoticeFormAttribute } from "@/validations/NoticeFormValidation";
 import { destroy, get, post, put } from "./ApiService";
 
 const url_prefix = "/api/notice";

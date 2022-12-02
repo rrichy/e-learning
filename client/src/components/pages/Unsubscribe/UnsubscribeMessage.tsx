@@ -1,4 +1,4 @@
-import { List, ListItem, Paper, Stack, Typography } from "@mui/material";
+import { Paper, Stack, Typography } from "@mui/material";
 import Button from "@/components/atoms/Button";
 
 function Unsubscribe() {
