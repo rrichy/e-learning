@@ -18,14 +18,19 @@ import AffiliationAddEdit from "./AffiliationAddEdit";
 import { affiliationColumns } from "@/columns";
 import { useMyTable } from "@/hooks/useMyTable";
 
-function AffiliationTable() {
+function AffiliationTable({
+  requestInvalidate,
+}: {
+  requestInvalidate: () => void;
+}) {
   const queryClient = useQueryClient();
   const { isConfirmed } = useConfirm();
   const { successSnackbar, errorSnackbar } = useAlerter();
 
   const [dialog, setDialog] =
     useState<PageDialogProps<AffiliationFormAttributeWithId>>(null);
-  const { selector, sorter, pagination, setPagination, resetTable } = useMyTable();
+  const { selector, sorter, pagination, setPagination, resetTable } =
+    useMyTable();
   const { tableData, fetchingData } = getData({
     sort: sorter.sort,
     setSort: sorter.setSort,
@@ -44,6 +49,8 @@ function AffiliationTable() {
           pagination,
           sorter.sort,
         ]);
+        queryClient.invalidateQueries(["affiliations-options"]);
+        requestInvalidate();
       },
       onError: (e: any) => errorSnackbar(e.message),
     }
@@ -108,7 +115,7 @@ function AffiliationTable() {
             pagination,
             sorter.sort,
           ]);
-          queryClient.invalidateQueries(["affiliations-option"]);
+          queryClient.invalidateQueries(["affiliations-options"]);
         }}
       />
     </>

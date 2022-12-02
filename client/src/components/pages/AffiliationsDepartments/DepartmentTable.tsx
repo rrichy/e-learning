@@ -10,7 +10,7 @@ import {
   PaginationState,
   SortingState,
 } from "@tanstack/react-table";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Button from "@/components/atoms/Button";
 import MyTable from "@/components/atoms/MyTable";
 import { DepartmentFormAttributeWithId } from "@/validations/DepartmentFormValidation";
@@ -21,7 +21,13 @@ import DepartmentAddEdit from "./DepartmentAddEdit";
 import { useMyTable } from "@/hooks/useMyTable";
 import { departmentColumns } from "@/columns";
 
-function DepartmentTable() {
+function DepartmentTable({
+  requestInvalidate,
+  setRequestInvalidate,
+}: {
+  requestInvalidate: boolean;
+  setRequestInvalidate: () => void;
+}) {
   const queryClient = useQueryClient();
   const { isConfirmed } = useConfirm();
   const { successSnackbar, errorSnackbar } = useAlerter();
@@ -91,6 +97,17 @@ function DepartmentTable() {
   };
 
   const columns = departmentColumns(setDialog, lookup);
+
+  useEffect(() => {
+    if (requestInvalidate) {
+      queryClient.invalidateQueries([
+        "departments-table",
+        pagination,
+        sorter.sort,
+      ]);
+      setRequestInvalidate();
+    }
+  }, [requestInvalidate, pagination, sorter.sort, setRequestInvalidate]);
 
   return (
     <>
