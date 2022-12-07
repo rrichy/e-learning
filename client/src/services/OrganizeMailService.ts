@@ -1,4 +1,5 @@
 import { OrderType } from "@/interfaces/CommonInterface";
+import { AccountMultipleAddFormAttribute } from "@/validations/AccountMultipleAddFormValidation";
 import { OrganizeMailFormAttribute } from "@/validations/OrganizeMailFormValidation";
 import { destroy, get, post, put } from "./ApiService";
 
@@ -15,7 +16,7 @@ export const indexOrganizeMail = (
   );
 };
 
-export const storeOrganizeMail = (data: OrganizeMailFormAttribute) => {
+export const storeOrganizeMail = (data: OrganizeMailFormAttribute | AccountMultipleAddFormAttribute) => {
   return post(url_prefix, data);
 };
 

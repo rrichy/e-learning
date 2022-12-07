@@ -21,8 +21,10 @@ import { useMyTable } from "@/hooks/useMyTable";
 import MyTable from "@/components/atoms/MyTable";
 import { getCacheableOptions } from "@/services/CommonService";
 import generateLookup from "@/utils/generateLookup";
+import AccountMultipleAdd from "./AccountMultipleAdd";
 
 function AccountManagement() {
+  const [openMultiple, setOpenMultiple] = useState(false);
   const queryClient = useQueryClient();
   const { isConfirmed } = useConfirm();
   const { successSnackbar, errorSnackbar } = useAlerter();
@@ -43,7 +45,8 @@ function AccountManagement() {
   }, [fetchingOptions, options]);
 
   const [filters, setFilters] = useState<{ [k: string]: any }>({});
-  const { selector, sorter, pagination, setPagination, resetTable } = useMyTable();
+  const { selector, sorter, pagination, setPagination, resetTable } =
+    useMyTable();
   const { tableData, fetchingData } = getData({
     sort: sorter.sort,
     setSort: sorter.setSort,
@@ -96,161 +99,73 @@ function AccountManagement() {
   const columns = accountColumns(lookups);
 
   return (
-    <>
+    <Stack
+      spacing={3}
+      sx={{
+        p: 3,
+        "& tbody tr:nth-last-of-type(1) td": {
+          borderBottom: "none !important",
+        },
+      }}
+    >
+      <AccountManagementSearch onSubmit={handleSearch} />
       <Stack
-        spacing={3}
-        sx={{
-          p: 3,
-          "& tbody tr:nth-last-of-type(1) td": {
-            borderBottom: "none !important",
-          },
-        }}
+        spacing={2}
+        justifyContent="center"
+        direction="row"
+        sx={{ "& .MuiButton-root": { maxWidth: 200 } }}
       >
-        <AccountManagementSearch onSubmit={handleSearch} />
-        <Stack
-          spacing={2}
-          justifyContent="center"
-          direction="row"
-          sx={{ "& .MuiButton-root": { maxWidth: 200 } }}
+        <Button to="create" variant="contained" rounded>
+          新規作成
+        </Button>
+        <Button
+          variant="contained"
+          rounded
+          onClick={() => setOpenMultiple(true)}
         >
-          <Button to="create" variant="contained" rounded>
-            新規作成
-          </Button>
-          <Button
-            variant="contained"
-            rounded
-            // onClick={handleMultipleAccountsOpen}
-          >
-            一括登録
-          </Button>
-        </Stack>
-
-        <Paper variant="outlined">
-          <Stack spacing={3}>
-            <Typography variant="sectiontitle2">アカウントの管理</Typography>
-            <Button
-              color="secondary"
-              variant="contained"
-              rounded
-              sx={{ maxWidth: 150 }}
-              onClick={handleDelete}
-              disabled={Object.keys(selector.selected).length === 0}
-            >
-              削除
-            </Button>
-            <Box>
-              <Typography fontStyle="italic">
-                検索結果: {tableData?.meta.total ?? 0}人
-              </Typography>
-              <MyTable
-                loading={fetchingData || deleteMutation.isLoading}
-                state={tableData}
-                columns={columns}
-                selector={selector}
-              />
-            </Box>
-          </Stack>
-        </Paper>
+          一括登録
+        </Button>
       </Stack>
 
-      {/* <FormContainer>
-        <Dialog open={multipleAccountsOpen} maxWidth="lg">
-          <DialogTitle>
-            <Typography
-              fontWeight="bold"
-              variant="h6"
-              pl={1}
-              sx={{ borderLeft: "5px solid #00c2b2" }}
-            >
-              アカウントの複数登録
+      <Paper variant="outlined">
+        <Stack spacing={3}>
+          <Typography variant="sectiontitle2">アカウントの管理</Typography>
+          <Button
+            color="secondary"
+            variant="contained"
+            rounded
+            sx={{ maxWidth: 150 }}
+            onClick={handleDelete}
+            disabled={Object.keys(selector.selected).length === 0}
+          >
+            削除
+          </Button>
+          <Box>
+            <Typography fontStyle="italic">
+              検索結果: {tableData?.meta.total ?? 0}人
             </Typography>
-            <IconButton
-              onClick={handleMultipleAccountsClose}
-              sx={{
-                position: 'absolute',
-                right: 8,
-                top: 8,
-                color: (theme) => theme.palette.grey[500],
-              }}
-            >
-              <CloseIcon />
-            </IconButton>
-          </DialogTitle>
-          <Stack spacing={1} p={3}>
-            <Card sx={{ border: "1px solid #dadfe1" }}>
-              <CardHeader 
-                subheader="CSVファイルから登録" 
-                sx={{ 
-                  background: "#dadfe1",
-                  fontSize: "1rem"
-                }}
-                align="center"
-              />
-              <CardContent>
-                <TextField
-                  name="name"
-                  placeholder="Upload CSV File"
-                  labelProps={{ compact: true }}
-                />
-              </CardContent>
-            </Card>
-            <Stack direction="row" spacing={2} p={1} justifyContent="flex-end">
-              <Typography>一括登録用のCSVテンプレート</Typography>
-              <Button color="warning" variant="contained" sx={{ borderRadius: 7, width: 100 }}>ダウンロード</Button>
-            </Stack>
-            <Divider />
-            <Stack direction="row" spacing={2} p={1} justifyContent="space-evenly">
-              <Typography>「登録のお知らせ」メール配信</Typography>
-              <FormControlLabel
-                label="メールを配信する"
-                control={
-                  <Checkbox
-                    size="small"
-                    checked={checked}
-                    onChange={(_, checked) => setChecked(checked)}
-                  />
-                }
-              />
-            </Stack>
-            {checked && (
-              <>
-                <Stack direction="row" spacing={2} p={1}>
-                  <Selection
-                    name="sex"
-                    label="性別"
-                  />
-                  <Button color="warning" variant="contained" sx={{ borderRadius: 7, width: 100 }}>メール整理</Button>
-                </Stack>
-                <TextField
-                  name="name"
-                  placeholder="Upload Image Here"
-                  label="アイコン画像"
-                />
-                <TextField
-                  name="name"
-                  placeholder="名前を入力"
-                  label="氏名"
-                  multiline
-                  rows={3}
-                />
-                <Stack direction="row" spacing={2} p={1} justifyContent="space-between">
-                  <Typography sx={{ color: "red" }}>（※）上記タイトル・内容を保存できます。</Typography>
-                  <Button color="warning" variant="contained" sx={{ borderRadius: 7, width: 100 }}>保存</Button>
-                </Stack>
-                <Selection
-                  name="sex"
-                  label="性別"
-                />
-              </>
-            )}
-          </Stack>
-          <Stack direction="row" spacing={2} p={3} justifyContent="center">
-            <Button large color="inherit" variant="outlined" sx={{ borderRadius: 7 }}>キャンセル</Button>
-            <Button large color="warning" variant="contained" sx={{ borderRadius: 7 }}>登録</Button>
-          </Stack>
-        </Dialog>
-      </FormContainer> */}
-    </>
+            <MyTable
+              loading={fetchingData || deleteMutation.isLoading}
+              state={tableData}
+              columns={columns}
+              selector={selector}
+            />
+          </Box>
+        </Stack>
+      </Paper>
+      <AccountMultipleAdd
+        open={openMultiple}
+        onClose={() => setOpenMultiple(false)}
+        resolver={() =>
+          queryClient.invalidateQueries([
+            "accounts-table",
+            pagination,
+            sorter.sort,
+            filters,
+          ])
+        }
+      />
+    </Stack>
   );
 }
 

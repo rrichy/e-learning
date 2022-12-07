@@ -1,5 +1,6 @@
 export { default as CheckboxGroup } from "./CheckboxGroup";
 export { default as ConditionalDateRange } from "./ConditionalDateRange";
+export { default as CSVDropzone } from "./CSVDropzone";
 export { default as DatePicker } from "./DatePicker";
 export { default as ImageDropzone } from "./ImageDropzone";
 export { default as MultiSelection } from "./MultiSelection";
@@ -12,6 +13,7 @@ export { default as VideoDropzone } from "./VideoDropzone";
 
 export type { CheckboxGroupProps } from "./CheckboxGroup";
 export type { ConditionalDateRangeProps } from "./ConditionalDateRange";
+export type { CSVDropzoneProps } from "./CSVDropzone";
 export type { DatePickerElementProps } from "./DatePicker";
 export type { ImageDropzoneProps } from "./ImageDropzone";
 export type { RadioGroupProps } from "./RadioGroup";
