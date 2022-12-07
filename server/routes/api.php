@@ -33,14 +33,12 @@ TODO: course management searching functionalities
 TODO: account-management/{id}/detail tables
 TODO: comprehension test details ???
 TODO: targets on notice and course info
-TODO: /account-management register multiple accounts
 TODO: conditional mail; [admin] コース管理 > コースクリック > 条件付きメール
 
 TODO: [admin] /course-management table attending students column
 TODO: [admin] clarification for course detail correction process
 
 TODO: [individual] prevent form submission when there are still some unanswered fields
-TODO: rewrite test simulation component
  */
 
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -56,6 +54,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/options', [OptionsController::class, 'index']);
 
     Route::prefix('/account')->group(function () {
+        Route::post('/multiple', [AccountController::class, 'multipleStore']);
         Route::post('/', [AccountController::class, 'store']);
         Route::get('/{account}', [AccountController::class, 'show']);
         Route::get('/', [AccountController::class, 'index']);

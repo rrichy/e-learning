@@ -2,13 +2,15 @@
 
 namespace App\Services;
 
+use App\Events\Registered;
 use App\Http\Resources\AccountIndexResource;
 use App\Http\Resources\AccountShowParsedResource;
 use App\Http\Resources\AccountShowResource;
+use App\Models\MailTemplate;
 use App\Models\MembershipType;
+use App\Models\Signature;
 use App\Models\User;
 use Exception;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -128,6 +130,43 @@ class AccountService
     public function deleteIds(Collection $ids)
     {
         return User::destroy($ids);
+    }
+
+
+    public function multipleStore(array $valid)
+    {
+        $accounts = collect();
+
+        DB::transaction(function () use (&$accounts, $valid) {
+            if ($valid['checked']) {
+                $mail = [
+                    'title' => $valid['title'],
+                    'content' => $valid['content'],
+                    'signature' => Signature::find($valid['signature_id'])->name,
+                ];
+            }
+            
+            foreach ($valid['file'] as $info) {
+                $account = User::create(array_merge($info, ['password' => bcrypt($info['password'])]));
+                $newdepartments = [];
+                if (isset($info['department_1'])) {
+                    $newdepartments[$info['department_1']] = ['order' => 1];
+
+                    if (isset($info['department_2'])) {
+                        $newdepartments[$info['department_2']] = ['order' => 2];
+                    }
+                }
+                $account->departments()->attach($newdepartments);
+
+                $accounts->push($account);
+
+                event(new Registered($account, $mail ?? null));
+            }
+        });
+
+        return [
+            'message' => 'Successfully create ' . $accounts->count() . ' accounts!',
+        ];
     }
 
 

@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use App\Notifications\VerifyEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -58,6 +59,11 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
         'last_login_date' => 'datetime',
     ];
+
+    public function sendEmailVerificationNotification($mail = null)
+    {
+        $this->notify(new VerifyEmail($mail));
+    }
 
     public function membershipType(): BelongsTo
     {
