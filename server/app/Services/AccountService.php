@@ -6,7 +6,6 @@ use App\Events\Registered;
 use App\Http\Resources\AccountIndexResource;
 use App\Http\Resources\AccountShowParsedResource;
 use App\Http\Resources\AccountShowResource;
-use App\Models\MailTemplate;
 use App\Models\MembershipType;
 use App\Models\Signature;
 use App\Models\User;

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AccountIndexRequest;
+use App\Http\Requests\AccountMultipleStoreRequest;
 use App\Http\Requests\AccountStoreUpdateRequest;
 use App\Models\User;
 use App\Services\AccountService;
@@ -79,5 +80,18 @@ class AccountController extends Controller
         return response()->json([
             'message' => 'Successfully deleted ' . $deleted_count . ' users!',
         ]);
+    }
+
+    public function multipleStore(AccountMultipleStoreRequest $request, AccountService $service)
+    {
+        Gate::authorize('check-membership', [['admin', 'corporate']]);
+
+        try {
+            $json = $service->multipleStore($request->validated());
+        } catch (Exception $ex) {
+            abort(500, $ex->getMessage());
+        }
+
+        return response()->json($json);
     }
 }
