@@ -50,7 +50,9 @@ export type ChapterContextAttribute = {
   chapterId: number;
 };
 
-function useChapter(preview = false): ChapterContextAttribute | Partial<ChapterContextAttribute> {
+function useChapter(
+  preview = false
+): ChapterContextAttribute | Partial<ChapterContextAttribute> {
   if (preview) return useContext(ChapterPreviewContext);
 
   return useOutletContext<ChapterContextAttribute>();
