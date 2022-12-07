@@ -48,7 +48,7 @@ function TemplateForm({ form }: TemplateFormProps) {
     return Boolean(title && content && signature_id);
   }, [title, content, signature_id]);
 
-  const [{ data: mail_templates }, { data: signatures }] = fetchingOptions(
+  const [{ data: mail_templates }, { data: signatures }] = useFetchingOptions(
     checked!
   );
 
@@ -200,7 +200,7 @@ function TemplateForm({ form }: TemplateFormProps) {
 
 export default TemplateForm;
 
-function fetchingOptions(checked: boolean) {
+function useFetchingOptions(checked: boolean) {
   const queries = useQueries({
     queries: [
       {

@@ -10,12 +10,12 @@ const accountBaseSearchSchema = object({
   category_id: number().optional(),
   never_logged_in: number(),
   logged_in_min_date: string().when("never_logged_in", {
-    is: (val: number | string) => val == 2,
+    is: (val: number | string) => +val === 2,
     then: (schema) => schema.required(),
     otherwise: (schema) => schema.nullable(),
   }),
   logged_in_max_date: string().when("never_logged_in", {
-    is: (val: number | string) => val == 2,
+    is: (val: number | string) => +val === 2,
     then: (schema) => schema.required(),
     otherwise: (schema) => schema.nullable(),
   }),

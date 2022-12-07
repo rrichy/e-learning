@@ -1,7 +1,7 @@
-import { StringSchema, NumberSchema } from "yup";
+import { StringSchema as BaseStringSchema } from "yup";
 
 declare module "yup" {
-  interface StringSchema {
+  interface StringSchema extends BaseStringSchema {
     furigana(message?: string): this;
     name(message?: string): this;
     password(message?: string): this;
