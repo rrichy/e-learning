@@ -7,12 +7,17 @@ const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
   headers: {
-    "Accept": "application/json",
+    Accept: "application/json",
   },
   withCredentials: true,
 });
 
-export const post = async (url: string, data: any = {}, config: AxiosRequestConfig = {}, detachAuth = false) => {
+export const post = async (
+  url: string,
+  data: any = {},
+  config: AxiosRequestConfig = {},
+  detachAuth = false
+) => {
   try {
     let access_token = localStorage.getItem(BEARER_TOKEN);
     let headers: AxiosRequestConfig["headers"] = config.headers ?? {};
@@ -87,7 +92,12 @@ export const patch = async (url: string, data: any = {}) => {
   }
 };
 
-export const put = async (url: string, data: any, config: AxiosRequestConfig = {}, detachAuth = false) => {
+export const put = async (
+  url: string,
+  data: any,
+  config: AxiosRequestConfig = {},
+  detachAuth = false
+) => {
   try {
     let access_token = localStorage.getItem(BEARER_TOKEN);
     let headers: AxiosRequestConfig["headers"] = config.headers ?? {};

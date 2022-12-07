@@ -23,7 +23,10 @@ export const storeAccount = (data: AdminRegistrationFormAttribute) => {
   return post(url_prefix, data);
 };
 
-export const updateAccount = (id: number, data: AdminRegistrationFormAttribute) => {
+export const updateAccount = (
+  id: number,
+  data: AdminRegistrationFormAttribute
+) => {
   return put(`${url_prefix}/${id}`, data);
 };
 

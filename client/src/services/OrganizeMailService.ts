@@ -16,7 +16,9 @@ export const indexOrganizeMail = (
   );
 };
 
-export const storeOrganizeMail = (data: OrganizeMailFormAttribute | AccountMultipleAddFormAttribute) => {
+export const storeOrganizeMail = (
+  data: OrganizeMailFormAttribute | AccountMultipleAddFormAttribute
+) => {
   return post(url_prefix, data);
 };
 

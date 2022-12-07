@@ -29,4 +29,4 @@ export const destroyCategory = (ids: number[]) => {
 
 export const duplicateCategory = (id: number) => {
   return post(`${url_prefix}/${id}/duplicate`);
-}
+};

@@ -1,9 +1,9 @@
 import { OptionAttribute } from "@/interfaces/CommonInterface";
 import React, { createContext } from "react";
 
-export const OptionsContext = createContext<{ [key: string]: OptionAttribute[] }>(
-  {}
-);
+export const OptionsContext = createContext<{
+  [key: string]: OptionAttribute[];
+}>({});
 
 function OptionsContextProvider({
   options,
