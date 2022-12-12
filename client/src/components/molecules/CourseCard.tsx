@@ -32,7 +32,8 @@ function CourseCard({ id, title, image, attendingCourse }: CourseCardProps) {
 
   const parsedDate = !start_date
     ? "NaN"
-    : "" + Math.ceil(
+    : "" +
+      Math.ceil(
         dateDifference(
           start_date,
           status === completed ? completion_date! : new Date()
