@@ -72,15 +72,12 @@ function StudentLecture({}: StudentLectureProps) {
   const handleProgress = (state?: OnProgressProps) => {
     if (!lecture.is_complete && initializedPlayer) {
       console.log("progress");
-      
-      const playedSeconds = state?.playedSeconds ?? playerRef.current.getDuration();
+
+      const playedSeconds =
+        state?.playedSeconds ?? playerRef.current.getDuration();
       const completed = state ? state.played === 1 : true;
 
-      updateViewingInformation(
-        lecture.id!,
-        playedSeconds,
-        completed
-      );
+      updateViewingInformation(lecture.id!, playedSeconds, completed);
       const temp = [...lectures];
       temp[currentIndex].playback_position = playedSeconds;
       temp[currentIndex].is_complete = completed;
@@ -135,7 +132,7 @@ function StudentLecture({}: StudentLectureProps) {
               progressInterval={10_000}
               ref={playerRef}
             />
-            {(lectureIsFetching && urlIsFetching) && !initializedPlayer && (
+            {lectureIsFetching && urlIsFetching && !initializedPlayer && (
               <Stack
                 height={1}
                 width={1}

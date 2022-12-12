@@ -1,5 +1,8 @@
-export const jpDate = (date?: string | Date | null, withTime: boolean = false) => {
-  if(!date) return null;
+export const jpDate = (
+  date?: string | Date | null,
+  withTime: boolean = false
+) => {
+  if (!date) return null;
   const dateObj = typeof date === "string" ? new Date(date) : date;
   return (
     dateObj.toLocaleDateString("ja-JP", { dateStyle: "long" }) +

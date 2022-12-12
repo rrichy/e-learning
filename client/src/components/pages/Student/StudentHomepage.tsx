@@ -1,8 +1,6 @@
 import Courses from "@/components/organisms/Student/HomepageFragments/Courses";
 import Notice from "@/components/organisms/Student/HomepageFragments/Notice";
-import {
-  Stack,
-} from "@mui/material";
+import { Stack } from "@mui/material";
 
 function StudentHomepage() {
   return (

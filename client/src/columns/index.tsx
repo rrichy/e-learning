@@ -699,7 +699,9 @@ export function resultColumns(onClick: (d: QuestionAttributes) => void) {
       id: "statement",
       header: () => "設問文題",
       cell: ({ row }) => (
-        <div style={{ textAlign: "center", whiteSpace: "break-spaces" }}>{row.original.statement}</div>
+        <div style={{ textAlign: "center", whiteSpace: "break-spaces" }}>
+          {row.original.statement}
+        </div>
       ),
     }),
     resultHelper.display({

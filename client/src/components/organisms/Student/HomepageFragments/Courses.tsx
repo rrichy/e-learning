@@ -11,7 +11,7 @@ function Courses() {
       const res = await indexCourse("public");
       const data = res.data.data;
 
-      return data as CourseListAttribute[]
+      return data as CourseListAttribute[];
     },
     {
       staleTime: 5_000,

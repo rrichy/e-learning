@@ -155,7 +155,7 @@ export type CourseFormAttributeWithId = CourseFormAttribute & {
     target_parsed: string;
     attendees: number;
     current_attendees: number;
-  }
+  };
 };
 
 export type CourseListAttribute = {

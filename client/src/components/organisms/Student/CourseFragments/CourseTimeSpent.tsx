@@ -9,7 +9,7 @@ interface CourseTimeSpentProps {
 
 const { attending, completed } = AttendingCourseStatus;
 
-function CourseTimeSpent({attendingCourse}: CourseTimeSpentProps) {
+function CourseTimeSpent({ attendingCourse }: CourseTimeSpentProps) {
   const { progress_rate, status, start_date, completion_date } =
     attendingCourse || {
       progress_rate: 0,
@@ -20,13 +20,14 @@ function CourseTimeSpent({attendingCourse}: CourseTimeSpentProps) {
 
   const parsedDate = !start_date
     ? "NaN"
-    : "" + Math.ceil(
+    : "" +
+      Math.ceil(
         dateDifference(
           start_date,
           status === completed ? completion_date! : new Date()
         )
       );
-  
+
   return (
     <Grid item xs={12} md={4}>
       <Paper variant="softoutline" sx={{ width: 1, height: 1 }}>

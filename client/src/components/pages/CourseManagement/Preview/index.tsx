@@ -192,8 +192,13 @@ function Preview({
     });
   }, [questions]);
 
-  
-  const headerTitle = `${chapterIndex! + 1}章 ${screen === "lecture" ? "理解度テスト" : screen === "chapter-test" ? "章末テスト" : "章末テスト結果"}`;
+  const headerTitle = `${chapterIndex! + 1}章 ${
+    screen === "lecture"
+      ? "理解度テスト"
+      : screen === "chapter-test"
+      ? "章末テスト"
+      : "章末テスト結果"
+  }`;
 
   return (
     <Dialog
@@ -235,10 +240,7 @@ function Preview({
           )}
           {context && (
             <ChapterPreviewProvider context={context}>
-              <CommonHeader
-                image={course.image || null}
-                title={headerTitle}
-              />
+              <CommonHeader image={course.image || null} title={headerTitle} />
               {screen === "chapter-test" && (
                 <TestDetailsDisplay screenFn={setTemplateScreen} />
               )}

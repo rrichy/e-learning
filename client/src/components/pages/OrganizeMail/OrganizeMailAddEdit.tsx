@@ -44,7 +44,9 @@ function OrganizeMailAddEdit({
       PaperProps={{ sx: { bgcolor: "#f7f7f7" } }}
     >
       <DialogTitle sx={{ px: 0, pt: 0 }}>
-        <Typography variant="sectiontitle1">メールテンプレートの登録</Typography>
+        <Typography variant="sectiontitle1">
+          メールテンプレートの登録
+        </Typography>
       </DialogTitle>
       <DialogContent>
         <FormContainer formContext={formContext} handleSubmit={handleSubmit}>

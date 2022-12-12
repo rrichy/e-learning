@@ -69,7 +69,8 @@ function TestResult({ preview }: { preview?: boolean }) {
             m={2}
             sx={{ "& strong": { fontSize: 28, color: "red", mx: 1 } }}
           >
-            あなたの得点は<strong>{result!.score}点</strong>です（{result!.total}
+            あなたの得点は<strong>{result!.score}点</strong>です（
+            {result!.total}
             満点中）
           </Typography>
         </Paper>

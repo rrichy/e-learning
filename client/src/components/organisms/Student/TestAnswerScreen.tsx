@@ -59,8 +59,8 @@ function TestAnswerScreen({
   const currentItem = chapter.itemNumber!;
   const currentQuestion = mappedQuestions.get(currentItem);
 
-  const checkboxes = chapter?.form!
-    .watch("answers")
+  const checkboxes = chapter
+    ?.form!.watch("answers")
     .map((a) => a.every((b) => Boolean(b.answer)));
 
   return (
@@ -176,7 +176,11 @@ function TestAnswerScreen({
                 <MUILink
                   key={index}
                   component="button"
-                  onClick={() => screenFn(`${chapter?.prefix!}/${index + 1}` as CourseScreenType)}
+                  onClick={() =>
+                    screenFn(
+                      `${chapter?.prefix!}/${index + 1}` as CourseScreenType
+                    )
+                  }
                   color={index + 1 === currentItem ? "secondary" : "primary"}
                   flex={1}
                   whiteSpace="nowrap"

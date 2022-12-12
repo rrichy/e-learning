@@ -23,7 +23,7 @@ export const adminRegistrationFormSchema = registrationFormSchema.shape({
   affiliation_id: number()
     .label("所属")
     .when("membership_type_id", {
-      is: (val: number | string) => val == MembershipType.corporate,
+      is: (val: number | string) => +val === MembershipType.corporate,
       then: (schema) => schema.selectionId(true),
       otherwise: (schema) => schema.selectionId(),
     }),
@@ -57,7 +57,9 @@ export const adminRegistrationFormInit: AdminRegistrationFormAttribute = {
   remarks: "",
 };
 
-export type DepartmentOptionsType = (OptionAttribute & { affiliation_id: number })[];
+export type DepartmentOptionsType = (OptionAttribute & {
+  affiliation_id: number;
+})[];
 export type ChildDepartmentOptionsType = (OptionAttribute & {
   affiliation_id: number;
   parent_id: number;

@@ -1,6 +1,9 @@
 import { useContext, useEffect, useState } from "react";
 import { ConfirmContext } from "@/providers/ConfirmContextProvider";
-import { CommonContentAttributes, ConfirmOptionsAttributes } from "@/interfaces/ConfirmDialog";
+import {
+  CommonContentAttributes,
+  ConfirmOptionsAttributes,
+} from "@/interfaces/ConfirmDialog";
 
 const useConfirm = () => {
   const [confirm, setConfirm] = useContext(ConfirmContext);

@@ -35,8 +35,8 @@ function UserHopup() {
       setUnauthorized();
       navigate("/login");
       queryClient.clear();
-    }
-  })
+    },
+  });
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 

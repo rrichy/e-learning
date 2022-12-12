@@ -3,14 +3,18 @@ import { FormContainer, useForm } from "react-hook-form-mui";
 import { TextField } from "../molecules/LabeledHookForms";
 import Button from "@/components/atoms/Button";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { ChangePasswordFormAttribute, changePasswordFormInit, changePasswordFormSchema } from "@/validations/ChangePasswordFormValidation";
+import {
+  ChangePasswordFormAttribute,
+  changePasswordFormInit,
+  changePasswordFormSchema,
+} from "@/validations/ChangePasswordFormValidation";
 import useConfirm from "@/hooks/useConfirm";
 import { useNavigate } from "react-router-dom";
 import useAlerter from "@/hooks/useAlerter";
 import DisabledComponentContextProvider from "@/providers/DisabledComponentContextProvider";
 import { changePassword } from "@/services/AuthService";
 
-function ChangePassword(){
+function ChangePassword() {
   const navigate = useNavigate();
   const { isConfirmed } = useConfirm();
   const { successSnackbar, handleError } = useAlerter();
