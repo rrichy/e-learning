@@ -227,7 +227,7 @@ function MultiSelection({
                           ? theme.typography.fontWeightBold
                           : theme.typography.fontWeightRegular,
                       ...item.sx,
-                    }}                    
+                    }}
                   >
                     {showCheckbox && !Boolean(item.disabled) && (
                       <Checkbox checked={isChecked} size={rest.size} />

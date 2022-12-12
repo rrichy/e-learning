@@ -69,7 +69,7 @@ function TextField({
           }}
           onBlur={(e) => {
             onBlur();
-            if(rest.onBlur) rest.onBlur(e);
+            if (rest.onBlur) rest.onBlur(e);
           }}
           required={required}
           type={

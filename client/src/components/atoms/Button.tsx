@@ -15,7 +15,15 @@ export type ButtonProps = MuiButtonProps & {
   fitY?: boolean;
 };
 
-function Button({ loading, large, rounded, fit, fitY, sx, ...props }: ButtonProps) {
+function Button({
+  loading,
+  large,
+  rounded,
+  fit,
+  fitY,
+  sx,
+  ...props
+}: ButtonProps) {
   if (loading) {
     const { children, disabled, ...rest } = props;
     return (

@@ -45,7 +45,7 @@ function Slider({
         disabled={disabledChild || disabledProp}
         onChange={(_e, v, a) => {
           onChange(v);
-          if(rest.onChange) rest.onChange(_e, v, a);
+          if (rest.onChange) rest.onChange(_e, v, a);
         }}
         disableSwap
       />

@@ -198,7 +198,9 @@ function MyTable<T extends unknown>({
           {table.getRowModel().rows.length === 0 && (
             <TableBody>
               <TableRow>
-                <TableCell colSpan={table.getAllColumns().length + (onDragEnd ? 1 : 0)}>
+                <TableCell
+                  colSpan={table.getAllColumns().length + (onDragEnd ? 1 : 0)}
+                >
                   <Box
                     pt={2}
                     width={1}

@@ -5,7 +5,10 @@ import {
   CheckboxButtonGroupProps,
 } from "react-hook-form-mui";
 
-export type CheckboxGroupProps = Omit<CheckboxButtonGroupProps<any>, "options"> & {
+export type CheckboxGroupProps = Omit<
+  CheckboxButtonGroupProps<any>,
+  "options"
+> & {
   options?: any[];
 };
 
@@ -20,7 +23,12 @@ function CheckboxGroup({
   const options = optionsProp || optionsChild?.[rest.name] || [];
 
   return (
-    <CheckboxButtonGroup disabled={disabled} options={options} labelKey="name" {...rest} />
+    <CheckboxButtonGroup
+      disabled={disabled}
+      options={options}
+      labelKey="name"
+      {...rest}
+    />
   );
 }
 
