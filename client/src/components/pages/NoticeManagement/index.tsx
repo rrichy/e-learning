@@ -15,7 +15,8 @@ import { NoticeTableRowAttribute } from "@/columns/rowTypes";
 function NoticeManagement() {
   const { isConfirmed } = useConfirm();
   const { successSnackbar, errorSnackbar } = useAlerter();
-  const { selector, pagination, setPagination, sorter, resetTable } = useMyTable();
+  const { selector, pagination, setPagination, sorter, resetTable } =
+    useMyTable();
   const queryClient = useQueryClient();
   const { data, isFetching } = useQuery(
     ["notices-management", pagination, sorter.sort],

@@ -1,7 +1,4 @@
-import {
-  Paper,
-  Typography,
-} from "@mui/material";
+import { Paper, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
 import Button from "@/components/atoms/Button";
 import { FormContainer } from "react-hook-form-mui";
@@ -12,7 +9,6 @@ import {
 } from "../../molecules/LabeledHookForms";
 
 function CourseDetailCorrection() {
-  
   return (
     <FormContainer>
       <Paper variant="outlined">
@@ -21,7 +17,9 @@ function CourseDetailCorrection() {
           <Paper variant="sectionsubpaper">
             <Typography variant="sectiontitle3">更新</Typography>
             <Paper variant="outlined" sx={{ m: { xs: 2, md: 4 }, p: 2 }}>
-              <Typography variant="sectiontitle2">Course Information</Typography>
+              <Typography variant="sectiontitle2">
+                Course Information
+              </Typography>
               <Stack spacing={2} p={2} alignItems="center">
                 <TextField
                   name="title"
@@ -29,10 +27,7 @@ function CourseDetailCorrection() {
                   placeholder="コースタイトルを入力"
                   disabled
                 />
-                <Selection
-                  name="category_id"
-                  label="Status"
-                />
+                <Selection name="category_id" label="Status" />
               </Stack>
               <Typography variant="sectiontitle2">User Info</Typography>
               <Stack spacing={2} p={2} alignItems="center">
