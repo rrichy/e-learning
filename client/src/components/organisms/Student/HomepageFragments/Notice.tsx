@@ -1,6 +1,10 @@
 import NoticeItem from "@/components/organisms/NoticeItem";
 import useAlerter from "@/hooks/useAlerter";
-import { initPaginatedData, OrderType, PaginationFilterInterface } from "@/interfaces/CommonInterface";
+import {
+  initPaginatedData,
+  OrderType,
+  PaginationFilterInterface,
+} from "@/interfaces/CommonInterface";
 import { indexNotice } from "@/services/NoticeService";
 import { TABLE_ROWS_PER_PAGE } from "@/settings/appconfig";
 import { NoticeItemAttribute } from "@/validations/NoticeFormValidation";
@@ -31,7 +35,10 @@ function Notice() {
       const res = await indexNotice(pagination, 10, "created_at", "desc");
       const { data, meta } = res.data;
 
-      return { data, meta } as { data: NoticeItemAttribute[], meta: PaginationFilterInterface };
+      return { data, meta } as {
+        data: NoticeItemAttribute[];
+        meta: PaginationFilterInterface;
+      };
     },
     {
       staleTime: 5_000,
@@ -129,8 +136,8 @@ function Notice() {
         >
           {(data?.data?.length ?? 0) > 0
             ? data?.data
-              .slice(0, showPagination ? 10 : 5)
-              .map((d) => <NoticeItem key={d.id} {...d} />)
+                .slice(0, showPagination ? 10 : 5)
+                .map((d) => <NoticeItem key={d.id} {...d} />)
             : "No notices"}
           {showPagination && (
             <Pagination

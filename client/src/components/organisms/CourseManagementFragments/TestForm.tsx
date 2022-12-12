@@ -214,7 +214,13 @@ function TestForm({
             >
               キャンセル
             </Button>
-            <Button variant="contained" rounded large type="button" onClick={simulateFn}>
+            <Button
+              variant="contained"
+              rounded
+              large
+              type="button"
+              onClick={simulateFn}
+            >
               プレビュー
             </Button>
             <Button

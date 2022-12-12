@@ -72,7 +72,17 @@ function CourseChapterList({ chapters, screenFn }: CourseChapterListProps) {
             }}
           >
             {chapters?.map(
-              ({ id, item_number, title, latest_score, has_passed, completed_lecture }, index) => (
+              (
+                {
+                  id,
+                  item_number,
+                  title,
+                  latest_score,
+                  has_passed,
+                  completed_lecture,
+                },
+                index
+              ) => (
                 <Chapter
                   key={id}
                   id={screenFn ? index : id!}
