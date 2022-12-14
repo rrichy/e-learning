@@ -38,7 +38,7 @@ function ExplainerVideoForm({
     video: VideoAttributes;
   } | null>(null);
   const {
-    formState: { isValid, isDirty },
+    formState: { isDirty },
     getValues,
   } = useFormContext<{ videos: VideoAttributes[] }>();
 

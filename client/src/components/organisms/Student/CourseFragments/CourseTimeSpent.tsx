@@ -10,7 +10,7 @@ interface CourseTimeSpentProps {
 const { attending, completed } = AttendingCourseStatus;
 
 function CourseTimeSpent({ attendingCourse }: CourseTimeSpentProps) {
-  const { progress_rate, status, start_date, completion_date } =
+  const { status, start_date, completion_date } =
     attendingCourse || {
       progress_rate: 0,
       status: attending,

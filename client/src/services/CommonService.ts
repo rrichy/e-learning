@@ -23,7 +23,7 @@ export const getOptions = (
   return get(url);
 };
 
-export const getCacheableOptions = (...options: string[]) => {
+export const useCacheableOptions = (...options: string[]) => {
   const { data, isFetching } = useQuery(
     options.map((o) => o + "-options"),
     async () => {

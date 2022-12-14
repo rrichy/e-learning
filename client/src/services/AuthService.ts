@@ -156,9 +156,12 @@ export const uploadVideo = async (
           parts: collection,
           contentType: file.type,
         });
-        const completeRes = await axios.post(completeUrl.data, parts, {
+        await axios.post(completeUrl.data, parts, {
           headers: { "Content-Type": file.type },
         });
+        // const completeRes = await axios.post(completeUrl.data, parts, {
+        //   headers: { "Content-Type": file.type },
+        // });
         console.log("upload complete");
         resolve(multipartUrl.data.url.split("?")[0] as string);
       }

@@ -13,7 +13,7 @@ import { PageDialogProps, TableStateProps } from "@/interfaces/CommonInterface";
 import { OrganizeMailFormAttributeWithId } from "@/validations/OrganizeMailFormValidation";
 import { get } from "@/services/ApiService";
 import MyTable from "@/components/atoms/MyTable";
-import { getCacheableOptions } from "@/services/CommonService";
+import { useCacheableOptions } from "@/services/CommonService";
 import {
   destroyOrganizeMail,
   massUpdateOrganizeMailPriority,
@@ -38,7 +38,7 @@ function OrganizeMail() {
   const [dialog, setDialog] =
     useState<PageDialogProps<OrganizeMailFormAttributeWithId>>(null);
 
-  const { options, fetchingOptions } = getCacheableOptions("signatures");
+  const { options, fetchingOptions } = useCacheableOptions("signatures");
   const lookup = useMemo(() => {
     if (!fetchingOptions && options.signatures) {
       return generateLookup(options.signatures);

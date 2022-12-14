@@ -85,7 +85,7 @@ function Notice() {
         setNotices((s) => ({ ...s, loading: false }));
       }
     },
-    []
+    [errorSnackbar]
   );
 
   const handleTogglePagination = () => {

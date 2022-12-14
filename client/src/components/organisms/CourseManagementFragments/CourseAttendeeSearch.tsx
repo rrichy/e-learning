@@ -10,7 +10,7 @@ import {
 } from "@/components/molecules/LabeledHookForms";
 import { OptionAttribute } from "@/interfaces/CommonInterface";
 import { FormContainer, useForm } from "react-hook-form-mui";
-import { getCacheableOptions } from "@/services/CommonService";
+import { useCacheableOptions } from "@/services/CommonService";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
   CourseAttendeeSearchAttributes,
@@ -24,7 +24,7 @@ function CourseAttendeeSearch({
   onSubmit: (r: CourseAttendeeSearchAttributes) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const { options, fetchingOptions } = getCacheableOptions("affiliations");
+  const { options, fetchingOptions } = useCacheableOptions("affiliations");
 
   const affiliations = useMemo(() => {
     if (fetchingOptions || !options?.affiliations)
@@ -33,7 +33,7 @@ function CourseAttendeeSearch({
       { id: 0, name: "未選択" },
       ...options.affiliations,
     ] as OptionAttribute[];
-  }, [options?.affilations, fetchingOptions]);
+  }, [fetchingOptions, options.affiliations]);
 
   const form = useForm({
     mode: "onChange",

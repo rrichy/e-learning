@@ -16,7 +16,7 @@ import {
   initAccountManagementDefault,
 } from "@/validations/SearchFormValidation";
 import { FormContainer, useForm } from "react-hook-form-mui";
-import { getCacheableOptions } from "@/services/CommonService";
+import { useCacheableOptions } from "@/services/CommonService";
 import { OptionAttribute } from "@/interfaces/CommonInterface";
 import { MembershipType, MembershipTypeJp } from "@/enums/membershipTypes";
 import {
@@ -32,7 +32,7 @@ function AccountManagementSearchAccordion({
   onSubmit: (r: AccountManagementSearchAttributes) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const { options, fetchingOptions } = getCacheableOptions(
+  const { options, fetchingOptions } = useCacheableOptions(
     "affiliations",
     "departments",
     "child_departments"
@@ -72,7 +72,7 @@ function AccountManagementSearchAccordion({
       { id: 0, name: "未選択" },
       ...options.affiliations,
     ] as OptionAttribute[];
-  }, [options?.affilations, fetchingOptions, membership_type_id]);
+  }, [fetchingOptions, options.affiliations, membership_type_id]);
 
   const departments = useMemo(() => {
     const depts: DepartmentOptionsType = [];

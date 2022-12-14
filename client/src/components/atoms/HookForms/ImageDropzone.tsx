@@ -71,7 +71,7 @@ function ImageDropzone({
         reader.readAsDataURL(file);
       });
     },
-    [disabled]
+    [onChange]
   );
 
   const { getRootProps, getInputProps, isDragAccept, isDragReject } =

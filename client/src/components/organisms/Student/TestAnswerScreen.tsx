@@ -23,11 +23,6 @@ import { useParams } from "react-router-dom";
 
 const alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-type TestDetails = {
-  questions: QuestionAttributes[];
-  mappedQuestions: Map<number, QuestionAttributes>;
-};
-
 // ENSURE NO DATA FETCHING IN THIS COMPONENT
 
 function TestAnswerScreen({
@@ -54,7 +49,7 @@ function TestAnswerScreen({
         if (chapter?.fetchQuestions) chapter.fetchQuestions(+itemNumber!);
       }
     }
-  }, [chapter, errorSnackbar, initialized]);
+  }, [chapter, errorSnackbar, initialized, itemNumber]);
 
   const currentItem = chapter.itemNumber!;
   const currentQuestion = mappedQuestions.get(currentItem);

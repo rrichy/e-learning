@@ -5,7 +5,7 @@ import { useFormContext } from "react-hook-form";
 import { SelectElementProps } from "react-hook-form-mui";
 import Labeler, { LabelerSupplementaryProps } from "../Labeler";
 
-interface RangeSelection {
+interface RangeSelectionProps {
   label: string;
   minProps: SelectElementProps<any>;
   maxProps: SelectElementProps<any>;
@@ -17,7 +17,7 @@ function RangeSelection({
   minProps,
   maxProps,
   labelProps,
-}: RangeSelection) {
+}: RangeSelectionProps) {
   const { watch, setError, clearErrors } = useFormContext();
   const [minValue, maxValue] = watch([minProps.name, maxProps.name]);
   const [localError, setLocalError] = useState("");
@@ -30,7 +30,7 @@ function RangeSelection({
       clearErrors(label);
       setLocalError("");
     }
-  }, [minValue, maxValue, setError, clearErrors]);
+  }, [minValue, maxValue, setError, clearErrors, label]);
 
   return (
     <Labeler label={label} {...labelProps}>

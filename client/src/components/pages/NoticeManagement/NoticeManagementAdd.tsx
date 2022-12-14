@@ -20,14 +20,14 @@ import { useNavigate } from "react-router-dom";
 import useAlerter from "@/hooks/useAlerter";
 import useConfirm from "@/hooks/useConfirm";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { getCacheableOptions } from "@/services/CommonService";
+import { useCacheableOptions } from "@/services/CommonService";
 
 function NoticeManagementAdd() {
   const navigate = useNavigate();
   const { isConfirmed } = useConfirm();
   const { successSnackbar, handleError } = useAlerter();
 
-  const { options, fetchingOptions } = getCacheableOptions("signatures");
+  const { options, fetchingOptions } = useCacheableOptions("signatures");
 
   const form = useForm<NoticeFormAttribute>({
     mode: "onChange",

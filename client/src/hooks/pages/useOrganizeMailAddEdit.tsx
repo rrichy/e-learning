@@ -85,7 +85,7 @@ function useOrganizeMailAddEdit({
     return () => {
       mounted.current = false;
     };
-  }, [state]);
+  }, [state, formContext]);
 
   return { formContext, handleSubmit, handleClose };
 }

@@ -3,7 +3,7 @@ import useAlerter from "@/hooks/useAlerter";
 import { useNavigate, useParams } from "react-router-dom";
 import { showCourse, updateCourse } from "@/services/CourseService";
 import { CourseFormAttribute } from "@/validations/CourseFormValidation";
-import { getCacheableOptions } from "@/services/CommonService";
+import { useCacheableOptions } from "@/services/CommonService";
 import CourseManagementForm from "@/components/organisms/CourseManagementFragments/CourseManagementForm";
 import DisabledComponentContextProvider from "@/providers/DisabledComponentContextProvider";
 import TestForm from "@/components/organisms/CourseManagementFragments/TestForm";
@@ -20,7 +20,7 @@ function CourseManagementEdit() {
   const navigate = useNavigate();
   const { successSnackbar, errorSnackbar, handleError } = useAlerter();
   const { isConfirmed } = useConfirm();
-  const { options } = getCacheableOptions("categories");
+  const { options } = useCacheableOptions("categories");
   const { courseId: id } = useParams();
   const courseId = +id!;
 

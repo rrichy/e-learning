@@ -1,16 +1,8 @@
 import useAuth from "@/hooks/useAuth";
 import React, { useMemo } from "react";
-import {
-  Navigate,
-  Outlet,
-  Route,
-  Routes,
-  To,
-  useRoutes,
-} from "react-router-dom";
+import { Navigate, Outlet, To, useRoutes } from "react-router-dom";
 import Home from "./Home";
 import Login from "./Login";
-import Public from "./Public";
 import { MembershipType } from "@/enums/membershipTypes";
 import Register from "./Register";
 import MyPage from "./MyPage";

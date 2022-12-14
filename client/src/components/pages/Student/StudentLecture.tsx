@@ -24,9 +24,7 @@ import { useRef, useState } from "react";
 import ReactPlayer from "react-player";
 import { OnProgressProps } from "react-player/base";
 
-interface StudentLectureProps {}
-
-function StudentLecture({}: StudentLectureProps) {
+function StudentLecture() {
   const playerRef = useRef<any>(null);
   const { errorSnackbar } = useAlerter();
   const [initializedPlayer, setInitializedPlayer] = useState(false);

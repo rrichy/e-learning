@@ -15,7 +15,7 @@ import Button from "@/components/atoms/Button";
 import MyTable from "@/components/atoms/MyTable";
 import { DepartmentFormAttributeWithId } from "@/validations/DepartmentFormValidation";
 import { destroyDepartment } from "@/services/DepartmentService";
-import { getCacheableOptions } from "@/services/CommonService";
+import { useCacheableOptions } from "@/services/CommonService";
 import OptionsContextProvider from "@/providers/OptionsContextProvider";
 import DepartmentAddEdit from "./DepartmentAddEdit";
 import { useMyTable } from "@/hooks/useMyTable";
@@ -31,7 +31,7 @@ function DepartmentTable({
   const queryClient = useQueryClient();
   const { isConfirmed } = useConfirm();
   const { successSnackbar, errorSnackbar } = useAlerter();
-  const { options, fetchingOptions } = getCacheableOptions("affiliations");
+  const { options, fetchingOptions } = useCacheableOptions("affiliations");
   const [dialog, setDialog] =
     useState<PageDialogProps<DepartmentFormAttributeWithId>>(null);
   const [expanded, setExpanded] = useState<ExpandedState>({});
@@ -107,7 +107,7 @@ function DepartmentTable({
       ]);
       setRequestInvalidate();
     }
-  }, [requestInvalidate, pagination, sorter.sort, setRequestInvalidate]);
+  }, [requestInvalidate, pagination, sorter.sort, setRequestInvalidate, queryClient]);
 
   return (
     <>
