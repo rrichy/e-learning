@@ -17,7 +17,7 @@ class SignatureService
         $sort = $pagination['sort'] ?? 'id';
         $order = $pagination['order'] ?? 'desc';
         $per_page = $pagination['per_page'] ?? 10;
-        
+
         return SignatureIndexResource::collection(
             Signature::orderBy($sort, $order)
                 ->paginate($per_page)
@@ -30,7 +30,12 @@ class SignatureService
 
     public function store(array $valid)
     {
-        return Signature::create($valid);
+        $count = Signature::get()->count();
+        $parsed = array_merge($valid, [
+            'priority' => $count + 1,
+        ]);
+
+        return Signature::create($parsed);
     }
 
 
@@ -38,10 +43,17 @@ class SignatureService
     {
         return $signature->update($valid);
     }
-    
+
 
     public function deleteIds(Collection $ids)
     {
-        return Signature::destroy($ids);
+        $delete = Signature::destroy($ids);
+        $signature = Signature::get();
+        $i = 1;
+        foreach($signature as $s) {
+            Signature::where('id', $s['id'])->update(['priority' => $i++]);
+        }
+
+        return $delete;
     }
 }

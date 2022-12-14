@@ -219,13 +219,13 @@ export function signatureColumns(
       ),
     }),
     signatureHelper.accessor("from_name", {
-      header: () => "from_name",
+      header: () => "from名前",
       cell: ({ getValue }) => (
         <div style={{ textAlign: "center" }}>{getValue()}</div>
       ),
     }),
     signatureHelper.accessor("from_email", {
-      header: () => "from_email",
+      header: () => "fromアドレス",
     }),
     signatureHelper.accessor("content", {
       header: () => "署名",
