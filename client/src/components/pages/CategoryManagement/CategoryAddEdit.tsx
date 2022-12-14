@@ -130,7 +130,7 @@ function CategoryAddEdit({
     return () => {
       mounted.current = false;
     };
-  }, [state]);
+  }, [formContext, state]);
 
   return (
     <Dialog

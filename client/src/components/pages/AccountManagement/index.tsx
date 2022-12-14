@@ -47,7 +47,7 @@ function AccountManagement() {
   const [filters, setFilters] = useState<{ [k: string]: any }>({});
   const { selector, sorter, pagination, setPagination, resetTable } =
     useMyTable();
-  const { tableData, fetchingData } = getData({
+  const { tableData, fetchingData } = useGetData({
     sort: sorter.sort,
     setSort: sorter.setSort,
     pagination,
@@ -171,7 +171,7 @@ function AccountManagement() {
 
 export default AccountManagement;
 
-const getData = ({
+const useGetData = ({
   sort,
   setSort,
   pagination,

@@ -36,8 +36,8 @@ function CourseDetail() {
   const { courseId } = useParams<{ courseId: string }>();
   const [filters, setFilters] = useState<{ [k: string]: any }>({});
   const { sorter, pagination, setPagination, resetTable } = useMyTable();
-  const { fetchingCourseDetails, courseDetails } = courseResult(+courseId!);
-  const { tableData, fetchingData } = getData({
+  const { fetchingCourseDetails, courseDetails } = useCourseResult(+courseId!);
+  const { tableData, fetchingData } = useGetData({
     sort: sorter.sort,
     setSort: sorter.setSort,
     pagination,
@@ -205,7 +205,7 @@ const Detailer = ({
   </>
 );
 
-const getData = ({
+const useGetData = ({
   sort,
   setSort,
   pagination,
@@ -259,7 +259,7 @@ const getData = ({
   return { tableData: data, fetchingData: isFetching };
 };
 
-const courseResult = (courseId: number) => {
+const useCourseResult = (courseId: number) => {
   const { data, isFetching } = useQuery(
     ["course-details-view", courseId],
     async () => {

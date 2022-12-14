@@ -41,7 +41,7 @@ interface PreviewProps {
 const lectureRegex = /^chapter\/\d+\/lecture$/;
 const chapterTestRegex = /^chapter\/\d+\/chapter-test$/;
 const answerScreenRegex = /^chapter\/\d+\/chapter-test\/\d+$/;
-const resultRegex = /^chapter\/\d+\/chapter-test\/result$/;
+// const resultRegex = /^chapter\/\d+\/chapter-test\/result$/;
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -190,7 +190,7 @@ function Preview({
           }))
       ),
     });
-  }, [questions]);
+  }, [form, questions]);
 
   const headerTitle = `${chapterIndex! + 1}章 ${
     screen === "lecture"

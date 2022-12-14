@@ -46,7 +46,7 @@ function OrganizeMail() {
     return {} as { [k: number]: string };
   }, [fetchingOptions, options]);
 
-  const { tableData, fetchingData } = getTableData({
+  const { tableData, fetchingData } = useGetTableData({
     sort: sorter.sort,
     setSort: sorter.setSort,
     pagination,
@@ -143,7 +143,9 @@ function OrganizeMail() {
     setDragData([]);
     setHasReordered(false);
   }, [
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     sorter.sort[0]?.id,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     sorter.sort[0]?.desc,
     pagination.pageIndex,
     pagination.pageSize,
@@ -230,7 +232,7 @@ function OrganizeMail() {
 export default OrganizeMail;
 
 // included sort for future updates
-const getTableData = ({
+const useGetTableData = ({
   sort,
   setSort,
   pagination,

@@ -27,7 +27,7 @@ function Signature() {
   const [dialog, setDialog] =
     useState<PageDialogProps<SignatureFormAttributeWithId>>(null);
   const { sorter, selector, pagination, setPagination } = useMyTable();
-  const { tableData, fetchingData } = getTableData({
+  const { tableData, fetchingData } = useGetTableData({
     sort: sorter.sort,
     setSort: sorter.setSort,
     pagination,
@@ -115,7 +115,7 @@ function Signature() {
 
 export default Signature;
 
-const getTableData = ({
+const useGetTableData = ({
   sort,
   setSort,
   pagination,

@@ -37,7 +37,7 @@ function DepartmentTable({
   const [expanded, setExpanded] = useState<ExpandedState>({});
   const { sorter, selector, pagination, setPagination, resetTable } =
     useMyTable();
-  const { tableData, fetchingData } = getData({
+  const { tableData, fetchingData } = useGetData({
     sort: sorter.sort,
     setSort: sorter.setSort,
     pagination,
@@ -169,7 +169,7 @@ function DepartmentTable({
 
 export default DepartmentTable;
 
-const getData = ({
+const useGetData = ({
   sort,
   setSort,
   pagination,
