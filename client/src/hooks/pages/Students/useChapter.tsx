@@ -53,9 +53,11 @@ export type ChapterContextAttribute = {
 function useChapter(
   preview = false
 ): ChapterContextAttribute | Partial<ChapterContextAttribute> {
-  if (preview) return useContext(ChapterPreviewContext);
+  const context = useContext(ChapterPreviewContext);
+  const outletContext = useOutletContext<ChapterContextAttribute>();
 
-  return useOutletContext<ChapterContextAttribute>();
+  if (preview) return context;
+  return outletContext;
 }
 
 export default useChapter;
