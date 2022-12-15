@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Http\Resources\SignatureIndexResource;
 use App\Models\Signature;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class SignatureService
@@ -21,7 +22,7 @@ class SignatureService
         return SignatureIndexResource::collection(
             Signature::orderBy($sort, $order)
                 ->paginate($per_page)
-            )->additional([
+        )->additional([
             'message' => 'Signatures successfully fetched!',
             'meta' => compact('sort', 'order'),
         ]);
@@ -30,12 +31,11 @@ class SignatureService
 
     public function store(array $valid)
     {
-        $count = Signature::get()->count();
-        $parsed = array_merge($valid, [
-            'priority' => $count + 1,
-        ]);
+        $max = Signature::max('priority');
 
-        return Signature::create($parsed);
+        return Signature::create($valid + [
+            'priority' => $max + 1
+        ]);
     }
 
 
@@ -47,13 +47,18 @@ class SignatureService
 
     public function deleteIds(Collection $ids)
     {
-        $delete = Signature::destroy($ids);
-        $signature = Signature::get();
-        $i = 1;
-        foreach($signature as $s) {
-            Signature::where('id', $s['id'])->update(['priority' => $i++]);
-        }
+        $count = DB::transaction(function () use ($ids) {
+            $delete = Signature::destroy($ids);
+            $signatures = Signature::orderBy('priority', 'asc')->get();
 
-        return $delete;
+            $signatures->each(function ($signature, $index) {
+                $signature->priority = $index + 1;
+                $signature->save();
+            });
+
+            return $delete;
+        });
+
+        return $count;
     }
 }
