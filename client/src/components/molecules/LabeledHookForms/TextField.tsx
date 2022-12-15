@@ -13,7 +13,11 @@ function TextField({
   return (
     <Labeler label={label} {...labelProps}>
       <AtomTextField
-        placeholder={placeholder !== "not_applicable" ? placeholder || label + "を入力してください" : "N/A"}
+        placeholder={
+          placeholder !== "not_applicable"
+            ? placeholder || label + "を入力してください"
+            : "N/A"
+        }
         fullWidth
         size="small"
         {...rest}

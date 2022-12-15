@@ -19,11 +19,13 @@ function Selection({
   control,
   optionName,
   ...rest
-}: SelectElementProps<any> & {optionName?: string}) {
+}: SelectElementProps<any> & { optionName?: string }) {
   const disabledChild = useDisabledComponent();
   const optionsChild = useOptions();
   const disabled = disabledProp || disabledChild;
-  const options = [...(optionsProp || optionsChild?.[optionName || name] || [])];
+  const options = [
+    ...(optionsProp || optionsChild?.[optionName || name] || []),
+  ];
 
   const isNativeSelect = !!rest.SelectProps?.native;
   const ChildComponent = isNativeSelect ? "option" : MenuItem;

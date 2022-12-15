@@ -13,7 +13,7 @@ import { PageDialogProps, TableStateProps } from "@/interfaces/CommonInterface";
 import { OrganizeMailFormAttributeWithId } from "@/validations/OrganizeMailFormValidation";
 import { get } from "@/services/ApiService";
 import MyTable from "@/components/atoms/MyTable";
-import { getCacheableOptions } from "@/services/CommonService";
+import { useCacheableOptions } from "@/services/CommonService";
 import {
   destroyOrganizeMail,
   massUpdateOrganizeMailPriority,
@@ -38,7 +38,7 @@ function OrganizeMail() {
   const [dialog, setDialog] =
     useState<PageDialogProps<OrganizeMailFormAttributeWithId>>(null);
 
-  const { options, fetchingOptions } = getCacheableOptions("signatures");
+  const { options, fetchingOptions } = useCacheableOptions("signatures");
   const lookup = useMemo(() => {
     if (!fetchingOptions && options.signatures) {
       return generateLookup(options.signatures);
@@ -46,7 +46,7 @@ function OrganizeMail() {
     return {} as { [k: number]: string };
   }, [fetchingOptions, options]);
 
-  const { tableData, fetchingData } = getTableData({
+  const { tableData, fetchingData } = useGetTableData({
     sort: sorter.sort,
     setSort: sorter.setSort,
     pagination,
@@ -143,7 +143,9 @@ function OrganizeMail() {
     setDragData([]);
     setHasReordered(false);
   }, [
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     sorter.sort[0]?.id,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     sorter.sort[0]?.desc,
     pagination.pageIndex,
     pagination.pageSize,
@@ -230,7 +232,7 @@ function OrganizeMail() {
 export default OrganizeMail;
 
 // included sort for future updates
-const getTableData = ({
+const useGetTableData = ({
   sort,
   setSort,
   pagination,

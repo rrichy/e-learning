@@ -41,7 +41,7 @@ interface PreviewProps {
 const lectureRegex = /^chapter\/\d+\/lecture$/;
 const chapterTestRegex = /^chapter\/\d+\/chapter-test$/;
 const answerScreenRegex = /^chapter\/\d+\/chapter-test\/\d+$/;
-const resultRegex = /^chapter\/\d+\/chapter-test\/result$/;
+// const resultRegex = /^chapter\/\d+\/chapter-test\/result$/;
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -190,10 +190,15 @@ function Preview({
           }))
       ),
     });
-  }, [questions]);
+  }, [form, questions]);
 
-  
-  const headerTitle = `${chapterIndex! + 1}章 ${screen === "lecture" ? "理解度テスト" : screen === "chapter-test" ? "章末テスト" : "章末テスト結果"}`;
+  const headerTitle = `${chapterIndex! + 1}章 ${
+    screen === "lecture"
+      ? "理解度テスト"
+      : screen === "chapter-test"
+      ? "章末テスト"
+      : "章末テスト結果"
+  }`;
 
   return (
     <Dialog
@@ -235,10 +240,7 @@ function Preview({
           )}
           {context && (
             <ChapterPreviewProvider context={context}>
-              <CommonHeader
-                image={course.image || null}
-                title={headerTitle}
-              />
+              <CommonHeader image={course.image || null} title={headerTitle} />
               {screen === "chapter-test" && (
                 <TestDetailsDisplay screenFn={setTemplateScreen} />
               )}

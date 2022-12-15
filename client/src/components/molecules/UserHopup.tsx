@@ -15,12 +15,7 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import {
-  UserIcon,
-  LogoutIcon,
-  ChangePlanIcon,
-  InquiryIcon,
-} from "../atoms/Icons";
+import { UserIcon, LogoutIcon, InquiryIcon } from "../atoms/Icons";
 
 function UserHopup() {
   const queryClient = useQueryClient();
@@ -35,8 +30,8 @@ function UserHopup() {
       setUnauthorized();
       navigate("/login");
       queryClient.clear();
-    }
-  })
+    },
+  });
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 

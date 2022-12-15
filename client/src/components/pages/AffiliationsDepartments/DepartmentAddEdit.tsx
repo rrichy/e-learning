@@ -1,7 +1,7 @@
 import Button from "@/components/atoms/Button";
 import { Selection, TextField } from "@/components/molecules/LabeledHookForms";
 import useAlerter from "@/hooks/useAlerter";
-import useConfirm from "@/hooks/useConfirm";
+// import useConfirm from "@/hooks/useConfirm";
 import {
   storeDepartment,
   updateDepartment,
@@ -20,7 +20,6 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
-  Divider,
   FormControlLabel,
   Paper,
   Stack,
@@ -40,7 +39,7 @@ function DepartmentAddEdit({
   resolverFn: () => void;
 }) {
   const mounted = useRef(true);
-  const { isConfirmed } = useConfirm();
+  // const { isConfirmed } = useConfirm();
   const { successSnackbar, handleError } = useAlerter();
   const [hasChildren, setHasChildren] = useState(false);
   const [tempChildren, setTempChildren] = useState<
@@ -121,7 +120,7 @@ function DepartmentAddEdit({
     return () => {
       mounted.current = false;
     };
-  }, [state]);
+  }, [formContext, state]);
 
   return (
     <Dialog

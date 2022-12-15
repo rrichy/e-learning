@@ -1,13 +1,13 @@
 import CommonHeader from "@/components/organisms/Student/CommonHeader";
-import { ChapterContextAttribute, QuestionAttributes } from "@/hooks/pages/Students/useChapter";
+import {
+  ChapterContextAttribute,
+  QuestionAttributes,
+} from "@/hooks/pages/Students/useChapter";
 import useAlerter from "@/hooks/useAlerter";
 import useConfirm from "@/hooks/useConfirm";
 import { proceedTest, showTest, submitAnswers } from "@/services/TestService";
 import createMap from "@/utils/createMap";
-import {
-  TestAttributes,
-  testInit,
-} from "@/validations/CourseFormValidation";
+import { TestAttributes, testInit } from "@/validations/CourseFormValidation";
 import { Grid } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
@@ -19,9 +19,8 @@ import { Outlet, useNavigate, useParams } from "react-router-dom";
 // states(test, videos, questions) will be shared among its subcomponents
 // if available. Test state will always be available, while videos and
 // questions will only be fetched when the subcomponents are loaded.
-interface StudentChapterDisplayProps {}
 
-function StudentChapterDisplay({}: StudentChapterDisplayProps) {
+function StudentChapterDisplay() {
   const mounted = useRef(true);
   const navigate = useNavigate();
   const { isConfirmed } = useConfirm();
@@ -126,14 +125,11 @@ function StudentChapterDisplay({}: StudentChapterDisplayProps) {
 
   useQuery(
     ["student-chapter-display", +chapterId!],
-    () => showTest(
-        +chapterId!,
-        testType === "chapter-test" ? 1 : 2
-      ),
+    () => showTest(+chapterId!, testType === "chapter-test" ? 1 : 2),
     {
       refetchOnWindowFocus: false,
       enabled: !!chapterId,
-      onSuccess: (res) => setTest(res.data.data)
+      onSuccess: (res) => setTest(res.data.data),
     }
   );
 

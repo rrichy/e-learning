@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Container,
   Dialog,
-  DialogContent, 
+  DialogContent,
   DialogTitle,
   DialogActions,
   Paper,
@@ -13,12 +14,9 @@ import { Stack } from "@mui/system";
 import { useState } from "react";
 import Button from "@/components/atoms/Button";
 import { FormContainer } from "react-hook-form-mui";
-import {
-  Selection,
-  TextField,
-} from "../../molecules/LabeledHookForms";
+import { Selection, TextField } from "../../molecules/LabeledHookForms";
 import MaterialTable from "material-table";
-import InputOutlinedIcon from '@mui/icons-material/InputOutlined';
+import InputOutlinedIcon from "@mui/icons-material/InputOutlined";
 
 function ConditionalMail() {
   const [open, setOpen] = useState(false);
@@ -54,7 +52,7 @@ function ConditionalMail() {
   const handleCloseReplacement = () => {
     setOpenReplacement(false);
   };
-  
+
   return (
     <Stack justifyContent="space-between">
       <Container>
@@ -70,25 +68,26 @@ function ConditionalMail() {
             </Typography>
             <Paper variant="outlined" sx={{ p: 6 }}>
               <Stack spacing={3}>
-                <Stack spacing={2} direction="row" justifyContent="space-between">
+                <Stack
+                  spacing={2}
+                  direction="row"
+                  justifyContent="space-between"
+                >
                   <Stack spacing={1} direction="row" alignItems="center">
                     <Typography>全員送信</Typography>
                   </Stack>
                   <Stack spacing={1} direction="row">
-                    <Button
-                      variant="contained"
-                      sx={{ width: "fit-content" }}
-                    >
+                    <Button variant="contained" sx={{ width: "fit-content" }}>
                       削除
                     </Button>
                   </Stack>
                 </Stack>
-                <MaterialTable 
+                <MaterialTable
                   columns={[
                     { field: "send_state", title: "送信状態" },
-                    { 
-                      field: "content", 
-                      title: "内容", 
+                    {
+                      field: "content",
+                      title: "内容",
                       render: () => (
                         <Button
                           variant="contained"
@@ -112,7 +111,12 @@ function ConditionalMail() {
                   }}
                   data={dataAll}
                 />
-                <Grid container spacing={3} justifyContent="space-between" alignItems="flex-end">
+                <Grid
+                  container
+                  spacing={3}
+                  justifyContent="space-between"
+                  alignItems="flex-end"
+                >
                   <Grid xs={12} sm={4} pr={1}>
                     <Selection
                       name="sex"
@@ -140,37 +144,35 @@ function ConditionalMail() {
                     </Button>
                   </Grid>
                 </Grid>
-                <Button
-                  type="button"
-                  variant="contained"
-                  color="secondary"
-                >
+                <Button type="button" variant="contained" color="secondary">
                   日程追加✙
                 </Button>
               </Stack>
-
             </Paper>
 
             <Paper variant="outlined" sx={{ p: 6 }}>
               <Stack spacing={3}>
-                <Stack spacing={2} direction="row" justifyContent="space-between">
+                <Stack
+                  spacing={2}
+                  direction="row"
+                  justifyContent="space-between"
+                >
                   <Stack spacing={1} direction="row" alignItems="center">
-                    <Typography>締め切り督促メール（受講完了・合格以外へ送信）</Typography>
+                    <Typography>
+                      締め切り督促メール（受講完了・合格以外へ送信）
+                    </Typography>
                   </Stack>
                   <Stack spacing={1} direction="row">
-                    <Button
-                      variant="contained"
-                      sx={{ width: "fit-content" }}
-                    >
+                    <Button variant="contained" sx={{ width: "fit-content" }}>
                       削除
                     </Button>
                   </Stack>
                 </Stack>
-                <MaterialTable 
+                <MaterialTable
                   columns={[
                     { field: "send_state", title: "送信状態" },
-                    { 
-                      field: "content", 
+                    {
+                      field: "content",
                       title: "内容",
                       render: () => (
                         <Button
@@ -180,7 +182,7 @@ function ConditionalMail() {
                         >
                           内容
                         </Button>
-                      ), 
+                      ),
                     },
                   ]}
                   options={{
@@ -195,7 +197,12 @@ function ConditionalMail() {
                   }}
                   data={dataReminder}
                 />
-                <Grid container spacing={3} justifyContent="space-between" alignItems="flex-end">
+                <Grid
+                  container
+                  spacing={3}
+                  justifyContent="space-between"
+                  alignItems="flex-end"
+                >
                   <Grid xs={12} sm={4} pr={1}>
                     <Stack direction="row" spacing={1}>
                       <Selection
@@ -230,40 +237,36 @@ function ConditionalMail() {
                     </Button>
                   </Grid>
                 </Grid>
-                <Button
-                  type="button"
-                  variant="contained"
-                  color="secondary"
-                >
+                <Button type="button" variant="contained" color="secondary">
                   日程追加✙
                 </Button>
               </Stack>
             </Paper>
 
             <Stack direction="row" spacing={1} justifyContent="flex-end" pt={2}>
-              <Button 
-                large 
-                startIcon={<InputOutlinedIcon />} 
-                color="inherit" 
-                variant="outlined" 
+              <Button
+                large
+                startIcon={<InputOutlinedIcon />}
+                color="inherit"
+                variant="outlined"
                 sx={{ borderRadius: 7 }}
               >
                 設定
               </Button>
-              <Button 
-                large 
-                startIcon={<InputOutlinedIcon />} 
-                color="secondary" 
-                variant="contained" 
+              <Button
+                large
+                startIcon={<InputOutlinedIcon />}
+                color="secondary"
+                variant="contained"
                 sx={{ borderRadius: 7 }}
               >
                 確認
               </Button>
             </Stack>
           </Stack>
-        
-          <Dialog 
-            open={open} 
+
+          <Dialog
+            open={open}
             maxWidth="sm"
             fullWidth
             PaperProps={{ sx: { bgcolor: "#f7f7f7" } }}
@@ -287,10 +290,10 @@ function ConditionalMail() {
                     multiline
                     rows={3}
                   />
-                  <Button 
-                    color="secondary" 
-                    variant="contained" 
-                    sx={{ width:"fit-content" }}
+                  <Button
+                    color="secondary"
+                    variant="contained"
+                    sx={{ width: "fit-content" }}
                     startIcon={<InputOutlinedIcon />}
                     onClick={handleOpenReplacement}
                   >
@@ -301,10 +304,10 @@ function ConditionalMail() {
 
               <Stack alignItems="center" spacing={2} pt={2}>
                 <Typography>email: admin@gmail.com</Typography>
-                <Button 
-                  color="secondary" 
-                  variant="contained" 
-                  sx={{ width:"fit-content" }}
+                <Button
+                  color="secondary"
+                  variant="contained"
+                  sx={{ width: "fit-content" }}
                   startIcon={<InputOutlinedIcon />}
                 >
                   テスト配信
@@ -312,18 +315,23 @@ function ConditionalMail() {
               </Stack>
             </DialogContent>
             <DialogActions>
-              <Stack direction="row" spacing={1} justifyContent="flex-end" pt={2}>
-                <Button 
-                  color="inherit" 
-                  variant="outlined" 
-                  sx={{ width:"fit-content" }}
+              <Stack
+                direction="row"
+                spacing={1}
+                justifyContent="flex-end"
+                pt={2}
+              >
+                <Button
+                  color="inherit"
+                  variant="outlined"
+                  sx={{ width: "fit-content" }}
                   onClick={handleClose}
                 >
                   戻る
                 </Button>
-                <Button 
-                  color="secondary" 
-                  variant="contained" 
+                <Button
+                  color="secondary"
+                  variant="contained"
                   sx={{ width: 175 }}
                   startIcon={<InputOutlinedIcon />}
                 >
@@ -333,14 +341,16 @@ function ConditionalMail() {
             </DialogActions>
           </Dialog>
 
-          <Dialog 
+          <Dialog
             open={openAddContent}
             maxWidth="sm"
             fullWidth
             PaperProps={{ sx: { bgcolor: "#f7f7f7" } }}
           >
             <DialogTitle sx={{ px: 0, pt: 0 }}>
-              <Typography variant="sectiontitle1">条件付きメール内容</Typography>
+              <Typography variant="sectiontitle1">
+                条件付きメール内容
+              </Typography>
             </DialogTitle>
             <DialogContent>
               <Paper variant="subpaper">
@@ -362,25 +372,30 @@ function ConditionalMail() {
               </Paper>
             </DialogContent>
             <DialogActions>
-              <Stack direction="row" spacing={1} justifyContent="flex-end" pt={2}>
-                <Button 
-                  variant="contained" 
-                  sx={{ width:"fit-content" }}
+              <Stack
+                direction="row"
+                spacing={1}
+                justifyContent="flex-end"
+                pt={2}
+              >
+                <Button
+                  variant="contained"
+                  sx={{ width: "fit-content" }}
                   onClick={handleOpenReplacement}
                 >
                   自動置換はこちら
                 </Button>
-                <Button 
-                  color="inherit" 
-                  variant="outlined" 
-                  sx={{ width:"fit-content" }}
+                <Button
+                  color="inherit"
+                  variant="outlined"
+                  sx={{ width: "fit-content" }}
                   onClick={handleCloseAddContent}
                 >
                   戻る
                 </Button>
-                <Button 
-                  color="secondary" 
-                  variant="contained" 
+                <Button
+                  color="secondary"
+                  variant="contained"
                   sx={{ width: 175 }}
                   startIcon={<InputOutlinedIcon />}
                 >
@@ -390,7 +405,7 @@ function ConditionalMail() {
             </DialogActions>
           </Dialog>
 
-          <Dialog 
+          <Dialog
             open={openReplacement}
             maxWidth="md"
             fullWidth
@@ -408,7 +423,9 @@ function ConditionalMail() {
                   <Grid xs={6}>
                     <Typography>ログインID</Typography>
                   </Grid>
-                  <Grid xs={12} pt={2} pb={2}><Divider /></Grid>
+                  <Grid xs={12} pt={2} pb={2}>
+                    <Divider />
+                  </Grid>
 
                   <Grid xs={6}>
                     <Typography fontWeight={700}>[user.remarks]</Typography>
@@ -416,90 +433,130 @@ function ConditionalMail() {
                   <Grid xs={6}>
                     <Typography>備考</Typography>
                   </Grid>
-                  <Grid xs={12} pt={2} pb={2}><Divider /></Grid>
-                  
+                  <Grid xs={12} pt={2} pb={2}>
+                    <Divider />
+                  </Grid>
+
                   <Grid xs={6}>
-                    <Typography fontWeight={700}>[user.last_login_at]</Typography>
+                    <Typography fontWeight={700}>
+                      [user.last_login_at]
+                    </Typography>
                   </Grid>
                   <Grid xs={6}>
                     <Typography>最後ログイン</Typography>
                   </Grid>
-                  <Grid xs={12} pt={2} pb={2}><Divider /></Grid>
-                  
+                  <Grid xs={12} pt={2} pb={2}>
+                    <Divider />
+                  </Grid>
+
                   <Grid xs={6}>
                     <Typography fontWeight={700}>[dept.name]</Typography>
                   </Grid>
                   <Grid xs={6}>
                     <Typography>部署名</Typography>
                   </Grid>
-                  <Grid xs={12} pt={2} pb={2}><Divider /></Grid>
-                  
+                  <Grid xs={12} pt={2} pb={2}>
+                    <Divider />
+                  </Grid>
+
                   <Grid xs={6}>
-                    <Typography fontWeight={700}>[parent_category.name]</Typography>
+                    <Typography fontWeight={700}>
+                      [parent_category.name]
+                    </Typography>
                   </Grid>
                   <Grid xs={6}>
                     <Typography>親カテゴリ名</Typography>
                   </Grid>
-                  <Grid xs={12} pt={2} pb={2}><Divider /></Grid>
-                  
+                  <Grid xs={12} pt={2} pb={2}>
+                    <Divider />
+                  </Grid>
+
                   <Grid xs={6}>
-                    <Typography fontWeight={700}>[child_category.name]</Typography>
+                    <Typography fontWeight={700}>
+                      [child_category.name]
+                    </Typography>
                   </Grid>
                   <Grid xs={6}>
                     <Typography>子カテゴリ名</Typography>
                   </Grid>
-                  <Grid xs={12} pt={2} pb={2}><Divider /></Grid>
-                  
+                  <Grid xs={12} pt={2} pb={2}>
+                    <Divider />
+                  </Grid>
+
                   <Grid xs={6}>
-                    <Typography fontWeight={700}>[course.start_date]</Typography>
+                    <Typography fontWeight={700}>
+                      [course.start_date]
+                    </Typography>
                   </Grid>
                   <Grid xs={6}>
                     <Typography>コース開始日</Typography>
                   </Grid>
-                  <Grid xs={12} pt={2} pb={2}><Divider /></Grid>
-                  
+                  <Grid xs={12} pt={2} pb={2}>
+                    <Divider />
+                  </Grid>
+
                   <Grid xs={6}>
                     <Typography fontWeight={700}>[course.status]</Typography>
                   </Grid>
                   <Grid xs={6}>
                     <Typography>コースステータス</Typography>
                   </Grid>
-                  <Grid xs={12} pt={2} pb={2}><Divider /></Grid>
-                  
+                  <Grid xs={12} pt={2} pb={2}>
+                    <Divider />
+                  </Grid>
+
                   <Grid xs={6}>
-                    <Typography fontWeight={700}>[course starting_time_period]</Typography>
+                    <Typography fontWeight={700}>
+                      [course starting_time_period]
+                    </Typography>
                   </Grid>
                   <Grid xs={6}>
                     <Typography>開始期間</Typography>
                   </Grid>
-                  <Grid xs={12} pt={2} pb={2}><Divider /></Grid>
-                  
+                  <Grid xs={12} pt={2} pb={2}>
+                    <Divider />
+                  </Grid>
+
                   <Grid xs={6}>
-                    <Typography fontWeight={700}>[course.ending_time_period]</Typography>
+                    <Typography fontWeight={700}>
+                      [course.ending_time_period]
+                    </Typography>
                   </Grid>
                   <Grid xs={6}>
                     <Typography>終了期間</Typography>
                   </Grid>
-                  <Grid xs={12} pt={2} pb={2}><Divider /></Grid>
-                  
+                  <Grid xs={12} pt={2} pb={2}>
+                    <Divider />
+                  </Grid>
+
                   <Grid xs={6}>
-                    <Typography fontWeight={700}>[attending_course.progress_rate]</Typography>
+                    <Typography fontWeight={700}>
+                      [attending_course.progress_rate]
+                    </Typography>
                   </Grid>
                   <Grid xs={6}>
                     <Typography>進捗率</Typography>
                   </Grid>
-                  <Grid xs={12} pt={2} pb={2}><Divider /></Grid>
-                  
+                  <Grid xs={12} pt={2} pb={2}>
+                    <Divider />
+                  </Grid>
+
                   <Grid xs={6}>
-                    <Typography fontWeight={700}>[attending_course.end_date]</Typography>
+                    <Typography fontWeight={700}>
+                      [attending_course.end_date]
+                    </Typography>
                   </Grid>
                   <Grid xs={6}>
                     <Typography>コース受講完了日</Typography>
                   </Grid>
-                  <Grid xs={12} pt={2} pb={2}><Divider /></Grid>
-                  
+                  <Grid xs={12} pt={2} pb={2}>
+                    <Divider />
+                  </Grid>
+
                   <Grid xs={6}>
-                    <Typography fontWeight={700}>[test_answer_result.score]</Typography>
+                    <Typography fontWeight={700}>
+                      [test_answer_result.score]
+                    </Typography>
                   </Grid>
                   <Grid xs={6}>
                     <Typography>テストの結果</Typography>
@@ -508,11 +565,16 @@ function ConditionalMail() {
               </Paper>
             </DialogContent>
             <DialogActions>
-              <Stack direction="row" spacing={1} justifyContent="flex-end" pt={2}>
-                <Button 
-                  color="inherit" 
-                  variant="outlined" 
-                  sx={{ width:"fit-content" }}
+              <Stack
+                direction="row"
+                spacing={1}
+                justifyContent="flex-end"
+                pt={2}
+              >
+                <Button
+                  color="inherit"
+                  variant="outlined"
+                  sx={{ width: "fit-content" }}
                   onClick={handleCloseReplacement}
                 >
                   閉じる
@@ -520,7 +582,6 @@ function ConditionalMail() {
               </Stack>
             </DialogActions>
           </Dialog>
-
         </FormContainer>
       </Container>
     </Stack>

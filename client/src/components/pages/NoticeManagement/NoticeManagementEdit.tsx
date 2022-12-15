@@ -13,7 +13,7 @@ import DisabledComponentContextProvider from "@/providers/DisabledComponentConte
 import { useNavigate, useParams } from "react-router-dom";
 import useConfirm from "@/hooks/useConfirm";
 import useAlerter from "@/hooks/useAlerter";
-import { getCacheableOptions } from "@/services/CommonService";
+import { useCacheableOptions } from "@/services/CommonService";
 import {
   NoticeFormAttribute,
   noticeFormInit,
@@ -35,7 +35,7 @@ function NoticeManagementEdit() {
     resolver: yupResolver(noticeFormSchema),
   });
 
-  const { options, fetchingOptions } = getCacheableOptions("signatures");
+  const { options, fetchingOptions } = useCacheableOptions("signatures");
   const { isLoading, isFetching } = useQuery(
     ["notice-details", +noticeId!],
     () => showNotice(+noticeId!),

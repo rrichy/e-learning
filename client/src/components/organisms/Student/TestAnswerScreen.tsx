@@ -23,11 +23,6 @@ import { useParams } from "react-router-dom";
 
 const alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-type TestDetails = {
-  questions: QuestionAttributes[];
-  mappedQuestions: Map<number, QuestionAttributes>;
-};
-
 // ENSURE NO DATA FETCHING IN THIS COMPONENT
 
 function TestAnswerScreen({
@@ -54,13 +49,13 @@ function TestAnswerScreen({
         if (chapter?.fetchQuestions) chapter.fetchQuestions(+itemNumber!);
       }
     }
-  }, [chapter, errorSnackbar, initialized]);
+  }, [chapter, errorSnackbar, initialized, itemNumber]);
 
   const currentItem = chapter.itemNumber!;
   const currentQuestion = mappedQuestions.get(currentItem);
 
-  const checkboxes = chapter?.form!
-    .watch("answers")
+  const checkboxes = chapter
+    ?.form!.watch("answers")
     .map((a) => a.every((b) => Boolean(b.answer)));
 
   return (
@@ -176,7 +171,11 @@ function TestAnswerScreen({
                 <MUILink
                   key={index}
                   component="button"
-                  onClick={() => screenFn(`${chapter?.prefix!}/${index + 1}` as CourseScreenType)}
+                  onClick={() =>
+                    screenFn(
+                      `${chapter?.prefix!}/${index + 1}` as CourseScreenType
+                    )
+                  }
                   color={index + 1 === currentItem ? "secondary" : "primary"}
                   flex={1}
                   whiteSpace="nowrap"

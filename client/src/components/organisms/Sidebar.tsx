@@ -21,13 +21,12 @@ import {
   CourseManagementIcon,
   DepartmentIcon,
   InquiryIcon,
-  LectureIcon,
   TemplateIcon,
   UserIcon,
 } from "../atoms/Icons";
 import Link from "../atoms/Link";
 
-const { admin, corporate, individual, trial, guest } = MembershipType;
+const { admin, corporate, individual } = MembershipType;
 
 function Sidebar({
   closeFn,

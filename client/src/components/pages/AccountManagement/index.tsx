@@ -19,7 +19,7 @@ import {
 } from "@tanstack/react-table";
 import { useMyTable } from "@/hooks/useMyTable";
 import MyTable from "@/components/atoms/MyTable";
-import { getCacheableOptions } from "@/services/CommonService";
+import { useCacheableOptions } from "@/services/CommonService";
 import generateLookup from "@/utils/generateLookup";
 import AccountMultipleAdd from "./AccountMultipleAdd";
 
@@ -28,7 +28,7 @@ function AccountManagement() {
   const queryClient = useQueryClient();
   const { isConfirmed } = useConfirm();
   const { successSnackbar, errorSnackbar } = useAlerter();
-  const { options, fetchingOptions } = getCacheableOptions(
+  const { options, fetchingOptions } = useCacheableOptions(
     "affiliations",
     "departments",
     "child_departments"
@@ -47,7 +47,7 @@ function AccountManagement() {
   const [filters, setFilters] = useState<{ [k: string]: any }>({});
   const { selector, sorter, pagination, setPagination, resetTable } =
     useMyTable();
-  const { tableData, fetchingData } = getData({
+  const { tableData, fetchingData } = useGetData({
     sort: sorter.sort,
     setSort: sorter.setSort,
     pagination,
@@ -171,7 +171,7 @@ function AccountManagement() {
 
 export default AccountManagement;
 
-const getData = ({
+const useGetData = ({
   sort,
   setSort,
   pagination,

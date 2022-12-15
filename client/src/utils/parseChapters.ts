@@ -1,8 +1,5 @@
 import { uploadVideo } from "@/services/AuthService";
-import {
-  ChapterAttributes,
-  VideoAttributes,
-} from "@/validations/CourseFormValidation";
+import { ChapterAttributes } from "@/validations/CourseFormValidation";
 
 type ProgressManager = React.Dispatch<
   React.SetStateAction<{

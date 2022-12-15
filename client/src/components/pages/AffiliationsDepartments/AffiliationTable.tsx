@@ -31,7 +31,7 @@ function AffiliationTable({
     useState<PageDialogProps<AffiliationFormAttributeWithId>>(null);
   const { selector, sorter, pagination, setPagination, resetTable } =
     useMyTable();
-  const { tableData, fetchingData } = getData({
+  const { tableData, fetchingData } = useGetData({
     sort: sorter.sort,
     setSort: sorter.setSort,
     pagination,
@@ -124,7 +124,7 @@ function AffiliationTable({
 
 export default AffiliationTable;
 
-const getData = ({
+const useGetData = ({
   sort,
   setSort,
   pagination,

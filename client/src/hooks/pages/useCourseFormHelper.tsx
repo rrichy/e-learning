@@ -114,7 +114,7 @@ function useCourseFormHelper() {
         ) || testInit
       );
     }
-  }, [selCh?.screen, selCh?.index]);
+  }, [selCh?.screen, selCh?.index, courseContext, testContext, videoContext]);
 
   return {
     courseContext,

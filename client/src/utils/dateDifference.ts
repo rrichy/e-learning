@@ -8,9 +8,9 @@ export default function dateDifference(
 
   const difference = Math.abs(dateObj2 - dateObj1);
 
-  if(unit === "milliseconds") return difference;
-  else if(unit === "seconds") return difference / 1000;
-  else if(unit === "minutes") return difference / (1000 * 60);
-  else if(unit === "hours") return difference / (1000 * 60 * 60);
+  if (unit === "milliseconds") return difference;
+  else if (unit === "seconds") return difference / 1000;
+  else if (unit === "minutes") return difference / (1000 * 60);
+  else if (unit === "hours") return difference / (1000 * 60 * 60);
   else return difference / (1000 * 60 * 60 * 24);
 }

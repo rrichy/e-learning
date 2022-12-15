@@ -97,7 +97,7 @@ function SignatureAddEdit({
     return () => {
       mounted.current = false;
     };
-  }, [state]);
+  }, [state, formContext]);
 
   return (
     <Dialog

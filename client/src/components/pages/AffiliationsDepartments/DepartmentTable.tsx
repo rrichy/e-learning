@@ -15,7 +15,7 @@ import Button from "@/components/atoms/Button";
 import MyTable from "@/components/atoms/MyTable";
 import { DepartmentFormAttributeWithId } from "@/validations/DepartmentFormValidation";
 import { destroyDepartment } from "@/services/DepartmentService";
-import { getCacheableOptions } from "@/services/CommonService";
+import { useCacheableOptions } from "@/services/CommonService";
 import OptionsContextProvider from "@/providers/OptionsContextProvider";
 import DepartmentAddEdit from "./DepartmentAddEdit";
 import { useMyTable } from "@/hooks/useMyTable";
@@ -31,13 +31,13 @@ function DepartmentTable({
   const queryClient = useQueryClient();
   const { isConfirmed } = useConfirm();
   const { successSnackbar, errorSnackbar } = useAlerter();
-  const { options, fetchingOptions } = getCacheableOptions("affiliations");
+  const { options, fetchingOptions } = useCacheableOptions("affiliations");
   const [dialog, setDialog] =
     useState<PageDialogProps<DepartmentFormAttributeWithId>>(null);
   const [expanded, setExpanded] = useState<ExpandedState>({});
   const { sorter, selector, pagination, setPagination, resetTable } =
     useMyTable();
-  const { tableData, fetchingData } = getData({
+  const { tableData, fetchingData } = useGetData({
     sort: sorter.sort,
     setSort: sorter.setSort,
     pagination,
@@ -107,7 +107,7 @@ function DepartmentTable({
       ]);
       setRequestInvalidate();
     }
-  }, [requestInvalidate, pagination, sorter.sort, setRequestInvalidate]);
+  }, [requestInvalidate, pagination, sorter.sort, setRequestInvalidate, queryClient]);
 
   return (
     <>
@@ -169,7 +169,7 @@ function DepartmentTable({
 
 export default DepartmentTable;
 
-const getData = ({
+const useGetData = ({
   sort,
   setSort,
   pagination,

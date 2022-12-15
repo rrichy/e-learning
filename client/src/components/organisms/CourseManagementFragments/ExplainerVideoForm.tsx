@@ -10,7 +10,7 @@ import { Stack } from "@mui/system";
 import Button from "@/components/atoms/Button";
 import {
   Control,
-  Controller,
+  // Controller,
   useFieldArray,
   useFormContext,
 } from "react-hook-form-mui";
@@ -18,9 +18,9 @@ import { TextField } from "../../molecules/LabeledHookForms";
 import { useEffect, useState } from "react";
 import MUIRichTextEditor from "mui-rte";
 import { VideoAttributes, videoInit } from "@/validations/CourseFormValidation";
-import { Close, Delete, Save } from "@mui/icons-material";
-import { convertToRaw } from "draft-js";
-import { VideoDropzone } from "@/components/atoms/HookForms";
+import { Close, Delete } from "@mui/icons-material";
+// import { convertToRaw } from "draft-js";
+import { RichTextEditor, VideoDropzone } from "@/components/atoms/HookForms";
 import ReactPlayer from "react-player";
 import { getTemporaryVideoUrl } from "@/services/AuthService";
 
@@ -38,7 +38,7 @@ function ExplainerVideoForm({
     video: VideoAttributes;
   } | null>(null);
   const {
-    formState: { isValid, isDirty },
+    formState: { isDirty },
     getValues,
   } = useFormContext<{ videos: VideoAttributes[] }>();
 
@@ -65,7 +65,8 @@ function ExplainerVideoForm({
                   name={`videos.${index}.title`}
                   label="解説動画タイトル"
                 />
-                <Controller
+                <RichTextEditor name={`videos.${index}.content`} />
+                {/* <Controller
                   name={`videos.${index}.content`}
                   render={({ field: { value, onChange } }) => {
                     const [isDirtyRTE, setIsDirtyRTE] = useState(false);
@@ -117,7 +118,7 @@ function ExplainerVideoForm({
                       />
                     );
                   }}
-                />
+                /> */}
                 <VideoDropzone name={`videos.${index}.video_file_path`} />
               </Stack>
             </Paper>

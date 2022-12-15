@@ -96,7 +96,7 @@ export default function DatePickerElement({
                 {...tempParams}
                 inputProps={{
                   ...tempParams["inputProps"],
-                  onChange: undefined
+                  onChange: undefined,
                 }}
                 {...inputProps}
                 required={!!required}

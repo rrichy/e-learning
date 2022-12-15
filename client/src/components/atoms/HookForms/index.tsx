@@ -6,6 +6,7 @@ export { default as ImageDropzone } from "./ImageDropzone";
 export { default as MultiSelection } from "./MultiSelection";
 export { default as NullableTextField } from "./NullableTextField";
 export { default as RadioGroup } from "./RadioGroup";
+export { default as RichTextEditor } from "./RichTextEditor";
 export { default as Selection } from "./Selection";
 export { default as Slider } from "./Slider";
 export { default as TextField } from "./TextField";

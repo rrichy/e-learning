@@ -1,7 +1,7 @@
 import Button from "@/components/atoms/Button";
 import { TextField } from "@/components/molecules/LabeledHookForms";
 import useAlerter from "@/hooks/useAlerter";
-import useConfirm from "@/hooks/useConfirm";
+// import useConfirm from "@/hooks/useConfirm";
 import {
   storeAffiliation,
   updateAffiliation,
@@ -35,7 +35,7 @@ function AffiliationAddEdit({
   resolverFn: () => void;
 }) {
   const mounted = useRef(true);
-  const { isConfirmed } = useConfirm();
+  // const { isConfirmed } = useConfirm();
   const { successSnackbar, handleError } = useAlerter();
   const formContext = useForm<AffiliationFormAttribute>({
     mode: "onChange",
@@ -83,7 +83,7 @@ function AffiliationAddEdit({
     return () => {
       mounted.current = false;
     };
-  }, [state]);
+  }, [formContext, state]);
 
   return (
     <Dialog

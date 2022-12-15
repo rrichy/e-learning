@@ -25,7 +25,7 @@ function PublicCourses() {
   const { successSnackbar, errorSnackbar } = useAlerter();
   const queryClient = useQueryClient();
   const [selected, setSelected] = useState(new Set<number>());
-  const { categories, fetchingData } = getCourses({});
+  const { categories, fetchingData } = useGetCourses({});
 
   const toggleMutation = useMutation(
     (ids: number[]) => toggleCourses("private", ids),
@@ -114,7 +114,7 @@ function PublicCourses() {
 
 export default PublicCourses;
 
-const getCourses = (filters: { [k: string]: any }) => {
+const useGetCourses = (filters: { [k: string]: any }) => {
   const { data, isFetching } = useQuery(
     ["public-courses-table", filters],
     async () => {

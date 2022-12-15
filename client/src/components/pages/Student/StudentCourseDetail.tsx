@@ -2,9 +2,7 @@ import { Grid, Paper, Typography } from "@mui/material";
 import CourseDetail from "@/components/organisms/Student/CourseFragments/CourseDetail";
 import CourseTimeSpent from "@/components/organisms/Student/CourseFragments/CourseTimeSpent";
 import CourseChapterList from "@/components/organisms/Student/CourseFragments/CourseChapterList";
-import {
-  CourseFormAttributeWithId,
-} from "@/validations/CourseFormValidation";
+import { CourseFormAttributeWithId } from "@/validations/CourseFormValidation";
 import { showCourse } from "@/services/CourseService";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -16,8 +14,7 @@ function StudentCourseDetail() {
     ["student-course-detail", +courseId!],
     async () => {
       const res = await showCourse(+courseId!);
-      const { id, study_time, chapters, ...data } =
-        res.data.data;
+      const { id, study_time, chapters, ...data } = res.data.data;
 
       return {
         ...data,

@@ -80,7 +80,7 @@ function Register() {
     return () => {
       mounted.current = false;
     };
-  }, []);
+  }, [errorSnackbar]);
 
   return (
     <Stack minHeight="100vh" justifyContent="space-between">

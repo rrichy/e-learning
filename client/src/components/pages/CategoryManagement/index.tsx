@@ -27,8 +27,9 @@ function CategoryManagement() {
   const [dialog, setDialog] =
     useState<PageDialogProps<CategoryFormAttribute>>(null);
   const [expanded, setExpanded] = useState<ExpandedState>({});
-  const { sorter, selector, pagination, setPagination, resetTable } = useMyTable();
-  const { tableData, fetchingData } = getData({
+  const { sorter, selector, pagination, setPagination, resetTable } =
+    useMyTable();
+  const { tableData, fetchingData } = useGetData({
     sort: sorter.sort,
     setSort: sorter.setSort,
     pagination,
@@ -156,7 +157,7 @@ function CategoryManagement() {
 
 export default CategoryManagement;
 
-const getData = ({
+const useGetData = ({
   sort,
   setSort,
   pagination,

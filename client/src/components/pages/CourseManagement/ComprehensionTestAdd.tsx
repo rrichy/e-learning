@@ -1,26 +1,23 @@
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  Container, 
-  Dialog, 
-  DialogContent, 
-  DialogTitle, 
-  Divider, 
-  IconButton, 
-  Paper, 
-  Typography 
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  Container,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  IconButton,
+  Paper,
+  Typography,
 } from "@mui/material";
 import { Stack } from "@mui/system";
 import Button from "@/components/atoms/Button";
 import { FormContainer } from "react-hook-form-mui";
-import {
-  Selection,
-  TextField,
-} from "../../molecules/LabeledHookForms";
+import { Selection, TextField } from "../../molecules/LabeledHookForms";
 import { RadioGroup } from "@/components/atoms/HookForms";
-import { useState } from 'react';
-import CloseIcon from '@mui/icons-material/Close';
+import { useState } from "react";
+import CloseIcon from "@mui/icons-material/Close";
 
 function ComprehensionTestAdd() {
   const [open, setOpen] = useState(false);
@@ -39,31 +36,28 @@ function ComprehensionTestAdd() {
           <FormContainer>
             <Paper variant="softoutline" sx={{ p: 6 }}>
               <Stack spacing={3}>
-                <Typography 
-                  fontWeight="bold" 
-                  variant="h6" 
-                  pl={1} 
-                  sx={{ borderLeft: '5px solid #00c2b2' }}
+                <Typography
+                  fontWeight="bold"
+                  variant="h6"
+                  pl={1}
+                  sx={{ borderLeft: "5px solid #00c2b2" }}
                 >
                   理解度テストを作成
                 </Typography>
-                
+
                 <Card>
-                  <CardHeader 
-                    title="基本情報" 
-                    sx={{ 
+                  <CardHeader
+                    title="基本情報"
+                    sx={{
                       fontWeight: "bold",
                       background: "#000000",
                       color: "#ffffff",
-                      fontSize: "1.25rem"
+                      fontSize: "1.25rem",
                     }}
                   />
                   <CardContent>
                     <Stack spacing={2} p={2}>
-                      <Selection
-                        name="sex"
-                        label="合格ライン"
-                      />
+                      <Selection name="sex" label="合格ライン" />
                       <TextField
                         name="name"
                         label="章末テストタイトル"
@@ -79,15 +73,15 @@ function ComprehensionTestAdd() {
                     </Stack>
                   </CardContent>
                 </Card>
-                
+
                 <Card>
-                  <CardHeader 
-                    title="問題 (Droppable)" 
-                    sx={{ 
+                  <CardHeader
+                    title="問題 (Droppable)"
+                    sx={{
                       fontWeight: "bold",
                       background: "#000000",
                       color: "#ffffff",
-                      fontSize: "1.25rem"
+                      fontSize: "1.25rem",
                     }}
                   />
                   <CardContent>
@@ -106,7 +100,11 @@ function ComprehensionTestAdd() {
                         type="button"
                         variant="contained"
                         color="warning"
-                        sx={{ height: 30, width: "fit-content", borderRadius: 6 }}
+                        sx={{
+                          height: 30,
+                          width: "fit-content",
+                          borderRadius: 6,
+                        }}
                         onClick={handleClickOpen}
                       >
                         問題を追加
@@ -117,26 +115,42 @@ function ComprehensionTestAdd() {
               </Stack>
 
               <Stack direction="row" spacing={2} pt={5} justifyContent="center">
-                <Button large color="inherit" variant="outlined" sx={{ borderRadius: 7 }}>キャンセル</Button>
-                <Button large variant="contained" sx={{ borderRadius: 7 }}>プレビュー</Button>
-                <Button large color="warning" variant="contained" sx={{ borderRadius: 7 }}>章末テストを作成</Button>
+                <Button
+                  large
+                  color="inherit"
+                  variant="outlined"
+                  sx={{ borderRadius: 7 }}
+                >
+                  キャンセル
+                </Button>
+                <Button large variant="contained" sx={{ borderRadius: 7 }}>
+                  プレビュー
+                </Button>
+                <Button
+                  large
+                  color="warning"
+                  variant="contained"
+                  sx={{ borderRadius: 7 }}
+                >
+                  章末テストを作成
+                </Button>
               </Stack>
             </Paper>
 
             <Dialog open={open} maxWidth="lg">
               <DialogTitle>
-                <Typography 
-                  fontWeight="bold" 
-                  variant="h6" 
-                  pl={1} 
-                  sx={{ borderLeft: '5px solid #00c2b2' }}
+                <Typography
+                  fontWeight="bold"
+                  variant="h6"
+                  pl={1}
+                  sx={{ borderLeft: "5px solid #00c2b2" }}
                 >
                   問1
                 </Typography>
                 <IconButton
                   onClick={handleClose}
                   sx={{
-                    position: 'absolute',
+                    position: "absolute",
                     right: 8,
                     top: 8,
                     color: (theme) => theme.palette.grey[500],
@@ -147,13 +161,13 @@ function ComprehensionTestAdd() {
               </DialogTitle>
               <DialogContent>
                 <Card>
-                  <CardHeader 
-                    title="基本情報" 
-                    sx={{ 
+                  <CardHeader
+                    title="基本情報"
+                    sx={{
                       fontWeight: "bold",
                       background: "#000000",
                       color: "#ffffff",
-                      fontSize: "1.25rem"
+                      fontSize: "1.25rem",
                     }}
                   />
                   <CardContent>
@@ -175,10 +189,7 @@ function ComprehensionTestAdd() {
                         multiline
                         rows={3}
                       />
-                      <Selection
-                        name="sex"
-                        label="問題形式"
-                      />
+                      <Selection name="sex" label="問題形式" />
                       <Stack direction="row" justifyContent="flex-end" pb={1}>
                         <Button
                           type="button"
@@ -203,14 +214,34 @@ function ComprehensionTestAdd() {
                     </Stack>
                   </CardContent>
                 </Card>
-                <Stack direction="row" spacing={1} justifyContent="center" pt={2}>
-                  <Button large color="inherit" variant="outlined" sx={{ borderRadius: 7 }}>キャンセル</Button>
-                  <Button large variant="contained" sx={{ borderRadius: 7 }}>プレビュー</Button>
-                  <Button large color="warning" variant="contained" sx={{ borderRadius: 7 }}>作成</Button>
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  justifyContent="center"
+                  pt={2}
+                >
+                  <Button
+                    large
+                    color="inherit"
+                    variant="outlined"
+                    sx={{ borderRadius: 7 }}
+                  >
+                    キャンセル
+                  </Button>
+                  <Button large variant="contained" sx={{ borderRadius: 7 }}>
+                    プレビュー
+                  </Button>
+                  <Button
+                    large
+                    color="warning"
+                    variant="contained"
+                    sx={{ borderRadius: 7 }}
+                  >
+                    作成
+                  </Button>
                 </Stack>
               </DialogContent>
             </Dialog>
-
           </FormContainer>
         </Stack>
       </Container>

@@ -55,7 +55,7 @@ function VideoDropzone({
         onChange([file, URL.createObjectURL(file)]);
       });
     },
-    [value, disabled]
+    [value, onChange]
   );
 
   const { getRootProps, getInputProps, isDragAccept, isDragReject } =

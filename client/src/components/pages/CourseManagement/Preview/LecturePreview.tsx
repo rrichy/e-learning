@@ -11,7 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import MUIRichTextEditor from "mui-rte";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import ReactPlayer from "react-player";
 
 interface LecturePreviewProps {
@@ -27,7 +27,7 @@ function LecturePreview({ lectures, chapterNumber }: LecturePreviewProps) {
 
   const lecture = lectures[currentIndex];
 
-  const handleChangeVideo = (index: number) => {
+  const handleChangeVideo = useCallback((index: number) => {
     setCurrentIndex(index);
     (async () => {
       try {
@@ -43,14 +43,14 @@ function LecturePreview({ lectures, chapterNumber }: LecturePreviewProps) {
         }
       } catch (e: any) {}
     })();
-  };
+  }, [lectures]);
 
   useEffect(() => {
     if (!initialized) {
       handleChangeVideo(0);
       setInitialized(true);
     }
-  }, [initialized]);
+  }, [handleChangeVideo, initialized]);
 
   return (
     <>

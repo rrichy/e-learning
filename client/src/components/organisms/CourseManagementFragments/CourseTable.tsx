@@ -10,23 +10,27 @@ interface CourseTableProps {
 }
 
 function CourseTable({ data, setIds }: CourseTableProps) {
+  const [init, setInit] = useState(false);
   const [selected, setSelected] = useState<RowSelectionState>({});
 
   const columns = courseColumns();
 
   useEffect(() => {
-    const selectionState = data.reduce(
-      (acc: { checked: number[]; unchecked: number[] }, row, index) => ({
-        ...acc,
-        [selected[index] ? "checked" : "unchecked"]: [
-          ...acc[selected[index] ? "checked" : "unchecked"],
-          row.id,
-        ],
-      }),
-      { checked: [], unchecked: [] }
-    );
-    setIds(selectionState);
-  }, [selected]);
+    if (!init) {
+      const selectionState = data.reduce(
+        (acc: { checked: number[]; unchecked: number[] }, row, index) => ({
+          ...acc,
+          [selected[index] ? "checked" : "unchecked"]: [
+            ...acc[selected[index] ? "checked" : "unchecked"],
+            row.id,
+          ],
+        }),
+        { checked: [], unchecked: [] }
+      );
+      setIds(selectionState);
+      setInit(true);
+    }
+  }, [init, data, selected, setIds]);
 
   return (
     <MyTable

@@ -1,6 +1,6 @@
 import { MembershipType } from "@/enums/membershipTypes";
 import { OptionAttribute } from "@/interfaces/CommonInterface";
-import { getCacheableOptions } from "@/services/CommonService";
+import { useCacheableOptions } from "@/services/CommonService";
 import {
   ChildDepartmentOptionsType,
   DepartmentOptionsType,
@@ -11,7 +11,7 @@ import { UseFormReturn } from "react-hook-form";
 const { trial } = MembershipType;
 
 function useAccountFormHelper(form: UseFormReturn<any, any>) {
-  const { options, fetchingOptions } = getCacheableOptions(
+  const { options, fetchingOptions } = useCacheableOptions(
     "affiliations",
     "departments",
     "child_departments"
@@ -64,7 +64,7 @@ function useAccountFormHelper(form: UseFormReturn<any, any>) {
       { id: 0, name: "未選択" },
       ...options.affiliations,
     ] as OptionAttribute[];
-  }, [membership_type_id, options?.affilations, fetchingOptions]);
+  }, [fetchingOptions, options.affiliations, membership_type_id]);
 
   const departments = useMemo(() => {
     const depts: DepartmentOptionsType = [];
