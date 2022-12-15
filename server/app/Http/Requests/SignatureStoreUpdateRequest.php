@@ -29,12 +29,12 @@ class SignatureStoreUpdateRequest extends FormRequest
             'from_email' => 'required|string|email',
             'from_name' => 'required|string',
             'content' => 'required|string',
-            'priority' => [
-                'required',
-                'integer',
-                'min:1',
-                Rule::unique('signatures')->when($this->signature, fn ($q) => $q->ignore($this->signature))
-            ]
+            // 'priority' => [
+            //     'required',
+            //     'integer',
+            //     'min:1',
+            //     Rule::unique('signatures')->when($this->signature, fn ($q) => $q->ignore($this->signature))
+            // ]
         ];
     }
 }

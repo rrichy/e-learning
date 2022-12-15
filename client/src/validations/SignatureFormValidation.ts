@@ -8,7 +8,7 @@ export const signatureFormSchema = Yup.object({
   from_name: string().required(),
   from_email: string().required(),
   content: string().label("署名").required(),
-  priority: number().label("並び順").required(),
+  priority: number().label("並び順").nullable(),
 });
 
 export type SignatureFormAttribute = Omit<
@@ -27,5 +27,5 @@ export const signatureFormInit: SignatureFormAttribute = {
   from_name: "",
   from_email: "",
   content: "",
-  priority: "",
+  priority: null,
 };

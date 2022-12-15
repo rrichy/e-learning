@@ -121,15 +121,15 @@ function SignatureAddEdit({
               </Typography>
               <Stack spacing={2}>
                 <TextField label="登録名" name="name" />
-                <TextField label="from_name" name="from_name" />
-                <TextField label="from_email" name="from_email" />
-                <TextField label="内容" name="content" multiline rows={3} />
-                <TextField
+                <TextField label="from名前" name="from_name" />
+                <TextField label="fromアドレス" name="from_email" />
+                <TextField label="署名" name="content" multiline rows={3} />
+                {/* <TextField
                   label="並び順"
                   name="priority"
                   type="number"
                   inputProps={{ min: 1 }}
-                />
+                /> */}
               </Stack>
             </Paper>
             <Stack
