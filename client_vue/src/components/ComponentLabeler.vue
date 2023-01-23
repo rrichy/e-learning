@@ -1,6 +1,6 @@
 <template>
   <div :class="containerClassName">
-    <p class="text-body2 font-weight-bold mb-2 text-black">
+    <p class="text-body-2 font-weight-bold mb-2 text-black">
       {{ label }}
     </p>
     <slot />
@@ -21,9 +21,6 @@ if (!props.stacked) containerClassName += " flex-md-row";
 </script>
 
 <style scoped>
-p {
-  font-size: 14px;
-}
 p::before {
   content: "";
   height: 100%;

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import SnackbarAlert from "./components/SnackbarAlert.vue";
+import SnackbarAlert from "@/components/SnackbarAlert.vue";
+import FooterComponent from "@/components/FooterComponent.vue";
 </script>
 
 <template>
@@ -12,7 +13,10 @@ import SnackbarAlert from "./components/SnackbarAlert.vue";
     </a>
   </div> -->
   <v-app>
-    <router-view />
+    <v-main>
+      <router-view />
+    </v-main>
+    <FooterComponent />
     <SnackbarAlert />
   </v-app>
 </template>
