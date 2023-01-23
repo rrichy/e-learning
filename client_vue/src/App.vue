@@ -11,8 +11,10 @@ import SnackbarAlert from "./components/SnackbarAlert.vue";
       <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
     </a>
   </div> -->
-  <router-view></router-view>
-  <SnackbarAlert />
+  <v-app>
+    <router-view />
+    <SnackbarAlert />
+  </v-app>
 </template>
 
 <style scoped>

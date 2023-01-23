@@ -1,5 +1,6 @@
 import { createApp } from "vue";
 import "./style.css";
+import "@mdi/font/css/materialdesignicons.css";
 import App from "@/App.vue";
 import { createPinia } from "pinia";
 import { VueQueryPlugin } from "vue-query";
@@ -13,9 +14,19 @@ import * as directives from "vuetify/directives";
 const vuetify = createVuetify({
   components,
   directives,
+  theme: {
+    themes: {
+      light: {
+        colors: {
+          background: "#fafafa",
+          primary: "#00b4aa",
+          black: "#222222",
+        },
+      },
+    },
+  },
 });
 
-import SnackbarAlert from "@/components/SnackbarAlert.vue";
 import HelloWorld from "@/components/HelloWorld.vue";
 import LoginPage from "@/components/LoginPage.vue";
 import RegisterPage from "@/components/RegisterPage.vue";
