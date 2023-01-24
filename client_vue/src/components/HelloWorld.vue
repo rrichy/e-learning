@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useAlertInject } from "@/hooks/useAlert";
+import { useAlertInject } from "@/composables/useAlert";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthenticationStore } from "../stores/authentication";

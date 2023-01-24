@@ -5,7 +5,7 @@ import { CredentialInterface } from "../interfaces/UserInterface";
 import { useAuthenticationStore } from "../stores/authentication";
 import ComponentLabeler from "./ComponentLabeler.vue";
 import logo from "@/assets/logo.png";
-import { useAlertInject } from "@/hooks/useAlert";
+import { useAlertInject } from "@/composables/useAlert";
 import TextField from "./Forms/TextField.vue";
 
 const auth = useAuthenticationStore();
@@ -88,7 +88,7 @@ onMounted(() => {
         </v-btn>
       </v-form>
       <div class="d-flex flex-column align-center">
-        <router-link to="/rule" class="a-btn">
+        <router-link to="/rules" class="a-btn">
           <v-btn append-icon="mdi-arrow-right" variant="outlined">
             利用規約
           </v-btn>

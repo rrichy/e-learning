@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import FooterComponent from "@/components/FooterComponent.vue";
-import { useAlertProvide } from "./hooks/useAlert";
+import { useAlertProvide } from "./composables/useAlert";
 import { useRouter } from "vue-router";
 import { useAuthenticationStore } from "./stores/authentication";
 
