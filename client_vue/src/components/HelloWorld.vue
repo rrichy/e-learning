@@ -9,11 +9,6 @@ const { successAlert, errorAlert } = useAlertInject();
 const router = useRouter();
 const { mutate } = auth.logoutMutation();
 
-if (!auth.isAuthenticated) {
-  console.log("not authenticated");
-  router.replace("/login");
-}
-
 defineProps<{ msg: string }>();
 
 const count = ref(0);
@@ -26,7 +21,7 @@ function logout() {
       console.log("errorsssss");
     },
     onSettled: () => {
-      router.replace("/login");
+      router.push("/login");
     },
   });
 }

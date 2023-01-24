@@ -40,11 +40,22 @@ axiosSetup();
 const pinia = createPinia();
 const router = createRouter({
   routes: [
-    { path: "/", component: HelloWorld, props: { msg: "asdsad" } },
-    { path: "/login", component: LoginPage },
-    { path: "/register", component: RegisterPage },
+    {
+      path: "/",
+      name: "root",
+      component: HelloWorld,
+      props: { msg: "asdsad" },
+    },
+    { path: "/login", name: "login", component: LoginPage },
+    { path: "/register", name: "register", component: RegisterPage },
   ],
   history: createWebHashHistory(),
 });
 
-createApp(App).use(VueQueryPlugin).use(pinia).use(router).use(vuetify).component("Datepicker", Datepicker).mount("#app");
+createApp(App)
+  .use(VueQueryPlugin)
+  .use(pinia)
+  .use(router)
+  .use(vuetify)
+  .component("Datepicker", Datepicker)
+  .mount("#app");

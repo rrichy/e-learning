@@ -6,19 +6,16 @@ import { useAuthenticationStore } from "../stores/authentication";
 import ComponentLabeler from "./ComponentLabeler.vue";
 import logo from "@/assets/logo.png";
 import { useAlertInject } from "@/hooks/useAlert";
+import TextField from "./Forms/TextField.vue";
 
 const auth = useAuthenticationStore();
 const { successAlert, errorAlert } = useAlertInject();
 const router = useRouter();
 
-const { mutate } = auth.loginMutation();
+const { mutate, isLoading } = auth.loginMutation();
 const form = ref<HTMLFormElement>();
-const emailRef = ref<HTMLInputElement>();
+const emailRef = ref();
 const showPassword = ref(false);
-
-if (auth.isAuthenticated) {
-  router.replace("/");
-}
 
 const state: CredentialInterface = reactive({
   email: "",
@@ -30,8 +27,7 @@ function handleSubmit(e: Event) {
   mutate(state, {
     onSuccess: (res: any) => {
       successAlert(res.data.message);
-      auth.getAuthData();
-      router.replace("/");
+      router.push("/");
     },
     onError: (e: any) => {
       Object.assign(state, {
@@ -44,7 +40,7 @@ function handleSubmit(e: Event) {
 }
 
 onMounted(() => {
-  emailRef.value?.focus();
+  emailRef.value.$refs.inputRef.focus();
 });
 </script>
 
@@ -65,24 +61,18 @@ onMounted(() => {
     >
       <v-form ref="form" @submit="handleSubmit">
         <ComponentLabeler label="User ID（登録メールアドレス）" stacked>
-          <v-text-field
+          <TextField
             v-model="state.email"
             placeholder="IDを入力してください"
-            variant="outlined"
-            density="compact"
-            color="primary"
             ref="emailRef"
           />
         </ComponentLabeler>
         <ComponentLabeler label="パスワード" stacked>
-          <v-text-field
+          <TextField
             v-model="state.password"
             :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
             placeholder="パスワードを入力してください"
-            variant="outlined"
             :type="showPassword ? 'text' : 'password'"
-            density="compact"
-            color="primary"
             @click:append-inner="showPassword = !showPassword"
           />
         </ComponentLabeler>
@@ -92,6 +82,7 @@ onMounted(() => {
           block
           height="60"
           class="font-weight-bold"
+          :loading="isLoading"
         >
           ログイン
         </v-btn>

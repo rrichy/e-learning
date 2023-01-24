@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { Ref, ref } from "vue";
-import { useMutation } from "vue-query";
+import { useMutation, useQuery } from "vue-query";
 import axios from "axios";
 import { CredentialInterface, UserAttributes } from "../interfaces/AuthAttributes";
 
@@ -53,6 +53,15 @@ export const useAuthenticationStore = defineStore("authentication-store", () => 
     });
   }
 
+  // Creates a get data query
+  function useGetAuthData(enabled = false) {
+    return useQuery("authenticated-user-data", getAuthData, {
+      enabled,
+      staleTime: Infinity,
+      refetchOnWindowFocus: false,
+    });
+  }
+
   // Attempts to get authenticated user's data with the stored token
   async function getAuthData() {
     try {
@@ -67,6 +76,7 @@ export const useAuthenticationStore = defineStore("authentication-store", () => 
   }
 
   function logout() {
+    token.value = null;
     isAuthenticated.value = false;
     data.value = null;
     count.value = {};
@@ -76,11 +86,12 @@ export const useAuthenticationStore = defineStore("authentication-store", () => 
   }
 
   return {
-    isAuthenticated,
+    isAuthenticated: () => isAuthenticated.value,
     data,
     loginMutation,
     logoutMutation,
-    getAuthData,
+    useGetAuthData,
+    // getAuthData,
     logout,
     token,
   };

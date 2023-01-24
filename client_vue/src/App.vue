@@ -1,6 +1,27 @@
 <script setup lang="ts">
 import FooterComponent from "@/components/FooterComponent.vue";
 import { useAlertProvide } from "./hooks/useAlert";
+import { useRouter } from "vue-router";
+import { useAuthenticationStore } from "./stores/authentication";
+
+const { isAuthenticated } = useAuthenticationStore();
+const router = useRouter();
+
+router.beforeEach((to, from) => {
+  const toName = to.name?.toString() || "";
+  const fromName = from.name?.toString || "";
+  console.log({ toName, fromName });
+  if (isAuthenticated()) {
+    if (["login", "register", "forgot-password"].includes(toName)) {
+      return { name: "root" };
+    }
+  } else {
+    // not authenticated and goes to guarded routes
+    if (!["login", "register", "rules", "forgot-password"].includes(toName)) {
+      return { name: "login" };
+    }
+  }
+});
 
 const { alertProps } = useAlertProvide();
 </script>

@@ -7,10 +7,6 @@ import ComponentLabeler from "./ComponentLabeler.vue";
 const auth = useAuthenticationStore();
 const router = useRouter();
 
-if (auth.isAuthenticated) {
-  router.replace("/");
-}
-
 const selectref = ref();
 const form = ref<HTMLFormElement>();
 const state = ref({
@@ -41,6 +37,13 @@ function handleSubmit(e: Event) {
 
 function handleSexChange(e: Event, data: any) {
   console.log({ e, data });
+}
+
+function itemsProps(item: any) {
+  console.log(item);
+
+  return true;
+  // return {value: item.id, title: item.name, disabled: item.disabled}
 }
 </script>
 
@@ -93,17 +96,8 @@ function handleSexChange(e: Event, data: any) {
           variant="outlined"
           density="compact"
           color="primary"
-        >
-          <template #item="{item, props}">
-            <v-list-item
-              :value="item.value"
-              :disabled="item.raw.disabled"
-              @click="props.onClick"
-            >
-              <v-list-item-title>{{ item.title }}</v-list-item-title>
-            </v-list-item>
-          </template>
-        </v-select>
+          :item-props="true"
+        />
       </ComponentLabeler>
       <ComponentLabeler
         label="生年月日"
