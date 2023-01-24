@@ -1,55 +1,57 @@
 <script setup lang="ts">
-import { useAlertStore } from "@/stores/alert";
-import { ref, Ref } from "vue";
+import { ref, reactive, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { CredentialInterface } from "../interfaces/UserInterface";
 import { useAuthenticationStore } from "../stores/authentication";
 import ComponentLabeler from "./ComponentLabeler.vue";
 import logo from "@/assets/logo.png";
+import { useAlertInject } from "@/hooks/useAlert";
 
 const auth = useAuthenticationStore();
-const { successAlert, errorAlert } = useAlertStore();
+const { successAlert, errorAlert } = useAlertInject();
 const router = useRouter();
 
 const { mutate } = auth.loginMutation();
 const form = ref<HTMLFormElement>();
+const emailRef = ref<HTMLInputElement>();
 const showPassword = ref(false);
 
 if (auth.isAuthenticated) {
   router.replace("/");
 }
 
-const state: Ref<CredentialInterface> = ref({
+const state: CredentialInterface = reactive({
   email: "",
   password: "",
 });
 
 function handleSubmit(e: Event) {
   e.preventDefault();
-  mutate(state.value, {
+  mutate(state, {
     onSuccess: (res: any) => {
       successAlert(res.data.message);
       auth.getAuthData();
       router.replace("/");
     },
     onError: (e: any) => {
-      state.value = {
+      Object.assign(state, {
         email: "",
         password: "",
-      };
+      });
       errorAlert(e.response.data.message);
     },
   });
 }
+
+onMounted(() => {
+  emailRef.value?.focus();
+});
 </script>
 
 <template>
   <div class="container h-100 d-flex flex-column justify-center align-center">
     <figure class="d-flex flex-column align-center">
-      <v-img
-        :src="logo"
-        width="200"
-      />
+      <v-img :src="logo" width="200" />
       <figcaption class="text-caption font-weight-bold mt-2">
         ITインフラエンジニア向け資格対策eラーニング
       </figcaption>
@@ -61,26 +63,18 @@ function handleSubmit(e: Event) {
       width="100%"
       max-width="430"
     >
-      <v-form
-        ref="form"
-        @submit="handleSubmit"
-      >
-        <ComponentLabeler
-          label="User ID（登録メールアドレス）"
-          stacked
-        >
+      <v-form ref="form" @submit="handleSubmit">
+        <ComponentLabeler label="User ID（登録メールアドレス）" stacked>
           <v-text-field
             v-model="state.email"
             placeholder="IDを入力してください"
             variant="outlined"
             density="compact"
             color="primary"
+            ref="emailRef"
           />
         </ComponentLabeler>
-        <ComponentLabeler
-          label="パスワード"
-          stacked
-        >
+        <ComponentLabeler label="パスワード" stacked>
           <v-text-field
             v-model="state.password"
             :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
@@ -103,41 +97,22 @@ function handleSubmit(e: Event) {
         </v-btn>
       </v-form>
       <div class="d-flex flex-column align-center">
-        <router-link
-          to="/rule"
-          class="a-btn"
-        >
-          <v-btn
-            append-icon="mdi-arrow-right"
-            variant="outlined"
-          >
+        <router-link to="/rule" class="a-btn">
+          <v-btn append-icon="mdi-arrow-right" variant="outlined">
             利用規約
           </v-btn>
         </router-link>
-        <router-link
-          to="/forgot-password"
-          class="text-caption"
-        >
+        <router-link to="/forgot-password" class="text-caption">
           パスワードをお忘れの方はこちら
         </router-link>
-        <router-link
-          to="/register"
-          class="text-caption"
-        >
+        <router-link to="/register" class="text-caption">
           アカウントをお持ちではない方はこちら
         </router-link>
       </div>
     </v-sheet>
-    <a
-      class="text-caption"
-      href="https://www.techhub.tokyo/"
-      target="_blank"
-    >
+    <a class="text-caption" href="https://www.techhub.tokyo/" target="_blank">
       techhub TOPページ
-      <v-icon
-        icon="mdi-open-in-new"
-        size="x-small"
-      />
+      <v-icon icon="mdi-open-in-new" size="x-small" />
     </a>
   </div>
 </template>

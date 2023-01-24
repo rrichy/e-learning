@@ -1,23 +1,23 @@
 <script setup lang="ts">
-import SnackbarAlert from "@/components/SnackbarAlert.vue";
 import FooterComponent from "@/components/FooterComponent.vue";
+import { useAlertProvide } from "./hooks/useAlert";
+
+const { alertProps } = useAlertProvide();
 </script>
 
 <template>
-  <!-- <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
-  </div> -->
   <v-app>
     <v-main>
       <router-view />
     </v-main>
     <FooterComponent />
-    <SnackbarAlert />
+    <v-snackbar
+      v-model="alertProps.show"
+      :timeout="alertProps.timeout"
+      :color="alertProps.color"
+    >
+      {{ alertProps.text }}
+    </v-snackbar>
   </v-app>
 </template>
 

@@ -1,5 +1,5 @@
 {
-  "extends": ["plugin:vue/recommended"],
+  "extends": ["plugin:vue/vue3-strongly-recommended", "prettier"],
   "parser": "vue-eslint-parser",
   "parserOptions": {
     "parser": "@typescript-eslint/parser",
