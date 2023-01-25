@@ -3,6 +3,7 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthenticationStore } from "../stores/authentication";
 import ComponentLabeler from "./ComponentLabeler.vue";
+import TextField from "./Forms/TextField.vue";
 
 const auth = useAuthenticationStore();
 const router = useRouter();
@@ -24,11 +25,6 @@ const sexSelection = [
   { id: 2, name: "女性" },
 ];
 
-const show = ref({
-  password: false,
-  confirm_password: false,
-});
-
 function handleSubmit(e: Event) {
   e.preventDefault();
 
@@ -40,10 +36,8 @@ function handleSexChange(e: Event, data: any) {
 }
 
 function itemsProps(item: any) {
-  console.log(item);
 
   return true;
-  // return {value: item.id, title: item.name, disabled: item.disabled}
 }
 </script>
 
@@ -55,39 +49,18 @@ function itemsProps(item: any) {
     width="100%"
     max-width="430"
   >
-    <v-form
-      ref="form"
-      @submit="handleSubmit"
-    >
-      <ComponentLabeler
-        label="氏名"
-        stacked
-      >
-        <v-text-field
-          v-model="state.name"
-          placeholder="氏名を入力してください"
-          variant="outlined"
-          density="compact"
-          color="primary"
-        />
+    <v-form ref="form" @submit="handleSubmit">
+      <ComponentLabeler label="氏名" stacked>
+        <TextField v-model="state.name" placeholder="氏名を入力してください" />
       </ComponentLabeler>
 
-      <ComponentLabeler
-        label="メールアドレス"
-        stacked
-      >
-        <v-text-field
+      <ComponentLabeler label="メールアドレス" stacked>
+        <TextField
           v-model="state.email"
           placeholder="メールアドレスを入力してください"
-          variant="outlined"
-          density="compact"
-          color="primary"
         />
       </ComponentLabeler>
-      <ComponentLabeler
-        label="性別"
-        stacked
-      >
+      <ComponentLabeler label="性別" stacked>
         <v-select
           v-model="state.sex"
           :items="sexSelection"
@@ -99,10 +72,7 @@ function itemsProps(item: any) {
           :item-props="true"
         />
       </ComponentLabeler>
-      <ComponentLabeler
-        label="生年月日"
-        stacked
-      >
+      <ComponentLabeler label="生年月日" stacked>
         <Datepicker
           v-model="state.birthday"
           :flow="['year', 'month', 'calendar']"
@@ -111,43 +81,24 @@ function itemsProps(item: any) {
           prevent-min-max-navigation
         />
       </ComponentLabeler>
-      <ComponentLabeler
-        label="パスワード"
-        stacked
-      >
-        <v-text-field
+      <ComponentLabeler label="パスワード" stacked>
+        <TextField
           v-model="state.password"
-          :append-inner-icon="show.password ? 'mdi-eye' : 'mdi-eye-off'"
-          :type="show.password ? 'text' : 'password'"
+          type="password"
           placeholder="パスワードを入力してください"
-          variant="outlined"
-          density="compact"
-          color="primary"
-          @click:append-inner="show.password = !show.password"
         />
       </ComponentLabeler>
-      <ComponentLabeler
-        label="パスワード（確認用）"
-        stacked
-      >
-        <v-text-field
+      <ComponentLabeler label="パスワード（確認用）" stacked>
+        <TextField
           v-model="state.password_confirmation"
-          :append-inner-icon="show.confirm_password ? 'mdi-eye' : 'mdi-eye-off'"
-          :type="show.confirm_password ? 'text' : 'password'"
+          type="password"
           placeholder="パスワード（確認用）を入力してください"
-          variant="outlined"
-          density="compact"
-          color="primary"
-          @click:append-inner="show.confirm_password = !show.confirm_password"
         />
       </ComponentLabeler>
       <button>Register</button>
     </v-form>
-    <router-link to="/login">
-      Back to login
-    </router-link>
+    <router-link to="/login"> Back to login </router-link>
   </v-sheet>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

@@ -15,7 +15,6 @@ const router = useRouter();
 const { mutate, isLoading } = auth.loginMutation();
 const form = ref<HTMLFormElement>();
 const emailRef = ref();
-const showPassword = ref(false);
 
 const state: CredentialInterface = reactive({
   email: "",
@@ -70,10 +69,8 @@ onMounted(() => {
         <ComponentLabeler label="パスワード" stacked>
           <TextField
             v-model="state.password"
-            :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+            type="password"
             placeholder="パスワードを入力してください"
-            :type="showPassword ? 'text' : 'password'"
-            @click:append-inner="showPassword = !showPassword"
           />
         </ComponentLabeler>
         <v-btn
