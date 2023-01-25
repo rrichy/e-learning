@@ -107,3 +107,10 @@ button:focus-visible {
   padding-top: 7px;
   padding-bottom: 7px;
 }
+
+.dp__input_focus {
+  transition: border-left-color 0ms, border-right-color 0ms,
+    border-top-color 0ms, border-bottom-color 0ms;
+  --dp-border-color-hover: #00b4aa;
+  box-shadow: 0px 0px 0px 1px #00b4aa inset;
+}
