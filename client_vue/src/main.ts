@@ -1,13 +1,13 @@
 import { createApp } from "vue";
+// import Datepicker from "@vuepic/vue-datepicker";
+import DatePickerVue from "./components/Forms/DatePicker.vue";
+import "@vuepic/vue-datepicker/dist/main.css";
 import "./style.css";
 import "@mdi/font/css/materialdesignicons.css";
 import App from "@/App.vue";
 import { createPinia } from "pinia";
 import { VueQueryPlugin } from "vue-query";
 import { createRouter, createWebHashHistory } from "vue-router";
-
-import Datepicker from "@vuepic/vue-datepicker";
-import "@vuepic/vue-datepicker/dist/main.css";
 
 import "vuetify/styles";
 import { createVuetify } from "vuetify";
@@ -57,5 +57,5 @@ createApp(App)
   .use(pinia)
   .use(router)
   .use(vuetify)
-  .component("Datepicker", Datepicker)
+  .component("DatePicker", DatePickerVue)
   .mount("#app");

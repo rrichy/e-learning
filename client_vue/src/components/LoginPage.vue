@@ -44,10 +44,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="container h-100 d-flex flex-column justify-center align-center">
+  <v-container class="d-flex flex-column justify-center align-center">
     <figure class="d-flex flex-column align-center">
       <v-img :src="logo" width="200" />
-      <figcaption class="text-caption font-weight-bold mt-2">
+      <figcaption class="text-caption text-center font-weight-bold mt-2">
         ITインフラエンジニア向け資格対策eラーニング
       </figcaption>
     </figure>
@@ -102,11 +102,11 @@ onMounted(() => {
       techhub TOPページ
       <v-icon icon="mdi-open-in-new" size="x-small" />
     </a>
-  </div>
+  </v-container>
 </template>
 
 <style scoped>
-.container {
+.v-container {
   gap: 40px;
 }
 

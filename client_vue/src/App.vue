@@ -28,6 +28,7 @@ const { alertProps } = useAlertProvide();
 
 <template>
   <v-app>
+    <v-app-bar elevation="1" />
     <v-main>
       <router-view />
     </v-main>
@@ -43,6 +44,9 @@ const { alertProps } = useAlertProvide();
 </template>
 
 <style scoped>
+.v-container {
+  min-height: 100%;
+}
 /* .logo {
   height: 6em;
   padding: 1.5em;

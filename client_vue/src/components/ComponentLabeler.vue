@@ -15,7 +15,7 @@ const props = defineProps<{
   stacked?: boolean;
 }>();
 
-let containerClassName = "d-flex flex-column";
+let containerClassName = "w-100 d-flex flex-column";
 
 if (!props.stacked) containerClassName += " flex-md-row";
 </script>
