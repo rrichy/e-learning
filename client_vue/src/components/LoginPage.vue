@@ -6,7 +6,7 @@ import { useAuthenticationStore } from "../stores/authentication";
 import ComponentLabeler from "./ComponentLabeler.vue";
 import logo from "@/assets/logo.png";
 import { useAlertInject } from "@/composables/useAlert";
-import TextField from "./Forms/TextField.vue";
+import TextField from "./Forms/Fields/TextField.vue";
 
 const auth = useAuthenticationStore();
 const { successAlert, errorAlert } = useAlertInject();
@@ -39,7 +39,7 @@ function handleSubmit(e: Event) {
 }
 
 onMounted(() => {
-  emailRef.value.$refs.inputRef.focus();
+  emailRef.value.inputRef.focus();
 });
 </script>
 
