@@ -1,18 +1,3 @@
-<template>
-  <v-text-field
-    ref="inputRef"
-    :model-value="value"
-    @update:model-value="updateModelValue($event)"
-    variant="outlined"
-    density="compact"
-    color="primary"
-    :name="name"
-    :append-inner-icon="appendInnerIcon"
-    :type="type"
-    @click:append-inner="clickAppendInner"
-  />
-</template>
-
 <script setup lang="ts">
 import { computed, inject, Ref, ref, useAttrs, VNodeRef } from "vue";
 import { VTextField } from "vuetify/components";
@@ -55,18 +40,12 @@ const appendInnerIcon = computed(() => {
   }
 });
 
-const value = computed<string | number | undefined>(() => {
-  if (props.modelValue) {
-    return props.modelValue;
-  } else if (injectedValue) {
-    return injectedValue?.value;
-  }
-  return undefined;
-});
+const value = computed<string | number | undefined>(
+  () => props.modelValue || injectedValue?.value
+);
 
 const type = computed<string | undefined>(() => {
   if (props.type === "password") {
-    console.log(showPassword.value ? "text" : "password");
     return showPassword.value ? "text" : "password";
   } else {
     return attrs.type as string | undefined;
@@ -75,7 +54,6 @@ const type = computed<string | undefined>(() => {
 
 function clickAppendInner(...args: any) {
   if (props.type === "password") {
-    console.log("new value: ", !showPassword.value);
     showPassword.value = !showPassword.value;
   } else {
     emit("click:appendInner", args);
@@ -86,5 +64,20 @@ defineExpose({
   inputRef,
 });
 </script>
+
+<template>
+  <v-text-field
+    ref="inputRef"
+    :model-value="value"
+    @update:model-value="updateModelValue($event)"
+    variant="outlined"
+    density="compact"
+    color="primary"
+    :name="name"
+    :append-inner-icon="appendInnerIcon"
+    :type="type"
+    @click:append-inner="clickAppendInner"
+  />
+</template>
 
 <style scoped></style>

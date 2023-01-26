@@ -1,42 +1,57 @@
+<script setup lang="ts">
+import Datepicker, { VueDatePicker } from "@vuepic/vue-datepicker";
+import { computed, inject, Ref, useAttrs } from "vue";
+
+type DateType = VueDatePicker["modelValue"];
+
+const attrs = useAttrs();
+const props = defineProps<{
+  modelValue?: DateType;
+  errors?: string[];
+}>();
+
+const emits = defineEmits<{
+  (e: "update:modelValue", v: DateType): void;
+}>();
+
+const name = attrs.name as string | undefined;
+const injectedValue = inject("value:" + name, undefined) as
+  | Ref<DateType>
+  | undefined;
+
+const injectedChange = inject("update:" + name, undefined) as
+  | ((e: DateType) => void)
+  | undefined;
+
+const value = computed<DateType>(() => {
+  return props.modelValue || injectedValue?.value;
+});
+
+function updateModelValue(e: DateType) {
+  emits("update:modelValue", e);
+  if (injectedChange) {
+    injectedChange(e);
+  }
+}
+
+const errors = computed<string[]>(() => {
+  return props.errors || [];
+});
+</script>
+
 <template>
   <div>
     <Datepicker
-      v-bind="$props"
-      :value="modelValue"
-      @update:model-value="$emit('update:model-value', $event)"
+      :model-value="value"
+      @update:model-value="updateModelValue"
+      v-bind="attrs"
     />
+    <!-- TODO: ERROR PROPS -->
     <div class="v-input__details">
       <v-messages active :messages="errors[0]" />
     </div>
   </div>
 </template>
-
-<script lang="ts">
-import Datepicker, { VueDatePicker } from "@vuepic/vue-datepicker";
-import { PropType } from "vue";
-
-export default {
-  extends: Datepicker,
-  components: {
-    Datepicker,
-  },
-  props: {
-    modelValue: {
-      type: [String, Date, Array, Object, Number] as PropType<
-        VueDatePicker["modelValue"]
-      >,
-      default: null,
-    },
-    errors: {
-      type: Array as PropType<string[]>,
-      default() {
-        return [];
-      },
-    }
-  },
-  emits: ["update:model-value"],
-};
-</script>
 
 <style scoped>
 .v-input__details {
