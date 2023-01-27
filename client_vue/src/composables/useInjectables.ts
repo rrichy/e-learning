@@ -1,34 +1,24 @@
 import { ItemAttributes } from "@/interfaces/ItemAttributes";
-import { inject, Ref, useAttrs } from "vue";
+import { inject, ref } from "vue";
 
 // This composable is used for form fields to inject value and update handler to the
 // field component;
-export default function useInjectables<Value>() {
-  // attempt to inject with attrs.name
-  const attrs = useAttrs();
-  const name = attrs.name as string | undefined;
-  const injectedItems = inject("items:" + name, undefined) as
+export default function useInjectables(
+  props: Readonly<{ name: string; disabled?: boolean; [k: string]: unknown }>
+) {
+  const injectedItems = inject("items:" + props.name, undefined) as
     | ItemAttributes[]
-    | undefined;
-
-  const injectedValue = inject("value:" + name, undefined) as
-    | Ref<Value>
-    | undefined;
-
-  const injectedChange = inject("update:" + name, undefined) as
-    | ((v: Value) => void)
     | undefined;
 
   const injectedDisabled = inject("inject:disabled", undefined) as
     | boolean
     | undefined;
 
+  const items = ref((props.items || injectedItems || []) as ItemAttributes[]);
+  const disabled = ref(props.disabled || injectedDisabled);
+
   return {
-    attrs,
-    name,
-    injectedItems,
-    injectedValue,
-    injectedChange,
-    injectedDisabled,
+    items,
+    disabled,
   };
 }

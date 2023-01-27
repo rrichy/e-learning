@@ -1,49 +1,37 @@
 <script setup lang="ts">
 import useInjectables from "@/composables/useInjectables";
 import { ItemAttributes } from "@/interfaces/ItemAttributes";
-import { computed, Ref, ref, VNode } from "vue";
+import { useField } from "vee-validate";
+import { Ref, ref, toRef, VNode } from "vue";
 
-type Value = number | undefined;
-
-const { injectedItems, injectedValue, injectedChange, injectedDisabled } =
-  useInjectables<Value>();
 const selectRef: Ref<VNode | undefined> = ref();
 
 const props = defineProps<{
-  modelValue?: Value;
   items?: ItemAttributes[];
   disabled?: boolean;
+  name: string;
 }>();
 
-const emits = defineEmits<{
-  (e: "update:modelValue", v: Value): void;
-}>();
+const { items, disabled } = useInjectables(props);
 
-const items = computed(() => props.items || injectedItems || []);
-const value = computed(() => props.modelValue || injectedValue?.value);
-const disabled = computed(() => props.disabled || injectedDisabled);
-
-function updateModelValue(v: Value) {
-  emits("update:modelValue", v);
-  if (injectedChange) {
-    injectedChange(v);
-  }
-}
+const { value, handleChange, errorMessage } = useField(toRef(props, "name"));
 </script>
 
 <template>
   <v-select
     ref="selectRef"
     :model-value="value"
-    @update:model-value="updateModelValue($event)"
+    @update:model-value="handleChange"
     :items="items"
     item-title="name"
     item-value="id"
     variant="outlined"
     density="compact"
     color="primary"
+    :error-messages="errorMessage"
     :item-props="true"
     :disabled="disabled"
+    :name="name"
   />
 </template>
 
