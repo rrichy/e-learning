@@ -2,52 +2,38 @@
 import useInjectables from "@/composables/useInjectables";
 import Datepicker, { VueDatePicker } from "@vuepic/vue-datepicker";
 import { ja } from "date-fns/locale";
-import { computed } from "vue";
+import { useField } from "vee-validate";
+import { computed, toRef } from "vue";
 
 type Value = VueDatePicker["modelValue"];
 
-const { attrs, injectedValue, injectedChange, injectedDisabled } =
-  useInjectables<Value>();
-
 const props = defineProps<{
-  modelValue?: Value;
-  errors?: string[];
   disabled?: boolean;
+  name: string;
 }>();
 
-const emits = defineEmits<{
-  (e: "update:modelValue", v: Value): void;
-}>();
+const { disabled } = useInjectables(props);
 
-const value = computed<Value>(() => props.modelValue || injectedValue?.value);
-const disabled = computed(() => props.disabled || injectedDisabled);
+const { value, handleChange, errorMessage } = useField<Value>(
+  toRef(props, "name")
+);
 
-function updateModelValue(e: Value) {
-  console.log(e);
-  emits("update:modelValue", e);
-  if (injectedChange) {
-    injectedChange(e);
-  }
-}
-
-const errors = computed<string[]>(() => {
-  return props.errors || [];
-});
+const className = computed(() => (errorMessage.value ? "v-input--error" : ""));
 </script>
 
 <template>
-  <div>
+  <div :class="className">
     <Datepicker
       :model-value="value"
-      @update:model-value="updateModelValue"
-      v-bind="attrs"
+      @update:model-value="handleChange"
+      v-bind="$attrs"
       locale="ja"
       :format-locale="ja"
       :disabled="disabled"
+      :name="name"
     />
-    <!-- TODO: ERROR PROPS -->
     <div class="v-input__details">
-      <v-messages active :messages="errors[0]" />
+      <v-messages active :messages="errorMessage" />
     </div>
   </div>
 </template>

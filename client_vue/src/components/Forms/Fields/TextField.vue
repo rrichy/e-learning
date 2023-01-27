@@ -1,41 +1,29 @@
 <script setup lang="ts">
 import useInjectables from "@/composables/useInjectables";
-import { computed, Ref, ref, VNodeRef } from "vue";
+import { computed, Ref, ref, toRef, VNodeRef } from "vue";
+import { useField } from "vee-validate";
 import { VTextField } from "vuetify/components";
 
-type Value = string | number | undefined;
-
-const { attrs, name, injectedValue, injectedChange, injectedDisabled } =
-  useInjectables<Value>();
 const inputRef: Ref<VNodeRef | undefined> = ref();
 const showPassword = ref(false);
 
 const props = defineProps<{
-  modelValue?: Value;
   type?: string;
   disabled?: boolean;
+  name: string;
 }>();
 
 const emits = defineEmits<{
-  (e: "update:modelValue", v: Value): void;
   (e: "click:appendInner", v: unknown): void;
 }>();
 
-function updateModelValue(v: Value) {
-  emits("update:modelValue", v);
-  if (injectedChange) {
-    injectedChange(v);
-  }
-}
-
-const value = computed(() => props.modelValue || injectedValue?.value);
-const disabled = computed(() => props.disabled || injectedDisabled);
+const { disabled } = useInjectables(props);
 
 const type = computed(() => {
   if (props.type === "password") {
     return showPassword.value ? "text" : "password";
   } else {
-    return attrs.type as string | undefined;
+    return props.type as string | undefined;
   }
 });
 
@@ -55,6 +43,8 @@ function clickAppendInner(...args: unknown[]) {
   }
 }
 
+const { errorMessage, value, handleChange } = useField(toRef(props, "name"));
+
 defineExpose({
   inputRef,
 });
@@ -64,10 +54,11 @@ defineExpose({
   <v-text-field
     ref="inputRef"
     :model-value="value"
-    @update:model-value="updateModelValue($event)"
+    @update:model-value="handleChange"
     variant="outlined"
     density="compact"
     color="primary"
+    :error-messages="errorMessage"
     :name="name"
     :append-inner-icon="appendInnerIcon"
     :type="type"
