@@ -19,11 +19,16 @@ export default function useInjectables<Value>() {
     | ((v: Value) => void)
     | undefined;
 
+  const injectedDisabled = inject("inject:disabled", undefined) as
+    | boolean
+    | undefined;
+
   return {
     attrs,
     name,
     injectedItems,
     injectedValue,
     injectedChange,
+    injectedDisabled,
   };
 }

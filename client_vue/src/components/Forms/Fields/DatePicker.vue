@@ -6,11 +6,13 @@ import { computed } from "vue";
 
 type Value = VueDatePicker["modelValue"];
 
-const { attrs, injectedValue, injectedChange } = useInjectables<Value>();
+const { attrs, injectedValue, injectedChange, injectedDisabled } =
+  useInjectables<Value>();
 
 const props = defineProps<{
   modelValue?: Value;
   errors?: string[];
+  disabled?: boolean;
 }>();
 
 const emits = defineEmits<{
@@ -18,6 +20,7 @@ const emits = defineEmits<{
 }>();
 
 const value = computed<Value>(() => props.modelValue || injectedValue?.value);
+const disabled = computed(() => props.disabled || injectedDisabled);
 
 function updateModelValue(e: Value) {
   console.log(e);
@@ -40,6 +43,7 @@ const errors = computed<string[]>(() => {
       v-bind="attrs"
       locale="ja"
       :format-locale="ja"
+      :disabled="disabled"
     />
     <!-- TODO: ERROR PROPS -->
     <div class="v-input__details">

@@ -5,13 +5,15 @@ import { VTextField } from "vuetify/components";
 
 type Value = string | number | undefined;
 
-const { attrs, name, injectedValue, injectedChange } = useInjectables<Value>();
+const { attrs, name, injectedValue, injectedChange, injectedDisabled } =
+  useInjectables<Value>();
 const inputRef: Ref<VNodeRef | undefined> = ref();
 const showPassword = ref(false);
 
 const props = defineProps<{
   modelValue?: Value;
   type?: string;
+  disabled?: boolean;
 }>();
 
 const emits = defineEmits<{
@@ -27,6 +29,7 @@ function updateModelValue(v: Value) {
 }
 
 const value = computed(() => props.modelValue || injectedValue?.value);
+const disabled = computed(() => props.disabled || injectedDisabled);
 
 const type = computed(() => {
   if (props.type === "password") {
@@ -69,6 +72,7 @@ defineExpose({
     :append-inner-icon="appendInnerIcon"
     :type="type"
     @click:append-inner="clickAppendInner"
+    :disabled="disabled"
   />
 </template>
 

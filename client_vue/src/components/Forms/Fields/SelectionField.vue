@@ -5,13 +5,14 @@ import { computed, Ref, ref, VNode } from "vue";
 
 type Value = number | undefined;
 
-const { injectedItems, injectedValue, injectedChange } =
+const { injectedItems, injectedValue, injectedChange, injectedDisabled } =
   useInjectables<Value>();
 const selectRef: Ref<VNode | undefined> = ref();
 
 const props = defineProps<{
   modelValue?: Value;
   items?: ItemAttributes[];
+  disabled?: boolean;
 }>();
 
 const emits = defineEmits<{
@@ -20,6 +21,7 @@ const emits = defineEmits<{
 
 const items = computed(() => props.items || injectedItems || []);
 const value = computed(() => props.modelValue || injectedValue?.value);
+const disabled = computed(() => props.disabled || injectedDisabled);
 
 function updateModelValue(v: Value) {
   emits("update:modelValue", v);
@@ -41,6 +43,7 @@ function updateModelValue(v: Value) {
     density="compact"
     color="primary"
     :item-props="true"
+    :disabled="disabled"
   />
 </template>
 
