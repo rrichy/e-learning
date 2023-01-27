@@ -1,36 +1,40 @@
 <script setup lang="ts">
-import { computed, inject, Ref, ref, useAttrs, VNodeRef } from "vue";
+import useInjectables from "@/composables/useInjectables";
+import { computed, Ref, ref, VNodeRef } from "vue";
 import { VTextField } from "vuetify/components";
 
+type Value = string | number | undefined;
+
+const { attrs, name, injectedValue, injectedChange } = useInjectables<Value>();
 const inputRef: Ref<VNodeRef | undefined> = ref();
-const attrs = useAttrs();
 const showPassword = ref(false);
 
 const props = defineProps<{
-  modelValue?: string | number;
+  modelValue?: Value;
   type?: string;
 }>();
 
-const emit = defineEmits<{
-  (e: "update:modelValue", v?: string | number): void;
-  (e: "click:appendInner", v: any): void;
+const emits = defineEmits<{
+  (e: "update:modelValue", v: Value): void;
+  (e: "click:appendInner", v: unknown): void;
 }>();
 
-const name = attrs.name as string | undefined;
-const injectedValue = inject("value:" + name, undefined) as
-  | Ref<string | number | undefined>
-  | undefined;
-
-const injectedChange = inject("update:" + name, undefined) as
-  | ((v?: string | number) => void)
-  | undefined;
-
-function updateModelValue(v?: string | number) {
-  emit("update:modelValue", v);
+function updateModelValue(v: Value) {
+  emits("update:modelValue", v);
   if (injectedChange) {
     injectedChange(v);
   }
 }
+
+const value = computed(() => props.modelValue || injectedValue?.value);
+
+const type = computed(() => {
+  if (props.type === "password") {
+    return showPassword.value ? "text" : "password";
+  } else {
+    return attrs.type as string | undefined;
+  }
+});
 
 const appendInnerIcon = computed(() => {
   if (props.type === "password") {
@@ -40,23 +44,11 @@ const appendInnerIcon = computed(() => {
   }
 });
 
-const value = computed<string | number | undefined>(
-  () => props.modelValue || injectedValue?.value
-);
-
-const type = computed<string | undefined>(() => {
-  if (props.type === "password") {
-    return showPassword.value ? "text" : "password";
-  } else {
-    return attrs.type as string | undefined;
-  }
-});
-
-function clickAppendInner(...args: any) {
+function clickAppendInner(...args: unknown[]) {
   if (props.type === "password") {
     showPassword.value = !showPassword.value;
   } else {
-    emit("click:appendInner", args);
+    emits("click:appendInner", args);
   }
 }
 

@@ -1,33 +1,24 @@
 <script setup lang="ts">
+import useInjectables from "@/composables/useInjectables";
 import Datepicker, { VueDatePicker } from "@vuepic/vue-datepicker";
-import { computed, inject, Ref, useAttrs } from "vue";
+import { computed } from "vue";
 
-type DateType = VueDatePicker["modelValue"];
+type Value = VueDatePicker["modelValue"];
 
-const attrs = useAttrs();
+const { attrs, injectedValue, injectedChange } = useInjectables<Value>();
+
 const props = defineProps<{
-  modelValue?: DateType;
+  modelValue?: Value;
   errors?: string[];
 }>();
 
 const emits = defineEmits<{
-  (e: "update:modelValue", v: DateType): void;
+  (e: "update:modelValue", v: Value): void;
 }>();
 
-const name = attrs.name as string | undefined;
-const injectedValue = inject("value:" + name, undefined) as
-  | Ref<DateType>
-  | undefined;
+const value = computed<Value>(() => props.modelValue || injectedValue?.value);
 
-const injectedChange = inject("update:" + name, undefined) as
-  | ((e: DateType) => void)
-  | undefined;
-
-const value = computed<DateType>(() => {
-  return props.modelValue || injectedValue?.value;
-});
-
-function updateModelValue(e: DateType) {
+function updateModelValue(e: Value) {
   emits("update:modelValue", e);
   if (injectedChange) {
     injectedChange(e);

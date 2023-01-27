@@ -1,41 +1,27 @@
 <script setup lang="ts">
+import useInjectables from "@/composables/useInjectables";
 import { ItemAttributes } from "@/interfaces/ItemAttributes";
-import { computed, inject, Ref, ref, useAttrs, VNode } from "vue";
+import { computed, Ref, ref, VNode } from "vue";
 
+type Value = number | undefined;
+
+const { injectedItems, injectedValue, injectedChange } =
+  useInjectables<Value>();
 const selectRef: Ref<VNode | undefined> = ref();
-const attrs = useAttrs();
 
 const props = defineProps<{
-  modelValue?: number;
+  modelValue?: Value;
   items?: ItemAttributes[];
 }>();
 
 const emits = defineEmits<{
-  (e: "update:modelValue", v?: number): void;
+  (e: "update:modelValue", v: Value): void;
 }>();
 
-const name = attrs.name as string | undefined;
-const injectedItems = inject("items:" + name, undefined) as
-  | ItemAttributes[]
-  | undefined;
+const items = computed(() => props.items || injectedItems || []);
+const value = computed(() => props.modelValue || injectedValue?.value);
 
-const injectedValue = inject("value:" + name, undefined) as
-  | Ref<number | undefined>
-  | undefined;
-
-const injectedChange = inject("update:" + name, undefined) as
-  | ((v?: number) => void)
-  | undefined;
-
-const items = computed<ItemAttributes[]>(
-  () => props.items || injectedItems || []
-);
-
-const value = computed<number | undefined>(
-  () => props.modelValue || injectedValue?.value
-);
-
-function updateModelValue(v?: number) {
+function updateModelValue(v: Value) {
   emits("update:modelValue", v);
   if (injectedChange) {
     injectedChange(v);

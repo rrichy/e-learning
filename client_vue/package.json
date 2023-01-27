@@ -11,7 +11,6 @@
     "lint:fix": "eslint \"src/**/*.{js,ts,vue}\" --fix"
   },
   "dependencies": {
-    "@typescript-eslint/parser": "^5.48.2",
     "@vuepic/vue-datepicker": "^3.6.5",
     "axios": "^1.2.3",
     "pinia": "^2.0.29",
@@ -22,13 +21,16 @@
   },
   "devDependencies": {
     "@mdi/font": "^7.1.96",
+    "@typescript-eslint/eslint-plugin": "^5.49.0",
+    "@typescript-eslint/parser": "^5.49.0",
     "@vitejs/plugin-vue": "^4.0.0",
     "eslint": "^8.32.0",
     "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-unused-imports": "^2.0.0",
     "eslint-plugin-vue": "^9.9.0",
     "prettier": "^2.8.3",
-    "typescript": "^4.9.3",
+    "typescript": "^4.9.4",
     "vite": "^4.0.0",
     "vue-eslint-parser": "^9.1.0",
     "vue-tsc": "^1.0.11"

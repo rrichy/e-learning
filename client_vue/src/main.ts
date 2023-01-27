@@ -1,6 +1,5 @@
 import { createApp } from "vue";
 // import Datepicker from "@vuepic/vue-datepicker";
-import DatePickerVue from "./components/Forms/DatePicker.vue";
 import "@vuepic/vue-datepicker/dist/main.css";
 import "./style.css";
 import "@mdi/font/css/materialdesignicons.css";
@@ -57,5 +56,4 @@ createApp(App)
   .use(pinia)
   .use(router)
   .use(vuetify)
-  .component("DatePicker", DatePickerVue)
   .mount("#app");
