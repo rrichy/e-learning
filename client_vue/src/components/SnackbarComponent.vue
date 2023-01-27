@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { useAlertProvide } from "@/composables/useAlert";
-const { show, timeout, color, text } = useAlertProvide();
+import useAlert from "@/composables/useAlert";
+
+const { show, timeout, color, text } = useAlert.provide();
 </script>
 
 <template>

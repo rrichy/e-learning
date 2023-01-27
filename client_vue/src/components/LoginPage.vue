@@ -5,11 +5,11 @@ import { CredentialInterface } from "../interfaces/UserInterface";
 import { useAuthenticationStore } from "../stores/authentication";
 import ComponentLabeler from "./ComponentLabeler.vue";
 import logo from "@/assets/logo.png";
-import { useAlertInject } from "@/composables/useAlert";
+import useAlert from "@/composables/useAlert";
 import TextField from "./Forms/Fields/TextField.vue";
 
 const auth = useAuthenticationStore();
-const { successAlert, errorAlert } = useAlertInject();
+const { successAlert, errorAlert } = useAlert.inject();
 const router = useRouter();
 
 const { mutate, isLoading } = auth.loginMutation();
