@@ -1,4 +1,4 @@
-import { inject, provide, reactive } from "vue";
+import { inject, provide, reactive, toRefs } from "vue";
 
 type AlertConfig = {
   timeout?: number;
@@ -39,7 +39,7 @@ export function useAlertProvide() {
   provide("successAlert", successAlert);
   provide("errorAlert", errorAlert);
 
-  return { alertProps };
+  return { ...toRefs(alertProps) };
 }
 // Custom hook on injecting alert functions
 export function useAlertInject() {

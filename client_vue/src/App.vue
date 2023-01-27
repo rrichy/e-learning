@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import FooterComponent from "@/components/FooterComponent.vue";
-import { useAlertProvide } from "./composables/useAlert";
 import { useRouter } from "vue-router";
+import SnackbarComponent from "./components/SnackbarComponent.vue";
 import { useAuthenticationStore } from "./stores/authentication";
 
 const { isAuthenticated } = useAuthenticationStore();
@@ -22,8 +22,6 @@ router.beforeEach((to, from) => {
     }
   }
 });
-
-const { alertProps } = useAlertProvide();
 </script>
 
 <template>
@@ -33,13 +31,8 @@ const { alertProps } = useAlertProvide();
       <router-view />
     </v-main>
     <FooterComponent />
-    <v-snackbar
-      v-model="alertProps.show"
-      :timeout="alertProps.timeout"
-      :color="alertProps.color"
-    >
-      {{ alertProps.text }}
-    </v-snackbar>
+    <!-- <v-dialog  -->
+    <SnackbarComponent />
   </v-app>
 </template>
 

@@ -61,6 +61,7 @@ onMounted(() => {
       <v-form ref="form" @submit="handleSubmit">
         <ComponentLabeler label="User ID（登録メールアドレス）" stacked>
           <TextField
+            name="email"
             v-model="state.email"
             placeholder="IDを入力してください"
             ref="emailRef"
@@ -68,6 +69,7 @@ onMounted(() => {
         </ComponentLabeler>
         <ComponentLabeler label="パスワード" stacked>
           <TextField
+            name="password"
             v-model="state.password"
             type="password"
             placeholder="パスワードを入力してください"
