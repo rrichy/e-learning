@@ -128,3 +128,18 @@ button:focus-visible {
   border-color: var(--dp-border-color) !important;
   opacity: var(--input-disabled-opacity);
 }
+
+.v-input--error .dp__input {
+  --dp-border-color: #b10020;
+}
+
+.v-input--error .dp__input:hover {
+  --dp-border-color-hover: #b10020;
+}
+
+.v-input--error .dp__input_focus {
+  transition: border-left-color 0ms, border-right-color 0ms,
+    border-top-color 0ms, border-bottom-color 0ms;
+  --dp-border-color-hover: #b10020;
+  box-shadow: 0px 0px 0px 1px #b10020 inset;
+}
