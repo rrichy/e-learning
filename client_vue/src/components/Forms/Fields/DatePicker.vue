@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import useInjectables from "@/composables/useInjectables";
 import Datepicker, { VueDatePicker } from "@vuepic/vue-datepicker";
+import { ja } from "date-fns/locale";
 import { computed } from "vue";
 
 type Value = VueDatePicker["modelValue"];
@@ -19,6 +20,7 @@ const emits = defineEmits<{
 const value = computed<Value>(() => props.modelValue || injectedValue?.value);
 
 function updateModelValue(e: Value) {
+  console.log(e);
   emits("update:modelValue", e);
   if (injectedChange) {
     injectedChange(e);
@@ -36,6 +38,8 @@ const errors = computed<string[]>(() => {
       :model-value="value"
       @update:model-value="updateModelValue"
       v-bind="attrs"
+      locale="ja"
+      :format-locale="ja"
     />
     <!-- TODO: ERROR PROPS -->
     <div class="v-input__details">

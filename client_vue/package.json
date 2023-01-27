@@ -13,6 +13,7 @@
   "dependencies": {
     "@vuepic/vue-datepicker": "^3.6.5",
     "axios": "^1.2.3",
+    "date-fns": "^2.29.3",
     "pinia": "^2.0.29",
     "vue": "^3.2.45",
     "vue-query": "^1.26.0",
