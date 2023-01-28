@@ -3,3 +3,5 @@ export interface ItemAttributes {
   name: string;
   disabled?: boolean;
 }
+
+export type GroupedItemAttributes = { [k: string]: ItemAttributes[] };

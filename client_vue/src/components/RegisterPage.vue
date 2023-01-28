@@ -4,20 +4,21 @@ import { useRouter } from "vue-router";
 import { useAuthenticationStore } from "../stores/authentication";
 import RegistrationForm from "./Forms/RegistrationForm.vue";
 import { useForm } from "vee-validate";
-import useItems from "@/composables/useItems";
 import useConfirm from "@/composables/useConfirm";
 import { registrationFormInit } from "@/interfaces/Forms/RegistrationFormAttributes";
+import useItems from "@/stores/items";
 
 const { show, showConfirmation } = useConfirm.inject();
 const auth = useAuthenticationStore();
 const router = useRouter();
+const { setItems } = useItems();
 
 const form = useForm({
   validationSchema: registrationFormSchema,
   initialValues: registrationFormInit,
 });
 
-useItems({
+setItems({
   sex: [
     { id: 0, name: "未選択", disabled: true },
     { id: 1, name: "男性" },

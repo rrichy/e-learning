@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import useInjectables from "@/composables/useInjectables";
 import { ItemAttributes } from "@/interfaces/ItemAttributes";
+import useItems from "@/stores/items";
 import { useField } from "vee-validate";
-import { Ref, ref, toRef, VNode } from "vue";
+import { computed, Ref, ref, toRef, VNode } from "vue";
 
 const selectRef: Ref<VNode | undefined> = ref();
 
@@ -12,7 +13,10 @@ const props = defineProps<{
   name: string;
 }>();
 
-const { items, disabled } = useInjectables(props);
+const { storedItems } = useItems();
+const items = computed(() => props.items || storedItems[props.name] || []);
+
+const { disabled } = useInjectables(props);
 
 const { value, handleChange, errorMessage } = useField(toRef(props, "name"));
 </script>
