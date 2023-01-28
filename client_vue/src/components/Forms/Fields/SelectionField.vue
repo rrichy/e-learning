@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import useInjectables from "@/composables/useInjectables";
 import { ItemAttributes } from "@/interfaces/ItemAttributes";
-import useItems from "@/stores/items";
+import useItems from "@/composables/useItems";
 import { useField } from "vee-validate";
 import { computed, Ref, ref, toRef, VNode } from "vue";
 

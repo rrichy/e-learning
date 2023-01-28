@@ -6,7 +6,7 @@ import RegistrationForm from "./Forms/RegistrationForm.vue";
 import { useForm } from "vee-validate";
 import useConfirm from "@/composables/useConfirm";
 import { registrationFormInit } from "@/interfaces/Forms/RegistrationFormAttributes";
-import useItems from "@/stores/items";
+import useItems from "@/composables/useItems";
 
 const { show, showConfirmation } = useConfirm.inject();
 const auth = useAuthenticationStore();
