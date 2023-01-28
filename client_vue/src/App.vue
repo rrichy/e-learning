@@ -30,9 +30,8 @@ router.beforeEach((to, from) => {
     <v-app-bar elevation="1" />
     <v-main>
       <SnackbarComponent>
-        <PreviewDialog>
-          <router-view />
-        </PreviewDialog>
+        <router-view />
+        <PreviewDialog />
       </SnackbarComponent>
     </v-main>
     <FooterComponent />

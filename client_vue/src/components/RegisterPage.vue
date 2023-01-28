@@ -4,16 +4,16 @@ import { useRouter } from "vue-router";
 import { useAuthenticationStore } from "../stores/authentication";
 import RegistrationForm from "./Forms/RegistrationForm.vue";
 import { useForm } from "vee-validate";
-import useConfirm from "@/composables/useConfirm";
+import usePreviewDialogStore from "@/stores/usePreviewDialogStore";
 import { registrationFormInit } from "@/interfaces/Forms/RegistrationFormAttributes";
-import useItems from "@/composables/useItems";
+import useItemStore from "@/stores/useItemStore";
 
-const { show, showConfirmation } = useConfirm.inject();
+const { showPreview } = usePreviewDialogStore();
 const auth = useAuthenticationStore();
 const router = useRouter();
-const { setItems } = useItems();
+const { setItems } = useItemStore();
 
-const { values, isSubmitting, handleSubmit } = useForm({
+const { isSubmitting, handleSubmit } = useForm({
   validationSchema: registrationFormSchema,
   initialValues: registrationFormInit,
 });
@@ -29,7 +29,7 @@ setItems({
 const onSubmit = handleSubmit(async (values) => {
   console.log(values);
 
-  const confirmed = await showConfirmation(values);
+  const confirmed = await showPreview(values);
   console.log(confirmed);
 });
 

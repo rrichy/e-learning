@@ -2,7 +2,7 @@ import { GroupedItemAttributes } from "@/interfaces/ItemAttributes";
 import { defineStore } from "pinia";
 import { reactive } from "vue";
 
-const useItems = defineStore("items-store", () => {
+const useItemStore = defineStore("item-store", () => {
   const storedItems = reactive({} as GroupedItemAttributes);
 
   function setItems(items: GroupedItemAttributes) {
@@ -12,4 +12,4 @@ const useItems = defineStore("items-store", () => {
   return { storedItems, setItems };
 });
 
-export default useItems;
+export default useItemStore;

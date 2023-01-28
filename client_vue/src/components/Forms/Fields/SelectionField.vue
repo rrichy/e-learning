@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ItemAttributes } from "@/interfaces/ItemAttributes";
-import useItems from "@/composables/useItems";
+import useItemStore from "@/stores/useItemStore";
 import { useField } from "vee-validate";
 import { computed, Ref, ref, toRef, VNode } from "vue";
 import useDisabled from "@/composables/useDisabled";
@@ -13,7 +13,7 @@ const props = defineProps<{
   name: string;
 }>();
 
-const { storedItems } = useItems();
+const { storedItems } = useItemStore();
 const { value, handleChange, errorMessage } = useField(toRef(props, "name"));
 const { disabled } = useDisabled.inject(props);
 

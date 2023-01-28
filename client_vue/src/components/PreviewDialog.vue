@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import useConfirm from "@/composables/useConfirm";
+import usePreviewDialogStore from "@/stores/usePreviewDialogStore";
 import { AppForm } from "@/interfaces/Forms/FormBase";
 import RegistrationForm from "./Forms/RegistrationForm.vue";
+import { storeToRefs } from "pinia";
 
-const { show, proceed, cancel, values } = useConfirm.provide();
+const { show, proceed, cancel, values } = storeToRefs(usePreviewDialogStore());
 </script>
 
 <template>
-  <slot />
   <v-dialog v-model="show" persistent>
     <v-card>
       <v-container>
