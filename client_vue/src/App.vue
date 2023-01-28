@@ -2,10 +2,10 @@
 import FooterComponent from "@/components/FooterComponent.vue";
 import { useRouter } from "vue-router";
 import PreviewDialog from "./components/PreviewDialog.vue";
-import SnackbarComponent from "./components/SnackbarComponent.vue";
-import { useAuthenticationStore } from "./stores/authentication";
+import SnackbarPrompt from "./components/SnackbarPrompt.vue";
+import useAuthStore from "./stores/useAuthStore";
 
-const { isAuthenticated } = useAuthenticationStore();
+const { isAuthenticated } = useAuthStore();
 const router = useRouter();
 
 router.beforeEach((to, from) => {
@@ -29,12 +29,11 @@ router.beforeEach((to, from) => {
   <v-app>
     <v-app-bar elevation="1" />
     <v-main>
-      <SnackbarComponent>
-        <router-view />
-        <PreviewDialog />
-      </SnackbarComponent>
+      <router-view />
     </v-main>
     <FooterComponent />
+    <PreviewDialog />
+    <SnackbarPrompt />
   </v-app>
 </template>
 

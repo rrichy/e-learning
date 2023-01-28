@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import useAlert from "@/composables/useAlert";
+import useAlertStore from "@/stores/useAlertStore";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { useAuthenticationStore } from "../stores/authentication";
+import useAuthStore from "../stores/useAuthStore";
 
-const auth = useAuthenticationStore();
-const { successAlert, errorAlert } = useAlert.inject();
+const auth = useAuthStore();
+const { successAlert, errorAlert } = useAlertStore();
 const router = useRouter();
 const { mutate } = auth.logoutMutation();
 

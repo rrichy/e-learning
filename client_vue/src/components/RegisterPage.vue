@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { registrationFormSchema } from "@/validations/RegistrationFormValidation";
 import { useRouter } from "vue-router";
-import { useAuthenticationStore } from "../stores/authentication";
+import useAuthStore from "../stores/useAuthStore";
 import RegistrationForm from "./Forms/RegistrationForm.vue";
 import { useForm } from "vee-validate";
 import usePreviewDialogStore from "@/stores/usePreviewDialogStore";
@@ -9,7 +9,7 @@ import { registrationFormInit } from "@/interfaces/Forms/RegistrationFormAttribu
 import useItemStore from "@/stores/useItemStore";
 
 const { showPreview } = usePreviewDialogStore();
-const auth = useAuthenticationStore();
+const auth = useAuthStore();
 const router = useRouter();
 const { setItems } = useItemStore();
 

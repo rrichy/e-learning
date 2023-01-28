@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import useAlert from "@/composables/useAlert";
+import useAlertStore from "@/stores/useAlertStore";
+import { storeToRefs } from "pinia";
 
-const { show, timeout, color, text } = useAlert.provide();
+const { show, timeout, color, text } = storeToRefs(useAlertStore());
 </script>
 
 <template>
-  <slot />
   <v-snackbar v-model="show" :timeout="timeout" :color="color">
     {{ text }}
   </v-snackbar>
