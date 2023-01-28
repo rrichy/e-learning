@@ -4,15 +4,6 @@ import Yup from "./localizedYup";
 
 const { string, number, date, ref } = Yup;
 
-export interface RegistrationFormAttributes {
-  name: string;
-  email: string;
-  sex: number;
-  birthday: Date | null;
-  password: string;
-  password_confirmation: string;
-}
-
 export const registrationFormSchema = Yup.object({
   // image: mixed().label("アイコン画像").nullable(),
   name: string().label("氏名").required().name(),
@@ -43,15 +34,15 @@ export const registrationFormSchema = Yup.object({
 // export interface AdminRegistrationFormAttribute
 //   extends InferType<typeof adminRegistrationFormSchema> {}
 
-export const registrationFormInit: RegistrationFormAttributes = {
-  // image: null,
-  name: "",
-  email: "",
-  sex: 0,
-  birthday: null,
-  password: "",
-  password_confirmation: "",
-};
+// export const registrationFormInit: RegistrationFormAttributes = {
+//   // image: null,
+//   name: "",
+//   email: "",
+//   sex: 0,
+//   birthday: null,
+//   password: "",
+//   password_confirmation: "",
+// };
 
 // export const adminRegistrationFormInit: AdminRegistrationFormAttribute = {
 //   ...registrationFormInit,

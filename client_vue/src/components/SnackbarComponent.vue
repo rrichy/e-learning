@@ -5,6 +5,7 @@ const { show, timeout, color, text } = useAlert.provide();
 </script>
 
 <template>
+  <slot />
   <v-snackbar v-model="show" :timeout="timeout" :color="color">
     {{ text }}
   </v-snackbar>
