@@ -1,6 +1,6 @@
 // import { MembershipType } from "@/enums/membershipTypes";
 // import { OptionAttribute } from "@/interfaces/CommonInterface";
-import Yup from "./localizedYup";
+import Yup from "@/configs/yup";
 
 const { string, number, date, ref } = Yup;
 
@@ -8,7 +8,7 @@ export const registrationFormSchema = Yup.object({
   // image: mixed().label("アイコン画像").nullable(),
   name: string().label("氏名").required().name(),
   email: string().label("メールアドレス").required().email(),
-  sex: number().label("性別").required().selectionId(),
+  sex: number().label("性別").selectionId(true),
   birthday: date().label("生年月日").required(),
   password: string().label("パスワード").required().password(),
   password_confirmation: string()

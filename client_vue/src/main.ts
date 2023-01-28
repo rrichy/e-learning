@@ -32,7 +32,7 @@ const vuetify = createVuetify({
 import HelloWorld from "@/components/HelloWorld.vue";
 import LoginPage from "@/components/LoginPage.vue";
 import RegisterPage from "@/components/RegisterPage.vue";
-import axiosSetup from "@/axios";
+import axiosSetup from "@/configs/axios";
 
 axiosSetup();
 

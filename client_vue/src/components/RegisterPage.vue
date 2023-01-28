@@ -1,19 +1,22 @@
 <script setup lang="ts">
 import { registrationFormSchema } from "@/validations/RegistrationFormValidation";
 import { useRouter } from "vue-router";
-import useAuthStore from "../stores/useAuthStore";
 import RegistrationForm from "./Forms/RegistrationForm.vue";
 import { useForm } from "vee-validate";
 import usePreviewDialogStore from "@/stores/usePreviewDialogStore";
 import { registrationFormInit } from "@/interfaces/Forms/RegistrationFormAttributes";
 import useItemStore from "@/stores/useItemStore";
+import { ref } from "vue";
+import useRegisterMutation from "@/mutations/useRegisterMutation";
+import { handleError, handleSuccess } from "@/utils/mutationResponseHandler";
 
 const { showPreview } = usePreviewDialogStore();
-const auth = useAuthStore();
+const { mutate, isLoading } = useRegisterMutation();
 const router = useRouter();
 const { setItems } = useItemStore();
 
-const { isSubmitting, handleSubmit } = useForm({
+const agree = ref(false);
+const { isSubmitting, handleSubmit, meta, setErrors } = useForm({
   validationSchema: registrationFormSchema,
   initialValues: registrationFormInit,
 });
@@ -27,19 +30,17 @@ setItems({
 });
 
 const onSubmit = handleSubmit(async (values) => {
-  console.log(values);
-
   const confirmed = await showPreview(values);
-  console.log(confirmed);
+  if (confirmed) {
+    mutate(values, {
+      onSuccess: (res: unknown) => {
+        handleSuccess(res, "Registered Successfully!");
+        router.push("/login");
+      },
+      onError: (err: unknown) => handleError(err, setErrors),
+    });
+  }
 });
-
-function handleSexChange(e: Event, data: any) {
-  console.log({ e, data });
-}
-
-function itemsProps(item: any) {
-  return true;
-}
 </script>
 
 <template>
@@ -58,6 +59,7 @@ function itemsProps(item: any) {
           density="compact"
           color="primary"
           hide-details
+          v-model="agree"
         />
         <v-btn
           type="submit"
@@ -66,7 +68,8 @@ function itemsProps(item: any) {
           height="60"
           class="font-weight-bold"
           form="registration-form"
-          :loading="isSubmitting"
+          :loading="isSubmitting || isLoading"
+          :disabled="!(meta.valid && agree)"
         >
           登録
         </v-btn>
@@ -79,24 +82,6 @@ function itemsProps(item: any) {
 </template>
 
 <style scoped>
-.v-sheet__title {
-  margin: 0;
-  background-color: #323232;
-  color: #ffffff;
-  font-size: 20px;
-  font-weight: bold;
-  padding: 16px 10px 12px 12px;
-  border-left: 5px solid #00b4aa;
-  display: block;
-}
-
-.v-sheet__content {
-  gap: 24px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
 button {
   box-shadow: 0 3px rgba(0, 150, 150);
 }
