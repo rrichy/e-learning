@@ -15,7 +15,7 @@ const { show, proceed, cancel, values } = useConfirm.provide();
           v-if="values.discriminator === AppForm.RegistrationForm"
           disabled
         />
-        <RegistrationForm v-if="false" disabled />
+        <RegistrationForm v-if="false" />
       </v-container>
       <v-card-actions>
         <v-btn color="secondary" @click="cancel">Cancel</v-btn>

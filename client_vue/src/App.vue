@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import FooterComponent from "@/components/FooterComponent.vue";
 import { useRouter } from "vue-router";
-import ConfirmationComponent from "./components/ConfirmationComponent.vue";
+import PreviewDialog from "./components/PreviewDialog.vue";
 import SnackbarComponent from "./components/SnackbarComponent.vue";
 import { useAuthenticationStore } from "./stores/authentication";
 
@@ -30,9 +30,9 @@ router.beforeEach((to, from) => {
     <v-app-bar elevation="1" />
     <v-main>
       <SnackbarComponent>
-        <ConfirmationComponent>
+        <PreviewDialog>
           <router-view />
-        </ConfirmationComponent>
+        </PreviewDialog>
       </SnackbarComponent>
     </v-main>
     <FooterComponent />

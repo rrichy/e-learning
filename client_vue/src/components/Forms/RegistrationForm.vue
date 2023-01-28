@@ -1,16 +1,15 @@
 <script setup lang="ts">
-import { provide, Ref, ref } from "vue";
+import { Ref, ref } from "vue";
 import ComponentLabeler from "../ComponentLabeler.vue";
 import SelectionField from "./Fields/SelectionField.vue";
 import TextField from "./Fields/TextField.vue";
 import DatePicker from "./Fields/DatePicker.vue";
+import useDisabled from "@/composables/useDisabled";
 
 const formRef: Ref<HTMLFormElement | null> = ref(null);
-const props = defineProps<{
-  disabled?: boolean;
-}>();
+const props = defineProps<{ disabled?: boolean }>();
 
-provide("inject:disabled", props.disabled);
+useDisabled.provide(props);
 
 defineExpose({
   formRef,

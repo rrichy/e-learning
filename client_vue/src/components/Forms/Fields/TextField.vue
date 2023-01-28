@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import useInjectables from "@/composables/useInjectables";
 import { computed, Ref, ref, toRef, VNodeRef } from "vue";
 import { useField } from "vee-validate";
 import { VTextField } from "vuetify/components";
+import useDisabled from "@/composables/useDisabled";
 
 const inputRef: Ref<VNodeRef | undefined> = ref();
 const showPassword = ref(false);
@@ -17,7 +17,7 @@ const emits = defineEmits<{
   (e: "click:appendInner", v: unknown): void;
 }>();
 
-const { disabled } = useInjectables(props);
+const { disabled } = useDisabled.inject(props);
 
 const type = computed(() => {
   if (props.type === "password") {

@@ -13,7 +13,7 @@ const auth = useAuthenticationStore();
 const router = useRouter();
 const { setItems } = useItems();
 
-const form = useForm({
+const { values, isSubmitting, handleSubmit } = useForm({
   validationSchema: registrationFormSchema,
   initialValues: registrationFormInit,
 });
@@ -26,12 +26,12 @@ setItems({
   ],
 });
 
-async function handleSubmit(e: Event) {
-  console.log(form.values);
+const onSubmit = handleSubmit(async (values) => {
+  console.log(values);
 
-  const confirmed = await showConfirmation(form.values);
+  const confirmed = await showConfirmation(values);
   console.log(confirmed);
-}
+});
 
 function handleSexChange(e: Event, data: any) {
   console.log({ e, data });
@@ -47,10 +47,7 @@ function itemsProps(item: any) {
     <v-sheet elevation="1" outlined width="100%" max-width="600">
       <div class="v-sheet__title">アカウント登録</div>
       <div class="v-sheet__content pa-4 pa-sm-10">
-        <RegistrationForm
-          id="registration-form"
-          @submit.prevent="handleSubmit"
-        />
+        <RegistrationForm id="registration-form" @submit="onSubmit" />
         <router-link to="/rules" class="a-btn">
           <v-btn append-icon="mdi-arrow-right" variant="outlined">
             利用規約
@@ -69,7 +66,7 @@ function itemsProps(item: any) {
           height="60"
           class="font-weight-bold"
           form="registration-form"
-          :loading="show"
+          :loading="isSubmitting"
         >
           登録
         </v-btn>

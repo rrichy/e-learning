@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import useInjectables from "@/composables/useInjectables";
+import useDisabled from "@/composables/useDisabled";
 import Datepicker, { VueDatePicker } from "@vuepic/vue-datepicker";
 import { ja } from "date-fns/locale";
 import { useField } from "vee-validate";
@@ -12,11 +12,10 @@ const props = defineProps<{
   name: string;
 }>();
 
-const { disabled } = useInjectables(props);
-
 const { value, handleChange, errorMessage } = useField<Value>(
   toRef(props, "name")
 );
+const { disabled } = useDisabled.inject(props);
 
 const className = computed(() => (errorMessage.value ? "v-input--error" : ""));
 </script>
