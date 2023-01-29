@@ -49,11 +49,15 @@ const useAuthStore = defineStore("auth-store", () => {
       count.value = res.data.users_count;
       categories.value = res.data.categories ?? [];
     } catch (e: unknown) {
-      logout();
+      cleanup();
     }
   }
 
-  function logout() {
+  function setUnauthenticate() {
+    isAuthenticated.value = false;
+  }
+
+  function cleanup() {
     token.value = null;
     isAuthenticated.value = false;
     data.value = null;
@@ -67,7 +71,8 @@ const useAuthStore = defineStore("auth-store", () => {
     isAuthenticated,
     data,
     useGetAuthData,
-    logout,
+    setUnauthenticate,
+    cleanup,
     token,
   };
 });

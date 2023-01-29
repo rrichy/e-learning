@@ -2,6 +2,7 @@
 import FooterComponent from "@/components/FooterComponent.vue";
 import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
+import AppBar from "./components/AppBar.vue";
 import PreviewDialog from "./components/PreviewDialog.vue";
 import SnackbarPrompt from "./components/SnackbarPrompt.vue";
 import useAuthStore from "./stores/useAuthStore";
@@ -28,7 +29,7 @@ router.beforeEach((to, from) => {
 
 <template>
   <v-app>
-    <v-app-bar elevation="1" />
+    <AppBar />
     <v-main>
       <router-view />
     </v-main>
