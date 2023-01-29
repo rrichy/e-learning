@@ -2,35 +2,37 @@ import { CredentialInterface } from "@/interfaces/AuthAttributes";
 import useAlertStore from "@/stores/useAlertStore";
 import useAuthStore from "@/stores/useAuthStore";
 import axios from "axios";
-import { storeToRefs } from "pinia";
-import { useMutation } from "vue-query";
+import { useMutation, useQueryClient } from "vue-query";
 import { useRouter } from "vue-router";
 
 export function useLoginMutation() {
-  const { isAuthenticated, token } = storeToRefs(useAuthStore());
+  const store = useAuthStore();
   return useMutation(
     (credentials: CredentialInterface) => axios.post("/api/login", credentials),
     {
-      onSuccess: (res) => {
-        isAuthenticated.value = true;
-        token.value = res.data.access_token;
-        localStorage.setItem("access_token", res.data.access_token);
-        axios.defaults.headers.common["Authorization"] =
-          "Bearer " + token.value;
+      onSuccess: (response: { data: { access_token: string } }) => {
+        const token = response.data.access_token;
+        store.$patch({
+          token,
+          isAuthenticated: true,
+        });
+        localStorage.setItem("access_token", token);
+        axios.defaults.headers.common["Authorization"] = "Bearer " + token;
       },
     }
   );
 }
 
 export function useLogoutMutation() {
-  const { cleanup, setUnauthenticate } = useAuthStore();
+  const queryClient = useQueryClient();
+  const store = useAuthStore();
   const { successAlert, errorAlert } = useAlertStore();
-  const router = useRouter();
+  const { push } = useRouter();
 
   return useMutation(
     (_: unknown) => {
-      setUnauthenticate();
-      router.push("/login");
+      store.$patch({ isAuthenticated: false });
+      push("/login");
       return axios.post("/api/logout");
     },
     {
@@ -39,7 +41,8 @@ export function useLogoutMutation() {
         errorAlert("Failed to log out properly");
       },
       onSettled: () => {
-        cleanup();
+        store.cleanup();
+        queryClient.invalidateQueries();
       },
     }
   );

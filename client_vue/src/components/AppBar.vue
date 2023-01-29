@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { useLogoutMutation } from "@/mutations/useAuthMutation";
-import useAlertStore from "@/stores/useAlertStore";
+import useAuthDataQuery from "@/queries/useAuthDataQuery";
 import useAuthStore from "@/stores/useAuthStore";
 import { storeToRefs } from "pinia";
 
-const { isAuthenticated, data } = storeToRefs(useAuthStore());
+const { isAuthenticated } = storeToRefs(useAuthStore());
+
+const { data } = useAuthDataQuery(isAuthenticated);
 const { mutate } = useLogoutMutation();
 </script>
 
@@ -21,9 +23,9 @@ const { mutate } = useLogoutMutation();
         </template>
         <v-list>
           <v-list-item
-            :title="data?.name"
-            :subtitle="data?.email"
-            :prepend-avatar="data?.image || undefined"
+            :title="data?.user.name"
+            :subtitle="data?.user.email"
+            :prepend-avatar="data?.user.image || undefined"
           />
           <v-list-item to="/profile"> アカウントを編集 </v-list-item>
           <v-list-item @click="mutate"> ログアウト </v-list-item>
