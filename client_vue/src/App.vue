@@ -1,18 +1,20 @@
 <script setup lang="ts">
 import FooterComponent from "@/components/FooterComponent.vue";
+import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
+import AppBar from "./components/AppBar.vue";
 import PreviewDialog from "./components/PreviewDialog.vue";
 import SnackbarPrompt from "./components/SnackbarPrompt.vue";
 import useAuthStore from "./stores/useAuthStore";
 
-const { isAuthenticated } = useAuthStore();
+const { isAuthenticated } = storeToRefs(useAuthStore());
 const router = useRouter();
 
 router.beforeEach((to, from) => {
   const toName = to.name?.toString() || "";
   const fromName = from.name?.toString || "";
   console.log({ toName, fromName });
-  if (isAuthenticated()) {
+  if (isAuthenticated.value) {
     if (["login", "register", "forgot-password"].includes(toName)) {
       return { name: "root" };
     }
@@ -27,7 +29,7 @@ router.beforeEach((to, from) => {
 
 <template>
   <v-app>
-    <v-app-bar elevation="1" />
+    <AppBar />
     <v-main>
       <router-view />
     </v-main>
