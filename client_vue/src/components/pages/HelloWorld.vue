@@ -3,7 +3,7 @@ import { useLogoutMutation } from "@/mutations/useAuthMutation";
 import useAlertStore from "@/stores/useAlertStore";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import useAuthStore from "../stores/useAuthStore";
+import useAuthStore from "../../stores/useAuthStore";
 
 const auth = useAuthStore();
 const { successAlert, errorAlert } = useAlertStore();

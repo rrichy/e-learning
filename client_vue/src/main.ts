@@ -29,9 +29,9 @@ const vuetify = createVuetify({
   },
 });
 
-import HelloWorld from "@/components/HelloWorld.vue";
-import LoginPage from "@/components/LoginPage.vue";
-import RegisterPage from "@/components/RegisterPage.vue";
+import HelloWorld from "@/components/pages/HelloWorld.vue";
+import LoginPage from "@/components/pages/LoginPage.vue";
+import RegisterPage from "@/components/pages/RegisterPage.vue";
 import axiosSetup from "@/configs/axios";
 
 axiosSetup();

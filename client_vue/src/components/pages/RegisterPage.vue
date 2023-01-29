@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { registrationFormSchema } from "@/validations/RegistrationFormValidation";
 import { useRouter } from "vue-router";
-import RegistrationForm from "./Forms/RegistrationForm.vue";
+import RegistrationForm from "../Forms/RegistrationForm.vue";
 import { useForm } from "vee-validate";
 import usePreviewDialogStore from "@/stores/usePreviewDialogStore";
 import { registrationFormInit } from "@/interfaces/Forms/RegistrationFormAttributes";

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import ComponentLabeler from "./ComponentLabeler.vue";
+import ComponentLabeler from "../ComponentLabeler.vue";
 import logo from "@/assets/logo.png";
-import TextField from "./Forms/Fields/TextField.vue";
+import TextField from "../Forms/Fields/TextField.vue";
 import { useLoginMutation } from "@/mutations/useAuthMutation";
 import { CredentialInterface } from "@/interfaces/AuthAttributes";
 import { handleError, handleSuccess } from "@/utils/mutationResponseHandler";
