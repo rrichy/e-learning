@@ -1,39 +1,41 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { CredentialInterface } from "../interfaces/UserInterface";
-import useAuthStore from "../stores/useAuthStore";
 import ComponentLabeler from "./ComponentLabeler.vue";
 import logo from "@/assets/logo.png";
-import useAlertStore from "@/stores/useAlertStore";
 import TextField from "./Forms/Fields/TextField.vue";
+import { useLoginMutation } from "@/mutations/useAuthMutation";
+import { CredentialInterface } from "@/interfaces/AuthAttributes";
+import { handleError, handleSuccess } from "@/utils/mutationResponseHandler";
+import { useForm } from "vee-validate";
 
-const auth = useAuthStore();
-const { successAlert, errorAlert } = useAlertStore();
+const form = useForm({
+  initialValues: {
+    email: "",
+    password: "",
+  } as CredentialInterface,
+});
+
 const router = useRouter();
 
-const { mutate, isLoading } = auth.loginMutation();
-const form = ref<HTMLFormElement>();
+const { mutate, isLoading } = useLoginMutation();
 const emailRef = ref();
 
-const state: CredentialInterface = reactive({
+const credentials: CredentialInterface = reactive({
   email: "",
   password: "",
 });
 
 function handleSubmit(e: Event) {
   e.preventDefault();
-  mutate(state, {
-    onSuccess: (res: any) => {
-      successAlert(res.data.message);
+  mutate(credentials, {
+    onSuccess: (response: unknown) => {
+      handleSuccess(response);
       router.push("/");
     },
-    onError: (e: any) => {
-      Object.assign(state, {
-        email: "",
-        password: "",
-      });
-      errorAlert(e.response.data.message);
+    onError: (error: unknown) => {
+      // TODO better error response
+      handleError(error, form.setErrors);
     },
   });
 }
@@ -62,7 +64,7 @@ onMounted(() => {
         <ComponentLabeler label="User ID（登録メールアドレス）" stacked>
           <TextField
             name="email"
-            v-model="state.email"
+            v-model="credentials.email"
             placeholder="IDを入力してください"
             ref="emailRef"
           />
@@ -70,7 +72,7 @@ onMounted(() => {
         <ComponentLabeler label="パスワード" stacked>
           <TextField
             name="password"
-            v-model="state.password"
+            v-model="credentials.password"
             type="password"
             placeholder="パスワードを入力してください"
           />

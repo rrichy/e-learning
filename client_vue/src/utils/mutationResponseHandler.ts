@@ -21,9 +21,10 @@ export function handleSuccess(_response: unknown, fallbackMsg = "") {
   return response;
 }
 
+// Will show an error alert and show error fields in setErrors Fn is supplied
 export function handleError(
   _error: unknown,
-  setErrors: (
+  setErrors?: (
     fields: Partial<Record<keyof undefined, string | undefined>>
   ) => void
 ) {
@@ -31,12 +32,14 @@ export function handleError(
   const error = _error as BEErrorResponse;
   errorAlert(error.response?.data?.message || error.message);
 
-  const errors: { [k: string]: string } = {};
-  if (error.response.data?.errors) {
-    for (const name in error.response.data.errors) {
-      errors[name] = error.response.data.errors[name][0];
+  if (setErrors) {
+    const errors: { [k: string]: string } = {};
+    if (error.response.data?.errors) {
+      for (const name in error.response.data.errors) {
+        errors[name] = error.response.data.errors[name][0];
+      }
     }
-  }
 
-  setErrors(errors);
+    setErrors(errors);
+  }
 }

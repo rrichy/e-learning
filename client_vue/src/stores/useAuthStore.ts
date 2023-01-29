@@ -1,11 +1,8 @@
 import { defineStore } from "pinia";
 import { Ref, ref } from "vue";
-import { useMutation, useQuery } from "vue-query";
+import { useQuery } from "vue-query";
 import axios from "axios";
-import {
-  CredentialInterface,
-  UserAttributes,
-} from "../interfaces/AuthAttributes";
+import { UserAttributes } from "../interfaces/AuthAttributes";
 
 interface CountAttributes {
   individual?: number;
@@ -32,30 +29,6 @@ const useAuthStore = defineStore("auth-store", () => {
   if (token.value) {
     axios.defaults.headers.common["Authorization"] = "Bearer " + token.value;
     getAuthData();
-  }
-
-  // Creates a login mutation
-  function loginMutation() {
-    return useMutation(
-      (credentials: CredentialInterface) =>
-        axios.post("/api/login", credentials),
-      {
-        onSuccess: (res) => {
-          isAuthenticated.value = true;
-          token.value = res.data.access_token;
-          localStorage.setItem("access_token", res.data.access_token);
-          axios.defaults.headers.common["Authorization"] =
-            "Bearer " + token.value;
-        },
-      }
-    );
-  }
-
-  // Creates a logout mutation
-  function logoutMutation() {
-    return useMutation((_: unknown) => axios.post("/api/logout"), {
-      onSettled: logout,
-    });
   }
 
   // Creates a get data query
@@ -91,12 +64,9 @@ const useAuthStore = defineStore("auth-store", () => {
   }
 
   return {
-    isAuthenticated: () => isAuthenticated.value,
+    isAuthenticated,
     data,
-    loginMutation,
-    logoutMutation,
     useGetAuthData,
-    // getAuthData,
     logout,
     token,
   };
