@@ -1,4 +1,5 @@
 import { CredentialInterface } from "@/interfaces/AuthAttributes";
+import { AdminMyPageAttributes } from "@/interfaces/Forms/MyPageFormAttributes";
 import useAlertStore from "@/stores/useAlertStore";
 import useAuthStore from "@/stores/useAuthStore";
 import axios from "axios";
@@ -46,4 +47,8 @@ export function useLogoutMutation() {
       },
     }
   );
+}
+
+export function useUpdateAuthMutation<T = AdminMyPageAttributes>() {
+  return useMutation((values: T) => axios.put("/api/me", values));
 }

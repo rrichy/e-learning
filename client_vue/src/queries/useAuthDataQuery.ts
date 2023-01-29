@@ -1,10 +1,19 @@
-import { UserAttributes } from "@/interfaces/AuthAttributes";
+import {
+  AdminUserInterface,
+  CorporateUserInterface,
+  IndividualUserInterface,
+  TrialUserInterface,
+} from "@/interfaces/UserInterface";
 import axios from "axios";
-import { Ref } from "vue";
 import { useQuery } from "vue-query";
+import { MaybeRef } from "vue-query/lib/vue/types";
 
 interface BEGetMeDataResponse {
-  user: UserAttributes;
+  user:
+    | AdminUserInterface
+    | IndividualUserInterface
+    | CorporateUserInterface
+    | TrialUserInterface;
   users_count: {
     trial?: number;
     individual?: number;
@@ -14,7 +23,7 @@ interface BEGetMeDataResponse {
   message?: string;
 }
 
-export default function (enabled: Ref<boolean>) {
+export default function (enabled: MaybeRef<boolean>) {
   return useQuery(
     "authenticated-user-data",
     async () => {

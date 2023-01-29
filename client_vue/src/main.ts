@@ -33,6 +33,7 @@ import HelloWorld from "@/components/pages/HelloWorld.vue";
 import LoginPage from "@/components/pages/LoginPage.vue";
 import RegisterPage from "@/components/pages/RegisterPage.vue";
 import axiosSetup from "@/configs/axios";
+import MyUpdatePageVue from "./components/pages/MyUpdatePage.vue";
 
 axiosSetup();
 
@@ -47,6 +48,7 @@ const router = createRouter({
     },
     { path: "/login", name: "login", component: LoginPage },
     { path: "/register", name: "register", component: RegisterPage },
+    { path: "/my-page", name: "my-page", component: MyUpdatePageVue },
   ],
   history: createWebHashHistory(),
 });

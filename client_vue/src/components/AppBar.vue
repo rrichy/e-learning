@@ -27,7 +27,7 @@ const { mutate } = useLogoutMutation();
             :subtitle="data?.user.email"
             :prepend-avatar="data?.user.image || undefined"
           />
-          <v-list-item to="/profile"> アカウントを編集 </v-list-item>
+          <v-list-item to="/my-page"> アカウントを編集 </v-list-item>
           <v-list-item @click="mutate"> ログアウト </v-list-item>
         </v-list>
       </v-menu>

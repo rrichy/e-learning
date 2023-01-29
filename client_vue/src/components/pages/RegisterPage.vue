@@ -9,6 +9,7 @@ import useItemStore from "@/stores/useItemStore";
 import { ref } from "vue";
 import useRegisterMutation from "@/mutations/useRegisterMutation";
 import { handleError, handleSuccess } from "@/utils/mutationResponseHandler";
+import FormSheet from "../Forms/FormSheet.vue";
 
 const { showPreview } = usePreviewDialogStore();
 const { mutate, isLoading } = useRegisterMutation();
@@ -44,41 +45,32 @@ const onSubmit = handleSubmit(async (values) => {
 </script>
 
 <template>
-  <v-container class="d-flex justify-center">
-    <v-sheet elevation="1" outlined width="100%" max-width="600">
-      <div class="v-sheet__title">アカウント登録</div>
-      <div class="v-sheet__content pa-4 pa-sm-10">
-        <RegistrationForm id="registration-form" @submit="onSubmit" />
-        <router-link to="/rules" class="a-btn">
-          <v-btn append-icon="mdi-arrow-right" variant="outlined">
-            利用規約
-          </v-btn>
-        </router-link>
-        <v-checkbox
-          label="利用規約に同意する"
-          density="compact"
-          color="primary"
-          hide-details
-          v-model="agree"
-        />
-        <v-btn
-          type="submit"
-          color="primary"
-          block
-          height="60"
-          class="font-weight-bold"
-          form="registration-form"
-          :loading="isSubmitting || isLoading"
-          :disabled="!(meta.valid && agree)"
-        >
-          登録
-        </v-btn>
-        <router-link to="/login" class="text-caption"
-          >ホームページへ</router-link
-        >
-      </div>
-    </v-sheet>
-  </v-container>
+  <FormSheet title="アカウント登録">
+    <RegistrationForm id="registration-form" @submit="onSubmit" />
+    <router-link to="/rules" class="a-btn">
+      <v-btn append-icon="mdi-arrow-right" variant="outlined"> 利用規約 </v-btn>
+    </router-link>
+    <v-checkbox
+      label="利用規約に同意する"
+      density="compact"
+      color="primary"
+      hide-details
+      v-model="agree"
+    />
+    <v-btn
+      type="submit"
+      color="primary"
+      block
+      height="60"
+      class="font-weight-bold"
+      form="registration-form"
+      :loading="isSubmitting || isLoading"
+      :disabled="!(meta.valid && agree)"
+    >
+      登録
+    </v-btn>
+    <router-link to="/login" class="text-caption">ホームページへ</router-link>
+  </FormSheet>
 </template>
 
 <style scoped>
