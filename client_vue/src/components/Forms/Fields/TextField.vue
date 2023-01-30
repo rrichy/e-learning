@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { computed, Ref, ref, toRef, VNodeRef } from "vue";
-import { useField } from "vee-validate";
+import { Ref, ref, VNodeRef, watch } from "vue";
+import { Field } from "vee-validate";
 import { VTextField } from "vuetify/components";
 import useDisabled from "@/composables/useDisabled";
 
 const inputRef: Ref<VNodeRef | undefined> = ref();
 const showPassword = ref(false);
+const type: Ref<string | undefined> = ref();
+const appendInnerIcon: Ref<string | undefined> = ref();
 
 const props = defineProps<{
   type?: string;
@@ -19,23 +21,28 @@ const emits = defineEmits<{
 
 const { disabled } = useDisabled.inject(props);
 
-const type = computed(() => {
-  if (props.type === "password") {
-    return showPassword.value ? "text" : "password";
-  } else {
-    return props.type as string | undefined;
-  }
-});
-
-const appendInnerIcon = computed(() => {
-  if (props.type === "password") {
-    return showPassword.value ? "mdi-eye" : "mdi-eye-off";
-  } else {
-    return undefined;
-  }
-});
+watch(
+  showPassword,
+  (show) => {
+    console.log("watching password type textfield");
+    if (props.type === "password") {
+      if (show) {
+        type.value = "text";
+        appendInnerIcon.value = "mdi-eye";
+      } else {
+        type.value = "password";
+        appendInnerIcon.value = "mdi-eye-off";
+      }
+    } else {
+      type.value = props.type;
+      appendInnerIcon.value = undefined;
+    }
+  },
+  { immediate: true }
+);
 
 function clickAppendInner(...args: unknown[]) {
+  console.log("append inner click fn");
   if (props.type === "password") {
     showPassword.value = !showPassword.value;
   } else {
@@ -43,28 +50,26 @@ function clickAppendInner(...args: unknown[]) {
   }
 }
 
-const { errorMessage, value, handleChange } = useField(toRef(props, "name"));
-
 defineExpose({
   inputRef,
 });
 </script>
 
 <template>
-  <v-text-field
-    ref="inputRef"
-    :model-value="value"
-    @update:model-value="handleChange"
-    variant="outlined"
-    density="compact"
-    color="primary"
-    :error-messages="errorMessage"
-    :name="name"
-    :append-inner-icon="appendInnerIcon"
-    :type="type"
-    @click:append-inner="clickAppendInner"
-    :disabled="disabled"
-  />
+  <Field :name="name" v-slot="{ field, errors }">
+    <v-text-field
+      v-bind="{ ...field, ...$attrs }"
+      ref="inputRef"
+      variant="outlined"
+      density="compact"
+      color="primary"
+      :error-messages="errors"
+      :append-inner-icon="appendInnerIcon"
+      :type="type"
+      @click:append-inner="clickAppendInner"
+      :disabled="disabled"
+    />
+  </Field>
 </template>
 
 <style scoped></style>

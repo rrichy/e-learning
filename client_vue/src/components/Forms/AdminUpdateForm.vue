@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { AdminMyPageAttributes } from "@/interfaces/Forms/MyPageFormAttributes";
-import { adminUserInit, AdminUserInterface } from "@/interfaces/UserInterface";
+import {
+  AdminMyPageAttributes,
+  adminMyPageInit,
+} from "@/interfaces/Forms/MyPageFormAttributes";
 import { useUpdateAuthMutation } from "@/mutations/useAuthMutation";
 import useAuthDataQuery from "@/queries/useAuthDataQuery";
-import useAuthStore from "@/stores/useAuthStore";
 import { handleError, handleSuccess } from "@/utils/mutationResponseHandler";
 import { adminMyPageFormSchema } from "@/validations/MyPageFormValidation";
 import { useForm } from "vee-validate";
@@ -12,46 +13,45 @@ import { useRouter } from "vue-router";
 import ComponentLabeler from "../ComponentLabeler.vue";
 import TextField from "./Fields/TextField.vue";
 
-// const { isAuthenticated } = storeuseAuthStore();\
 const { push } = useRouter();
 const { mutate } = useUpdateAuthMutation<AdminMyPageAttributes>();
-const { data } = useAuthDataQuery(true);
+const { data, isSuccess } = useAuthDataQuery(true);
 const { resetForm, handleSubmit, setErrors, meta } =
   useForm<AdminMyPageAttributes>({
     validationSchema: adminMyPageFormSchema,
-    initialValues: {
-      name: "",
-      email: "",
-      image: null,
-    },
+    initialValues: adminMyPageInit,
   });
 
 watch(
-  data,
-  (data) => {
-    if (data) {
-      resetForm({
-        values: {
-          name: data.user.name,
-          email: data.user.email,
-          image: data.user.image,
-        },
-      });
-    }
+  isSuccess,
+  () => {
+    console.log("resetting form");
+    const { name, email, image } = data.value?.user || adminMyPageInit;
+    resetForm({
+      values: {
+        name,
+        email,
+        image,
+      },
+    });
   },
   { immediate: true }
 );
 
 const onSubmit = handleSubmit((values) => {
-  mutate(values, {
-    onSuccess: (response: unknown) => {
-      handleSuccess(response);
-      push("/");
-    },
-    onError: (error: unknown) => {
-      handleError(error, setErrors);
-    },
-  });
+  // TODO: IMAGE UPLOAD
+  mutate(
+    { ...values, image: null },
+    {
+      onSuccess: (response: unknown) => {
+        handleSuccess(response);
+        push("/");
+      },
+      onError: (error: unknown) => {
+        handleError(error, setErrors);
+      },
+    }
+  );
 });
 </script>
 

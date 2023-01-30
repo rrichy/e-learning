@@ -50,5 +50,8 @@ export function useLogoutMutation() {
 }
 
 export function useUpdateAuthMutation<T = AdminMyPageAttributes>() {
-  return useMutation((values: T) => axios.put("/api/me", values));
+  const queryClient = useQueryClient();
+  return useMutation((values: T) => axios.put("/api/me", values), {
+    onSuccess: () => queryClient.invalidateQueries("authenticated-user-data"),
+  });
 }

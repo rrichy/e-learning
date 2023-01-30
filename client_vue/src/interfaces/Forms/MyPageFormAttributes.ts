@@ -3,3 +3,9 @@ export interface AdminMyPageAttributes {
   email: string;
   image: string | null;
 }
+
+export const adminMyPageInit: AdminMyPageAttributes = {
+  name: "",
+  email: "",
+  image: null,
+};

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import ComponentLabeler from "../ComponentLabeler.vue";
 import logo from "@/assets/logo.png";
@@ -9,7 +9,7 @@ import { CredentialInterface } from "@/interfaces/AuthAttributes";
 import { handleError, handleSuccess } from "@/utils/mutationResponseHandler";
 import { useForm } from "vee-validate";
 
-const form = useForm({
+const { handleSubmit, setErrors } = useForm({
   initialValues: {
     email: "",
     password: "",
@@ -21,24 +21,18 @@ const router = useRouter();
 const { mutate, isLoading } = useLoginMutation();
 const emailRef = ref();
 
-const credentials: CredentialInterface = reactive({
-  email: "",
-  password: "",
-});
-
-function handleSubmit(e: Event) {
-  e.preventDefault();
-  mutate(credentials, {
+const onSubmit = handleSubmit((values) => {
+  mutate(values, {
     onSuccess: (response: unknown) => {
       handleSuccess(response);
       router.push("/");
     },
     onError: (error: unknown) => {
       // TODO better error response
-      handleError(error, form.setErrors);
+      handleError(error, setErrors);
     },
   });
-}
+});
 
 onMounted(() => {
   emailRef.value.inputRef.focus();
@@ -60,11 +54,10 @@ onMounted(() => {
       width="100%"
       max-width="430"
     >
-      <v-form ref="form" @submit="handleSubmit">
+      <v-form ref="form" @submit="onSubmit">
         <ComponentLabeler label="User ID（登録メールアドレス）" stacked>
           <TextField
             name="email"
-            v-model="credentials.email"
             placeholder="IDを入力してください"
             ref="emailRef"
           />
@@ -72,7 +65,6 @@ onMounted(() => {
         <ComponentLabeler label="パスワード" stacked>
           <TextField
             name="password"
-            v-model="credentials.password"
             type="password"
             placeholder="パスワードを入力してください"
           />
