@@ -15,13 +15,14 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    protected $appends = ['parentDepartment', 'childDepartment'];
+    protected $appends = ['parentDepartment', 'childDepartment', 'image'];
     /**
      * The attributes that are mass assignable.
      *
@@ -30,7 +31,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $fillable = [
         'name',
         'email',
-        'image',
+        // 'image',
         'password',
         'birthday',
         'sex',
@@ -65,6 +66,11 @@ class User extends Authenticatable implements MustVerifyEmail
         $this->notify(new VerifyEmail($mail));
     }
 
+    public function imagePolymorphic()
+    {
+        return $this->morphOne(Image::class, 'imageable');
+    }
+
     public function membershipType(): BelongsTo
     {
         return $this->belongsTo(MembershipType::class);
@@ -91,6 +97,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function getChildDepartmentAttribute()
     {
         return $this->departments()->where('order', 2)->first();
+    }
+
+    public function getImageAttribute()
+    {
+        return Storage::disk('public')->url($this->imagePolymorphic?->url);
     }
 
     public function affiliation(): BelongsTo

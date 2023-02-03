@@ -28,6 +28,7 @@ class UpdateSelfRequest extends FormRequest
 
     protected function prepareForValidation()
     {
+        // dd(request()->all());
         if ($this->auth->isAdmin()) {
             $this->merge([
                 'name' => $this->name,
@@ -69,13 +70,15 @@ class UpdateSelfRequest extends FormRequest
             return [
                 'name' => 'required|string',
                 'email' => 'required|string|email|unique:users,email,' . $this->auth->id,
-                'image' => 'nullable|string|starts_with:' . $image_prefix,
+                // 'image' => 'nullable|string' . (config('filesystem.default') === 's3' ? '|starts_with:' . $image_prefix : ''),
+                'image' => config('filesystems.default') === 's3' ? 'nullable|string|starts_with:' . $image_prefix : 'nullable|file',
             ];
         } else if ($this->auth->isCorporate() || $this->auth->isIndividual()) {
             return [
                 'name' => 'required|string',
                 'email' => 'required|string|email|unique:users,email,' . $this->auth->id,
-                'image' => 'nullable|string|starts_with:' . $image_prefix,
+                // 'image' => 'nullable|string' . (config('filesystem.default') === 's3' ? '|starts_with:' . $image_prefix : ''),
+                'image' => config('filesystems.default') === 's3' ? 'nullable|string|starts_with:' . $image_prefix : 'nullable|file',
                 'sex' => 'required|integer|in:1,2',
                 'birthday' => ['required', 'date_format:Y-m-d'],
                 'department_1' => [
@@ -95,7 +98,8 @@ class UpdateSelfRequest extends FormRequest
             return [
                 'name' => 'required|string',
                 'email' => 'required|string|email|unique:users,email,' . auth()->id(),
-                'image' => 'nullable|string|starts_with:' . $image_prefix,
+                // 'image' => 'nullable|string' . (config('filesystem.default') === 's3' ? '|starts_with:' . $image_prefix : ''),
+                'image' => config('filesystems.default') === 's3' ? 'nullable|string|starts_with:' . $image_prefix : 'nullable|file',
                 'sex' => 'required|integer|in:1,2',
                 'birthday' => ['required', 'date_format:Y-m-d'],
             ];
@@ -104,7 +108,7 @@ class UpdateSelfRequest extends FormRequest
 
     protected function failedValidation(Validator $validator)
     {
-        if (isset($this->image)) {
+        if (config('filesystems.default') === 's3' && isset($this->image)) {
             $s3_image_url = $this->auth->temporaryUrls()
                 ->where('directory', 'profiles/')
                 ->where('url', explode('?', $this->image)[0])

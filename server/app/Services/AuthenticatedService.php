@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Exception;
+use Illuminate\Http\File;
 
 class AuthenticatedService
 {
@@ -39,14 +40,15 @@ class AuthenticatedService
         DB::transaction(function () use ($valid, $auth) {
             $has_new_image = isset($valid['image']) && $valid['image'] !== $auth->image;
 
-            if ($has_new_image && !$auth->temporaryUrls()->where('url', $valid['image'])->exists()) {
+            if (config('filesystems.default') === 's3' && $has_new_image && !$auth->temporaryUrls()->where('url', $valid['image'])->exists()) {
                 throw new Exception("Temporary url does not exists!");
             }
 
             $old_image = $auth->image;
 
             $auth->update(array_merge($valid, [
-                'email_verified_at' => $valid['email'] !== $auth->email ? null : $auth->email_verified_at
+                'email_verified_at' => $valid['email'] !== $auth->email ? null : $auth->email_verified_at,
+                'image' => null,
             ]));
 
             $newdepartments = [];
@@ -56,10 +58,25 @@ class AuthenticatedService
             }
             $auth->departments()->sync($newdepartments);
 
+            $path = null;
             // cleanup old image from storage
-            if ($has_new_image && $old_image) {
-                Storage::delete(str_replace(config('constants.prefixes.s3'), '', $old_image));
+            if ($has_new_image) {
+                if (config('filesystems.default') === 'local') {
+                    $path = Storage::disk('public')->putFile('profiles/' . $auth->id , $valid['image']);
+                    $auth->imagePolymorphic()->updateOrCreate([
+                        'imageable_id' => $auth['id'],
+                        'imageable_type' => 'App\Models\User',
+                    ], [
+                        'url' => $path,
+                    ]);
+                }
+
+                if (config('filesystems.default') === 's3' && $old_image) {
+                    Storage::delete(str_replace(config('constants.prefixes.s3'), '', $old_image));
+                }
             }
+
+            return $valid['image'];
         });
 
         return [
