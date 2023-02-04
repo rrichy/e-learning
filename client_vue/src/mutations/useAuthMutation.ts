@@ -1,5 +1,5 @@
 import { CredentialInterface } from "@/interfaces/AuthAttributes";
-import { AdminMyPageAttributes } from "@/interfaces/Forms/MyPageFormAttributes";
+import { MyPageAttributes } from "@/interfaces/Forms/MyPageFormAttributes";
 import useAlertStore from "@/stores/useAlertStore";
 import useAuthStore from "@/stores/useAuthStore";
 import axios from "axios";
@@ -49,9 +49,20 @@ export function useLogoutMutation() {
   );
 }
 
-export function useUpdateAuthMutation<T = AdminMyPageAttributes>() {
+export function useUpdateAuthMutation() {
   const queryClient = useQueryClient();
-  return useMutation((values: T) => axios.put("/api/me", values), {
-    onSuccess: () => queryClient.invalidateQueries("authenticated-user-data"),
-  });
+  return useMutation(
+    (values: MyPageAttributes) => {
+      const form = new FormData();
+
+      form.append("_method", "put");
+      form.append("name", values.name);
+      form.append("email", values.email);
+      form.append("image", values.image[0]);
+      return axios.post("/api/me", form);
+    },
+    {
+      onSuccess: () => queryClient.invalidateQueries("authenticated-user-data"),
+    }
+  );
 }

@@ -8,6 +8,7 @@ const { isAuthenticated } = storeToRefs(useAuthStore());
 
 const { data } = useAuthDataQuery(isAuthenticated);
 const { mutate } = useLogoutMutation();
+// TODO: CHANGE DEFAULT IMAGE OF NULL
 </script>
 
 <template>
@@ -22,11 +23,14 @@ const { mutate } = useLogoutMutation();
           </v-btn>
         </template>
         <v-list>
-          <v-list-item
-            :title="data?.user.name"
-            :subtitle="data?.user.email"
-            :prepend-avatar="data?.user.image || undefined"
-          />
+          <v-list-item :title="data?.user.name" :subtitle="data?.user.email">
+            <template #prepend>
+              <v-avatar v-if="data?.user.image">
+                <v-img :src="data?.user.image" alt="user-profile" />
+              </v-avatar>
+              <v-icon v-else icon="mdi-account-circle" size="large" />
+            </template>
+          </v-list-item>
           <v-list-item to="/my-page"> アカウントを編集 </v-list-item>
           <v-list-item @click="mutate"> ログアウト </v-list-item>
         </v-list>

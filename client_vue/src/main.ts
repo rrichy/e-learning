@@ -3,6 +3,7 @@ import { createApp } from "vue";
 import "@vuepic/vue-datepicker/dist/main.css";
 import "./style.css";
 import "@mdi/font/css/materialdesignicons.css";
+import "cropperjs/dist/cropper.css";
 import App from "@/App.vue";
 import { createPinia } from "pinia";
 import { VueQueryPlugin } from "vue-query";

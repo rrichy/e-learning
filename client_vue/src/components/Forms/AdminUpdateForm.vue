@@ -2,6 +2,7 @@
 import {
   AdminMyPageAttributes,
   adminMyPageInit,
+  ImageFieldValue,
 } from "@/interfaces/Forms/MyPageFormAttributes";
 import { useUpdateAuthMutation } from "@/mutations/useAuthMutation";
 import useAuthDataQuery from "@/queries/useAuthDataQuery";
@@ -11,10 +12,11 @@ import { useForm } from "vee-validate";
 import { watch } from "vue";
 import { useRouter } from "vue-router";
 import ComponentLabeler from "../ComponentLabeler.vue";
+import ImageField from "./Fields/ImageField.vue";
 import TextField from "./Fields/TextField.vue";
 
 const { push } = useRouter();
-const { mutate } = useUpdateAuthMutation<AdminMyPageAttributes>();
+const { mutate } = useUpdateAuthMutation();
 const { data, isSuccess } = useAuthDataQuery(true);
 const { resetForm, handleSubmit, setErrors, meta } =
   useForm<AdminMyPageAttributes>({
@@ -26,7 +28,8 @@ watch(
   isSuccess,
   () => {
     console.log("resetting form");
-    const { name, email, image } = data.value?.user || adminMyPageInit;
+    const { name, email } = { ...adminMyPageInit, ...data.value?.user };
+    const image = ["", data.value?.user.image || null] as ImageFieldValue;
     resetForm({
       values: {
         name,
@@ -40,18 +43,16 @@ watch(
 
 const onSubmit = handleSubmit((values) => {
   // TODO: IMAGE UPLOAD
-  mutate(
-    { ...values, image: null },
-    {
-      onSuccess: (response: unknown) => {
-        handleSuccess(response);
-        push("/");
-      },
-      onError: (error: unknown) => {
-        handleError(error, setErrors);
-      },
-    }
-  );
+  console.log(values);
+  mutate(values, {
+    onSuccess: (response: unknown) => {
+      handleSuccess(response);
+      push("/");
+    },
+    onError: (error: unknown) => {
+      handleError(error, setErrors);
+    },
+  });
 });
 </script>
 
@@ -59,6 +60,7 @@ const onSubmit = handleSubmit((values) => {
   <v-form ref="formRef" class="w-100" @submit="onSubmit">
     <!-- TODO: INSERT IMAGE COMPONENT -->
     <h6>INSERT IMAGE COMPONENT HERE</h6>
+    <ImageField name="image" />
     <ComponentLabeler label="氏名" stacked>
       <TextField name="name" placeholder="氏名を入力してください" />
     </ComponentLabeler>
